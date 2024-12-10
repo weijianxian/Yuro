@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shimmer/shimmer.dart';
 
 class WorkCoverImage extends StatelessWidget {
   final String imageUrl;
@@ -26,10 +27,11 @@ class WorkCoverImage extends StatelessWidget {
               fit: BoxFit.cover,
               width: double.infinity,
               height: double.infinity,
-              placeholder: (context, url) => Container(
-                color: Theme.of(context).colorScheme.surfaceVariant,
-                child: const Center(
-                  child: CircularProgressIndicator(),
+              placeholder: (context, url) => Shimmer.fromColors(
+                baseColor: Theme.of(context).colorScheme.surfaceVariant,
+                highlightColor: Theme.of(context).colorScheme.surface,
+                child: Container(
+                  color: Colors.white,
                 ),
               ),
               errorWidget: (context, url, error) => Container(
