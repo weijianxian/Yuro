@@ -19,23 +19,26 @@ class WorkCoverImage extends StatelessWidget {
       aspectRatio: _aspectRatio,
       child: Stack(
         children: [
-          CachedNetworkImage(
-            imageUrl: imageUrl,
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-            placeholder: (context, url) => Container(
-              color: Theme.of(context).colorScheme.surfaceVariant,
-              child: const Center(
-                child: CircularProgressIndicator(),
+          Hero(
+            tag: 'work-cover-$rjNumber',
+            child: CachedNetworkImage(
+              imageUrl: imageUrl,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+              placeholder: (context, url) => Container(
+                color: Theme.of(context).colorScheme.surfaceVariant,
+                child: const Center(
+                  child: CircularProgressIndicator(),
+                ),
               ),
-            ),
-            errorWidget: (context, url, error) => Container(
-              color: Theme.of(context).colorScheme.errorContainer,
-              child: Center(
-                child: Icon(
-                  Icons.error_outline,
-                  color: Theme.of(context).colorScheme.error,
+              errorWidget: (context, url, error) => Container(
+                color: Theme.of(context).colorScheme.errorContainer,
+                child: Center(
+                  child: Icon(
+                    Icons.error_outline,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
                 ),
               ),
             ),

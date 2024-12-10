@@ -22,7 +22,10 @@ class DetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            WorkCover(imageUrl: work.mainCoverUrl ?? ''),
+            WorkCover(
+              imageUrl: work.mainCoverUrl ?? '',
+              rjNumber: 'RJ${work.id ?? 0}',
+            ),
             WorkInfo(work: work),
           ],
         ),
