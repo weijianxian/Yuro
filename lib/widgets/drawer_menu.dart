@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:asmrapp/common/constants/strings.dart';
 
 class DrawerMenu extends StatelessWidget {
   const DrawerMenu({super.key});
@@ -9,13 +10,13 @@ class DrawerMenu extends StatelessWidget {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(
+          DrawerHeader(
+            decoration: const BoxDecoration(
               color: Colors.deepPurple,
             ),
             child: Text(
-              'ASMR Music',
-              style: TextStyle(
+              Strings.appName,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 24,
               ),
@@ -23,7 +24,7 @@ class DrawerMenu extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.home),
-            title: const Text('主页'),
+            title: Text(Strings.home),
             onTap: () {
               Navigator.pop(context);
               // TODO: 导航到主页
@@ -31,7 +32,7 @@ class DrawerMenu extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.favorite),
-            title: const Text('我的收藏'),
+            title: Text(Strings.favorites),
             onTap: () {
               Navigator.pop(context);
               // TODO: 导航到收藏页面
@@ -39,7 +40,7 @@ class DrawerMenu extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.settings),
-            title: const Text('设置'),
+            title: Text(Strings.settings),
             onTap: () {
               Navigator.pop(context);
               // TODO: 导航到设置页面

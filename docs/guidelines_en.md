@@ -1,4 +1,4 @@
-# ASMR Music App Development Guidelines
+# ASMR One App Development Guidelines
 
 [中文版本](guidelines_zh.md)
 
@@ -39,9 +39,30 @@ lib/
 │   ├── screens/        # Pages
 │   └── widgets/        # Components
 └── common/             # Common functionality
-    ├── constants/      # Constants
+    ├── constants/      # Constants definitions
     └── extensions/     # Extensions
 </pre>
+
+### 1.4 String Management
+- All text strings must be centrally defined in `lib/common/constants/strings.dart`
+- No hardcoded strings allowed in the code
+- String constants should be grouped by feature modules
+- Prepared for future internationalization
+- String names should clearly express their purpose
+
+Example:
+```dart
+class Strings {
+  // App
+  static const String appName = 'asmr.one';
+  
+  // Common
+  static const String loading = 'Loading...';
+  
+  // Feature specific
+  static const String search = 'Search';
+}
+```
 
 ## 2. UI/UX Design Guidelines
 

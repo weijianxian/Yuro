@@ -1,4 +1,4 @@
-# ASMR Music App 开发准则
+# ASMR One App 开发准则
 
 [English Version](guidelines_en.md)
 
@@ -39,9 +39,30 @@ lib/
 │   ├── screens/        # 页面
 │   └── widgets/        # 组件
 └── common/             # 通用功能
-    ├── constants/      # 常量
+    ├── constants/      # 常量定义
     └── extensions/     # 扩展方法
 </pre>
+
+### 1.4 字符串管理
+- 所有文本字符串必须在 `lib/common/constants/strings.dart` 中集中定义
+- 禁止在代码中使用硬编码的字符串
+- 字符串常量按功能模块分组管理
+- 为后续国际化做好准备
+- 字符串命名应清晰表达其用途
+
+示例：
+```dart
+class Strings {
+  // App
+  static const String appName = 'asmr.one';
+  
+  // Common
+  static const String loading = '加载中...';
+  
+  // Feature specific
+  static const String search = '搜索';
+}
+```
 
 ## 2. UI/UX 设计准则
 
@@ -91,7 +112,7 @@ lib/
 - 遵循语义化版本控制
 - 每次发布都要有清晰的更新日志
 - 重要版本发布前进行完整测试
-- 保留每个版本的文档更新
+- 保留���个版本的文档更新
 
 ## 5. 项目管理准则
 
