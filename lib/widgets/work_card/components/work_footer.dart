@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:asmrapp/data/models/work.dart';
+import 'package:asmrapp/data/models/works/work.dart';
 
 class WorkFooter extends StatelessWidget {
   final Work work;
@@ -15,18 +15,18 @@ class WorkFooter extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          work.release,
+          work.release ?? '',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            fontSize: 10,
-          ),
+                fontSize: 10,
+              ),
         ),
         Text(
-          '${work.dlCount}次下载',
+          '${work.dlCount ?? 0}次下载',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            fontSize: 10,
-          ),
+                fontSize: 10,
+              ),
         ),
       ],
     );
   }
-} 
+}

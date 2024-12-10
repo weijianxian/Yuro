@@ -20,4 +20,4 @@ class PlayerScreen extends StatelessWidget {
       ),
     );
   }
-} 
+}

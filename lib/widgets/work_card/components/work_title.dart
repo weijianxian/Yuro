@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:asmrapp/data/models/work.dart';
+import 'package:asmrapp/data/models/works/work.dart';
 
 class WorkTitle extends StatelessWidget {
   final Work work;
@@ -12,12 +12,12 @@ class WorkTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      work.title,
+      work.title ?? '',
       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-        fontSize: 14,
-      ),
+            fontSize: 14,
+          ),
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
     );
   }
-} 
+}

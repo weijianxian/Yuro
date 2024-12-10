@@ -1,18 +1,20 @@
 import 'package:dio/dio.dart';
-import '../models/work.dart';
+import '../models/works/works.dart';
+import '../models/works/work.dart';
 
 class ApiService {
   static const String baseUrl = 'https://api.asmr.one/api';
   final Dio _dio;
 
-  ApiService() : _dio = Dio(BaseOptions(
-    baseUrl: baseUrl,
-    connectTimeout: const Duration(seconds: 5),
-    receiveTimeout: const Duration(seconds: 10),
-    headers: {
-      'Accept': 'application/json',
-    },
-  ));
+  ApiService()
+      : _dio = Dio(BaseOptions(
+          baseUrl: baseUrl,
+          connectTimeout: const Duration(seconds: 5),
+          receiveTimeout: const Duration(seconds: 10),
+          headers: {
+            'Accept': 'application/json',
+          },
+        ));
 
   Future<List<Work>> getWorks({
     String order = 'create_date',
@@ -31,9 +33,8 @@ class ApiService {
         },
       );
 
-      final data = response.data;
-      final List<dynamic> works = data['works'];
-      return works.map((json) => Work.fromJson(json)).toList();
+      final works = Works.fromJson(response.data);
+      return works.works ?? [];
     } on DioException catch (e) {
       throw _handleDioError(e);
     }
@@ -53,4 +54,4 @@ class ApiService {
         return Exception('网络错误: ${e.message}');
     }
   }
-} 
+}

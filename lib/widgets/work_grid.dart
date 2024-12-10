@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:asmrapp/data/models/work.dart';
+import 'package:asmrapp/data/models/works/work.dart';
 import 'package:asmrapp/widgets/work_row.dart';
 import 'package:asmrapp/presentation/layouts/work_layout_strategy.dart';
 
@@ -27,7 +27,8 @@ class WorkGrid extends StatelessWidget {
         (context, index) {
           if (index >= rows.length) return null;
           return Padding(
-            padding: EdgeInsets.only(bottom: index < rows.length - 1 ? rowSpacing : 0),
+            padding: EdgeInsets.only(
+                bottom: index < rows.length - 1 ? rowSpacing : 0),
             child: WorkRow(
               works: rows[index],
               onWorkTap: onWorkTap,
@@ -39,4 +40,4 @@ class WorkGrid extends StatelessWidget {
       ),
     );
   }
-} 
+}

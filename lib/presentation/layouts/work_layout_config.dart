@@ -72,4 +72,4 @@ class WorkLayoutConfig {
         return mobilePadding;
     }
   }
-} 
+}

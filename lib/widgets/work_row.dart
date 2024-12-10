@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:asmrapp/data/models/work.dart';
+import 'package:asmrapp/data/models/works/work.dart';
 import 'package:asmrapp/widgets/work_card/work_card.dart';
 
 class WorkRow extends StatelessWidget {
@@ -33,4 +33,4 @@ class WorkRow extends StatelessWidget {
       ),
     );
   }
-} 
+}

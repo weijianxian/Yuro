@@ -52,9 +52,9 @@ class WorkCoverImage extends StatelessWidget {
               child: Text(
                 rjNumber,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.white,
-                  fontSize: 12,
-                ),
+                      color: Colors.white,
+                      fontSize: 12,
+                    ),
               ),
             ),
           ),
@@ -62,4 +62,4 @@ class WorkCoverImage extends StatelessWidget {
       ),
     );
   }
-} 
+}

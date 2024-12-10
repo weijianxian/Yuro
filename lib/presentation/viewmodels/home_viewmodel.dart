@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:asmrapp/data/models/work.dart';
+import 'package:asmrapp/data/models/works/work.dart';
 import 'package:asmrapp/data/services/api_service.dart';
 
 class HomeViewModel extends ChangeNotifier {
@@ -44,4 +44,4 @@ class HomeViewModel extends ChangeNotifier {
   void onSearch() {
     // TODO: 实现搜索逻辑
   }
-} 
+}

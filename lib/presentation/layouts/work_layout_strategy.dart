@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:asmrapp/data/models/work.dart';
+import 'package:asmrapp/data/models/works/work.dart';
 import 'package:asmrapp/presentation/layouts/work_layout_config.dart';
 
 /// 作品布局策略
@@ -40,4 +40,4 @@ class WorkLayoutStrategy {
     }
     return rows;
   }
-} 
+}

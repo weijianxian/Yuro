@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:asmrapp/data/models/work.dart';
+import 'package:asmrapp/data/models/works/work.dart';
 import 'work_header.dart';
 import 'work_title.dart';
 import 'work_tags.dart';
@@ -25,17 +25,18 @@ class WorkInfoSection extends StatelessWidget {
           WorkTitle(work: work),
           const SizedBox(height: 4),
           Text(
-            work.circleName,
+            work.circle?.name ?? '',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontSize: 12,
-            ),
+                  fontSize: 12,
+                ),
           ),
-          const Spacer(),
+          const SizedBox(height: 8),
           WorkTags(work: work),
           const SizedBox(height: 4),
+          const Spacer(),
           WorkFooter(work: work),
         ],
       ),
     );
   }
-} 
+}
