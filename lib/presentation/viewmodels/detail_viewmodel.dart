@@ -1,18 +1,25 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:asmrapp/data/models/files/files.dart';
+import 'package:asmrapp/data/models/files/child.dart';
 import 'package:asmrapp/data/models/works/work.dart';
 import 'package:asmrapp/data/services/api_service.dart';
+import 'package:asmrapp/core/audio/audio_service.dart';
 import 'package:asmrapp/utils/logger.dart';
 
 class DetailViewModel extends ChangeNotifier {
   final ApiService _apiService = ApiService();
+  final AudioService _audioService;
   final Work work;
   
   Files? _files;
   bool _isLoading = false;
   String? _error;
 
-  DetailViewModel({required this.work});
+  DetailViewModel({
+    required this.work,
+    required AudioService audioService,
+  }) : _audioService = audioService;
 
   Files? get files => _files;
   bool get isLoading => _isLoading;
@@ -35,6 +42,19 @@ class DetailViewModel extends ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> playFile(Child file, BuildContext context) async {
+    if (file.mediaDownloadUrl == null) {
+      throw Exception('无法播放：文件URL不存在');
+    }
+    
+    try {
+      await _audioService.play(file.mediaDownloadUrl!);
+    } catch (e) {
+      AppLogger.error('播放失败', e);
+      rethrow;
     }
   }
 } 

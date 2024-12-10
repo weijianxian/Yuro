@@ -11,9 +11,8 @@ import 'package:asmrapp/core/audio/audio_player.dart';
 
 class DetailScreen extends StatelessWidget {
   final Work work;
-  final AudioService _audioService = AudioPlayerService();
 
-  DetailScreen({
+  const DetailScreen({
     super.key,
     required this.work,
   });
@@ -21,7 +20,10 @@ class DetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => DetailViewModel(work: work)..loadFiles(),
+      create: (_) => DetailViewModel(
+        work: work,
+        audioService: AudioPlayerService(),
+      )..loadFiles(),
       child: Scaffold(
         appBar: AppBar(
           title: Text('RJ${work.id ?? 0}'),
@@ -54,15 +56,8 @@ class DetailScreen extends StatelessWidget {
                     return WorkFilesList(
                       files: viewModel.files!,
                       onFileTap: (file) async {
-                        if (file.mediaDownloadUrl == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('无法播放：文件URL不存在')),
-                          );
-                          return;
-                        }
-                        
                         try {
-                          await _audioService.play(file.mediaDownloadUrl!);
+                          await viewModel.playFile(file, context);
                         } catch (e) {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
