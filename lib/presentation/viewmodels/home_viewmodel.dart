@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:asmrapp/data/models/works/work.dart';
 import 'package:asmrapp/data/services/api_service.dart';
+import 'package:asmrapp/utils/logger.dart';
 
 class HomeViewModel extends ChangeNotifier {
   final ApiService _apiService = ApiService();
@@ -15,6 +16,7 @@ class HomeViewModel extends ChangeNotifier {
 
   Future<void> loadWorks({bool refresh = false}) async {
     if (refresh) {
+      AppLogger.info('刷新作品列表');
       _currentPage = 1;
       _works = [];
     }
@@ -26,10 +28,13 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
+      AppLogger.info('加载作品列表: 第$_currentPage页');
       final newWorks = await _apiService.getWorks(page: _currentPage);
       _works = refresh ? newWorks : [..._works, ...newWorks];
       _currentPage++;
+      AppLogger.info('作品列表加载成功: ${newWorks.length}个作品');
     } catch (e) {
+      AppLogger.error('加载作品列表失败', e);
       _error = e.toString();
     } finally {
       _isLoading = false;

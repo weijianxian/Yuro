@@ -4,8 +4,10 @@ import 'package:asmrapp/screens/player_screen.dart';
 import 'package:asmrapp/screens/detail_screen.dart';
 import 'package:asmrapp/widgets/drawer_menu.dart';
 import 'package:asmrapp/common/constants/strings.dart';
+import 'package:asmrapp/utils/logger.dart';
 
 void main() {
+  AppLogger.init();
   runApp(const MyApp());
 }
 
