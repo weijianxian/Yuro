@@ -5,6 +5,7 @@ import 'package:asmrapp/widgets/work_grid.dart';
 import 'package:asmrapp/common/constants/strings.dart';
 import 'package:asmrapp/presentation/viewmodels/home_viewmodel.dart';
 import 'package:asmrapp/presentation/layouts/work_layout_strategy.dart';
+import 'package:asmrapp/screens/detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -87,8 +88,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       works: viewModel.works,
                       layoutStrategy: _layoutStrategy,
                       onWorkTap: (work) {
-                        viewModel.onWorkTap(work);
-                        Navigator.pushNamed(context, '/detail');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DetailScreen(work: work),
+                          ),
+                        );
                       },
                     ),
                   ),
