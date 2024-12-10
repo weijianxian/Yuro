@@ -5,6 +5,7 @@ import 'package:asmrapp/widgets/detail/work_cover.dart';
 import 'package:asmrapp/widgets/detail/work_info.dart';
 import 'package:asmrapp/widgets/detail/work_actions.dart';
 import 'package:asmrapp/widgets/detail/work_files_list.dart';
+import 'package:asmrapp/widgets/detail/work_files_skeleton.dart';
 import 'package:asmrapp/presentation/viewmodels/detail_viewmodel.dart';
 
 class DetailScreen extends StatelessWidget {
@@ -35,7 +36,7 @@ class DetailScreen extends StatelessWidget {
               Consumer<DetailViewModel>(
                 builder: (context, viewModel, _) {
                   if (viewModel.isLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const WorkFilesSkeleton();
                   }
                   
                   if (viewModel.error != null) {
