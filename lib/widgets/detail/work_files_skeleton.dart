@@ -54,7 +54,7 @@ class WorkFilesSkeleton extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.all(8),
       child: Shimmer.fromColors(
-        baseColor: Theme.of(context).colorScheme.surfaceVariant,
+        baseColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         highlightColor: Theme.of(context).colorScheme.surface,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

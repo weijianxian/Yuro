@@ -15,7 +15,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final _layoutStrategy = WorkLayoutStrategy();
+  final _layoutStrategy = const WorkLayoutStrategy();
   final _scrollController = ScrollController();
   late HomeViewModel _viewModel;
 
@@ -46,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
       value: _viewModel,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(Strings.appName),
+          title: const Text(Strings.appName),
           actions: [
             IconButton(
               icon: const Icon(Icons.search),

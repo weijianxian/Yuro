@@ -35,7 +35,7 @@ class WorkTagsList extends StatelessWidget {
                         fontSize: 12,
                       ),
                 ),
-                backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               ))
           .toList(),
     );

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:asmrapp/data/models/works/work.dart';
-import 'package:asmrapp/data/models/files/child.dart';
 import 'package:asmrapp/widgets/detail/work_cover.dart';
 import 'package:asmrapp/widgets/detail/work_info.dart';
 import 'package:asmrapp/widgets/detail/work_actions.dart';
