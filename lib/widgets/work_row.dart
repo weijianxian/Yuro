@@ -16,19 +16,21 @@ class WorkRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (int i = 0; i < works.length; i++) ...[
-          if (i > 0) SizedBox(width: spacing),
-          Expanded(
-            child: WorkCard(
-              work: works[i],
-              onTap: onWorkTap != null ? () => onWorkTap!(works[i]) : null,
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (int i = 0; i < works.length; i++) ...[
+            if (i > 0) SizedBox(width: spacing),
+            Expanded(
+              child: WorkCard(
+                work: works[i],
+                onTap: onWorkTap != null ? () => onWorkTap!(works[i]) : null,
+              ),
             ),
-          ),
+          ],
         ],
-      ],
+      ),
     );
   }
 } 

@@ -32,7 +32,6 @@ class WorkCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 封面图片
@@ -58,90 +57,92 @@ class WorkCard extends StatelessWidget {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ID和评分
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'RJ${work.id}',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      if (work.rateCount > 0)
-                        Row(
-                          children: [
-                            const Icon(Icons.star, size: 16, color: Colors.amber),
-                            const SizedBox(width: 4),
-                            Text(
-                              work.rateAverage.toStringAsFixed(1),
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ],
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ID和评分
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'RJ${work.id}',
+                          style: Theme.of(context).textTheme.bodySmall,
                         ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  // 标题
-                  Text(
-                    work.title,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontSize: 14,
+                        if (work.rateCount > 0)
+                          Row(
+                            children: [
+                              const Icon(Icons.star, size: 16, color: Colors.amber),
+                              const SizedBox(width: 4),
+                              Text(
+                                work.rateAverage.toStringAsFixed(1),
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
+                      ],
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  // 创作者
-                  Text(
-                    work.circleName,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontSize: 12,
+                    const SizedBox(height: 4),
+                    // 标题
+                    Text(
+                      work.title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontSize: 14,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  // 标签
-                  Wrap(
-                    spacing: 4,
-                    runSpacing: 2,
-                    children: work.tags.map((tag) => Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceVariant,
-                        borderRadius: BorderRadius.circular(4),
+                    const SizedBox(height: 4),
+                    // 创作者
+                    Text(
+                      work.circleName,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontSize: 12,
                       ),
-                      child: Text(
-                        _getLocalizedTagName(tag),
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    const Spacer(),
+                    // 标签
+                    Wrap(
+                      spacing: 4,
+                      runSpacing: 2,
+                      children: work.tags.map((tag) => Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surfaceVariant,
+                          borderRadius: BorderRadius.circular(4),
                         ),
-                      ),
-                    )).toList(),
-                  ),
-                  const SizedBox(height: 4),
-                  // 发布日期和下载数
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        work.release,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontSize: 10,
+                        child: Text(
+                          _getLocalizedTagName(tag),
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                         ),
-                      ),
-                      Text(
-                        '${work.dlCount}次下载',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontSize: 10,
+                      )).toList(),
+                    ),
+                    const SizedBox(height: 4),
+                    // 发布日期和下载数
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          work.release,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontSize: 10,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                        Text(
+                          '${work.dlCount}次下载',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
