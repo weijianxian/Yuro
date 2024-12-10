@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:asmrapp/data/models/works/work.dart';
 import 'package:asmrapp/widgets/detail/work_cover.dart';
 import 'package:asmrapp/widgets/detail/work_info.dart';
-import 'package:asmrapp/widgets/detail/work_actions.dart';
 import 'package:asmrapp/widgets/detail/work_files_list.dart';
 import 'package:asmrapp/widgets/detail/work_files_skeleton.dart';
 import 'package:asmrapp/presentation/viewmodels/detail_viewmodel.dart';
@@ -80,41 +79,6 @@ class DetailScreen extends StatelessWidget {
               ),
             ],
           ),
-        ),
-        bottomNavigationBar: WorkActions(
-          onDownload: () {
-            // TODO: 实现下载功能
-          },
-          onPlay: () async {
-            final viewModel = context.read<DetailViewModel>();
-            final files = viewModel.files?.children ?? [];
-            
-            // 查找第一个可播放的文件
-            try {
-              final playableFile = files.firstWhere(
-                (file) => file.type == 'file' && file.mediaDownloadUrl != null,
-              );
-
-              if (playableFile.mediaDownloadUrl != null) {
-                try {
-                  await _audioService.play(playableFile.mediaDownloadUrl!);
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('播放失败: $e')),
-                    );
-                  }
-                }
-              }
-            } catch (e) {
-              // 没有找到可播放的文件时会抛出 StateError
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('没有可播放的音频文件')),
-                );
-              }
-            }
-          },
         ),
       ),
     );
