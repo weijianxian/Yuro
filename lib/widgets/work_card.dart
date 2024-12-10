@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:asmrapp/data/models/work.dart';
 
 class WorkCard extends StatelessWidget {
@@ -10,6 +11,19 @@ class WorkCard extends StatelessWidget {
     required this.work,
     this.onTap,
   });
+
+  String _getLocalizedTagName(Tag tag) {
+    // 优先使用中文名称
+    final zhName = tag.i18n['zh-cn']?.name;
+    if (zhName != null) return zhName;
+
+    // 如果没有中文名称，使用日文名称
+    final jaName = tag.i18n['ja-jp']?.name;
+    if (jaName != null) return jaName;
+
+    // 如果都没有，使用原始名称
+    return tag.name;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,12 +38,24 @@ class WorkCard extends StatelessWidget {
             // 封面图片
             AspectRatio(
               aspectRatio: 16 / 9,
-              child: Image.network(
-                work.coverUrl,
+              child: CachedNetworkImage(
+                imageUrl: work.mainCoverUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Center(child: Icon(Icons.error));
-                },
+                placeholder: (context, url) => Container(
+                  color: Theme.of(context).colorScheme.surfaceVariant,
+                  child: const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  color: Theme.of(context).colorScheme.errorContainer,
+                  child: Center(
+                    child: Icon(
+                      Icons.error_outline,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ),
               ),
             ),
             Padding(
@@ -37,18 +63,25 @@ class WorkCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // RJ号和时长
+                  // ID和评分
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        work.id,
+                        'RJ${work.id}',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
-                      Text(
-                        work.duration,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
+                      if (work.rateCount > 0)
+                        Row(
+                          children: [
+                            const Icon(Icons.star, size: 16, color: Colors.amber),
+                            const SizedBox(width: 4),
+                            Text(
+                              work.rateAverage.toStringAsFixed(1),
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
                     ],
                   ),
                   const SizedBox(height: 4),
@@ -64,7 +97,7 @@ class WorkCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   // 创作者
                   Text(
-                    work.circle,
+                    work.circleName,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontSize: 12,
                     ),
@@ -81,7 +114,7 @@ class WorkCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        tag,
+                        _getLocalizedTagName(tag),
                         style: TextStyle(
                           fontSize: 10,
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -90,12 +123,23 @@ class WorkCard extends StatelessWidget {
                     )).toList(),
                   ),
                   const SizedBox(height: 4),
-                  // 发布日期
-                  Text(
-                    work.releaseDate,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontSize: 10,
-                    ),
+                  // 发布日期和下载数
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        work.release,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontSize: 10,
+                        ),
+                      ),
+                      Text(
+                        '${work.dlCount}次下载',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
