@@ -4,14 +4,39 @@
 
 ## 文件结构
 
-- `audio_service.dart` - 音频服务接口定义
-- `audio_player.dart` - 播放器核心实现
-- `playlist_manager.dart` - 播放列表管理
-- `audio_state.dart` - 音频播放状态定义
+- `i_audio_player_service.dart` - 音频服务接口定义
+- `audio_player_service.dart` - 音频服务实现（单例）
+- `playlist_manager.dart` - 播放列表管理（待实现）
+- `audio_state.dart` - 音频播放状态定义（待实现）
 
 ## 职责
 
-- 音频播放控制
-- 播放状态管理
-- 播放列表管理
-- 音频缓存处理 
+### 音频服务接口 (IAudioPlayerService)
+- 定义音频播放的核心接口
+- 提供播放控制方法
+- 提供状态监听流
+
+### 音频服务实现 (AudioPlayerService)
+- 基于 just_audio 实现音频播放功能
+- 维护全局单例播放器实例
+- 处理音频会话和状态管理
+
+### 播放列表管理 (待实现)
+- 播放队列管理
+- 播放模式控制
+- 播放历史记录
+
+### 状态管理 (待实现)
+- 播放状态定义
+- 缓冲状态管理
+- 错误状态处理
+
+## 依赖注入
+
+通过 GetIt 进行依赖注入管理：
+- 注册为懒加载单例
+- 支持依赖替换（便于测试）
+- 统一的生命周期管理
+
+## 使用方式
+ 

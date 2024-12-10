@@ -43,6 +43,7 @@ dependencies:
   shimmer: ^3.0.0
   just_audio: ^0.9.36
   audio_session: ^0.1.18
+  get_it: ^8.0.2
 
 dev_dependencies:
   flutter_test:

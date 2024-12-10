@@ -6,8 +6,6 @@ import 'package:asmrapp/widgets/detail/work_info.dart';
 import 'package:asmrapp/widgets/detail/work_files_list.dart';
 import 'package:asmrapp/widgets/detail/work_files_skeleton.dart';
 import 'package:asmrapp/presentation/viewmodels/detail_viewmodel.dart';
-import 'package:asmrapp/core/audio/audio_service.dart';
-import 'package:asmrapp/core/audio/audio_player.dart';
 
 class DetailScreen extends StatelessWidget {
   final Work work;
@@ -22,7 +20,6 @@ class DetailScreen extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) => DetailViewModel(
         work: work,
-        audioService: AudioPlayerService(),
       )..loadFiles(),
       child: Scaffold(
         appBar: AppBar(

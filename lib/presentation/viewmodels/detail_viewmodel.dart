@@ -1,15 +1,15 @@
-import 'package:flutter/foundation.dart';
+import 'package:get_it/get_it.dart';
 import 'package:flutter/material.dart';
 import 'package:asmrapp/data/models/files/files.dart';
 import 'package:asmrapp/data/models/files/child.dart';
 import 'package:asmrapp/data/models/works/work.dart';
 import 'package:asmrapp/data/services/api_service.dart';
-import 'package:asmrapp/core/audio/audio_service.dart';
+import 'package:asmrapp/core/audio/i_audio_player_service.dart';
 import 'package:asmrapp/utils/logger.dart';
 
 class DetailViewModel extends ChangeNotifier {
-  final ApiService _apiService = ApiService();
-  final AudioService _audioService;
+  late final ApiService _apiService;
+  late final IAudioPlayerService _audioService;
   final Work work;
   
   Files? _files;
@@ -18,8 +18,10 @@ class DetailViewModel extends ChangeNotifier {
 
   DetailViewModel({
     required this.work,
-    required AudioService audioService,
-  }) : _audioService = audioService;
+  }) {
+    _audioService = GetIt.I<IAudioPlayerService>();
+    _apiService = GetIt.I<ApiService>();
+  }
 
   Files? get files => _files;
   bool get isLoading => _isLoading;
