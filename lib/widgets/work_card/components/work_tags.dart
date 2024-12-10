@@ -26,7 +26,7 @@ class WorkTags extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (work.tags == null) return const SizedBox.shrink();
-    
+
     return Wrap(
       spacing: 4,
       runSpacing: 2,

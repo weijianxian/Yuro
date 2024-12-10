@@ -8,7 +8,7 @@ class DetailScreen extends StatelessWidget {
   final Work work;
 
   const DetailScreen({
-    super.key, 
+    super.key,
     required this.work,
   });
 

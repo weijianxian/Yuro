@@ -40,4 +40,4 @@ class WorkStats extends StatelessWidget {
       ],
     );
   }
-} 
+}

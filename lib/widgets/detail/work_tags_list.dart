@@ -27,15 +27,17 @@ class WorkTagsList extends StatelessWidget {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: tags.map((tag) => Chip(
-        label: Text(
-          _getLocalizedTagName(tag),
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontSize: 12,
-          ),
-        ),
-        backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-      )).toList(),
+      children: tags
+          .map((tag) => Chip(
+                label: Text(
+                  _getLocalizedTagName(tag),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontSize: 12,
+                      ),
+                ),
+                backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+              ))
+          .toList(),
     );
   }
-} 
+}

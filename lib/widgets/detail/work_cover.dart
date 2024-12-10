@@ -28,4 +28,4 @@ class WorkCover extends StatelessWidget {
       ),
     );
   }
-} 
+}

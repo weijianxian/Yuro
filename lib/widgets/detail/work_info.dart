@@ -23,19 +23,16 @@ class WorkInfo extends StatelessWidget {
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
-          
           Text(
             work.circle?.name ?? '',
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 16),
-          
           WorkStats(work: work),
           const SizedBox(height: 16),
-          
           WorkTagsList(tags: work.tags ?? []),
         ],
       ),
     );
   }
-} 
+}
