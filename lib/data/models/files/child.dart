@@ -1,6 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import 'child.dart';
 import 'work.dart';
 
 part 'child.freezed.dart';
