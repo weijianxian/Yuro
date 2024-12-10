@@ -1,0 +1,31 @@
+import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:asmrapp/presentation/viewmodels/mini_player_viewmodel.dart';
+
+class MiniPlayerProgress extends StatelessWidget {
+  const MiniPlayerProgress({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final viewModel = GetIt.I<MiniPlayerViewModel>();
+    return ListenableBuilder(
+      listenable: viewModel,
+      builder: (context, _) {
+        final position = viewModel.position?.inMilliseconds.toDouble() ?? 0.0;
+        final duration = viewModel.duration?.inMilliseconds.toDouble() ?? 0.0;
+        final progress = duration > 0 ? position / duration : 0.0;
+
+        return SizedBox(
+          height: 2,
+          child: LinearProgressIndicator(
+            value: progress,
+            backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+            valueColor: AlwaysStoppedAnimation<Color>(
+              Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        );
+      },
+    );
+  }
+} 

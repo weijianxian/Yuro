@@ -12,6 +12,7 @@ class AudioPlayerService implements IAudioPlayerService {
   factory AudioPlayerService() => _instance;
   
   late final AudioPlayer _player;
+  AudioTrackInfo? _currentTrack;
   
   Future<void> _init() async {
     _player = AudioPlayer();
@@ -27,11 +28,15 @@ class AudioPlayerService implements IAudioPlayerService {
   }
 
   @override
-  Future<void> play(String url) async {
+  Future<void> play(String url, {AudioTrackInfo? trackInfo}) async {
     try {
+      if (trackInfo != null) {
+        _currentTrack = trackInfo;
+      }
       await _player.setUrl(url);
       await _player.play();
     } catch (e) {
+      _currentTrack = null;
       AppLogger.error('播放失败', e);
       rethrow;
     }
@@ -50,6 +55,7 @@ class AudioPlayerService implements IAudioPlayerService {
   @override
   Future<void> stop() async {
     await _player.stop();
+    _currentTrack = null;
   }
   
   @override
@@ -68,4 +74,7 @@ class AudioPlayerService implements IAudioPlayerService {
 
   @override
   Stream<Duration?> get duration => _player.durationStream;
+
+  @override
+  AudioTrackInfo? get currentTrack => _currentTrack;
 }

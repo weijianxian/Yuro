@@ -1,3 +1,4 @@
+import 'package:asmrapp/widgets/mini_player/mini_player.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:asmrapp/data/models/works/work.dart';
@@ -6,6 +7,8 @@ import 'package:asmrapp/widgets/detail/work_info.dart';
 import 'package:asmrapp/widgets/detail/work_files_list.dart';
 import 'package:asmrapp/widgets/detail/work_files_skeleton.dart';
 import 'package:asmrapp/presentation/viewmodels/detail_viewmodel.dart';
+import 'package:asmrapp/presentation/viewmodels/mini_player_viewmodel.dart';
+
 
 class DetailScreen extends StatelessWidget {
   final Work work;
@@ -72,6 +75,7 @@ class DetailScreen extends StatelessWidget {
             ],
           ),
         ),
+        bottomSheet: const MiniPlayer(),
       ),
     );
   }
