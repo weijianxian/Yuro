@@ -44,7 +44,7 @@ class AudioPlayerHandler extends BaseAudioHandler {
     );
 
     AppLogger.debug('更新播放状态: playing=${_player.playing}, state=${_player.processingState}');
-    this.playbackState.add(state);
+    playbackState.add(state);
   }
 
   @override

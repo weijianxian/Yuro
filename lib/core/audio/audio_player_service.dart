@@ -62,7 +62,7 @@ class AudioPlayerService implements IAudioPlayerService {
         
         // 等待获取到音频时长后再更新通知栏
         try {
-          final duration = await _player.duration;
+          final duration = _player.duration;
           AppLogger.debug('获取音频时长成功: $duration');
           
           final updatedTrackInfo = AudioTrackInfo(
