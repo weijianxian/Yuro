@@ -4,6 +4,7 @@ import 'package:asmrapp/presentation/viewmodels/search_viewmodel.dart';
 import 'package:asmrapp/widgets/work_grid_view.dart';
 import 'package:asmrapp/presentation/layouts/work_layout_strategy.dart';
 import 'package:asmrapp/utils/logger.dart';
+import 'package:asmrapp/widgets/pagination_controls.dart';
 
 class SearchScreen extends StatelessWidget {
   const SearchScreen({super.key});
@@ -27,10 +28,12 @@ class SearchScreenContent extends StatefulWidget {
 class _SearchScreenContentState extends State<SearchScreenContent> {
   final _searchController = TextEditingController();
   final _layoutStrategy = const WorkLayoutStrategy();
+  final _scrollController = ScrollController();
 
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -40,6 +43,18 @@ class _SearchScreenContentState extends State<SearchScreenContent> {
 
     AppLogger.debug('执行搜索: $keyword');
     context.read<SearchViewModel>().search(keyword);
+  }
+
+  void _onPageChanged(int page) async {
+    final viewModel = context.read<SearchViewModel>();
+    await viewModel.loadPage(page);
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
   }
 
   @override
@@ -92,6 +107,15 @@ class _SearchScreenContentState extends State<SearchScreenContent> {
             onRetry: _onSearch,
             customEmptyWidget: emptyWidget,
             layoutStrategy: _layoutStrategy,
+            scrollController: _scrollController,
+            bottomWidget: viewModel.works.isNotEmpty
+                ? PaginationControls(
+                    currentPage: viewModel.currentPage,
+                    totalPages: viewModel.totalPages,
+                    isLoading: viewModel.isLoading,
+                    onPageChanged: _onPageChanged,
+                  )
+                : null,
           );
         },
       ),

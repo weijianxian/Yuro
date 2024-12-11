@@ -20,8 +20,15 @@ class SearchViewModel extends ChangeNotifier {
   String? _error;
   String? get error => _error;
 
+  Pagination? _pagination;
+  int get totalPages => _pagination?.totalCount != null && _pagination?.pageSize != null 
+      ? (_pagination!.totalCount! / _pagination!.pageSize!).ceil()
+      : 1;
+  int _currentPage = 1;
+  int get currentPage => _currentPage;
+
   /// 执行搜索
-  Future<void> search(String keyword) async {
+  Future<void> search(String keyword, {int page = 1}) async {
     if (keyword.isEmpty) return;
     
     _keyword = keyword;
@@ -30,13 +37,15 @@ class SearchViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      AppLogger.info('搜索关键词: $keyword');
+      AppLogger.info('搜索关键词: $keyword, 页码: $page');
       final response = await _apiService.searchWorks(
         keyword: keyword,
-        page: 1,
+        page: page,
       );
       
       _works = response.works;
+      _pagination = response.pagination;
+      _currentPage = page;
       AppLogger.info('搜索成功: ${response.works.length}个结果');
     } catch (e) {
       AppLogger.error('搜索失败', e);
@@ -47,11 +56,19 @@ class SearchViewModel extends ChangeNotifier {
     }
   }
 
+  /// 加载指定页
+  Future<void> loadPage(int page) async {
+    if (_keyword.isEmpty) return;
+    await search(_keyword, page: page);
+  }
+
   /// 清空搜索结果
   void clear() {
     _works = [];
     _keyword = '';
     _error = null;
+    _pagination = null;
+    _currentPage = 1;
     notifyListeners();
   }
 } 
