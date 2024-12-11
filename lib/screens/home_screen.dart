@@ -16,7 +16,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _layoutStrategy = const WorkLayoutStrategy();
-  final _scrollController = ScrollController();
   late HomeViewModel _viewModel;
 
   @override
@@ -24,22 +23,11 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _viewModel = HomeViewModel();
     _viewModel.loadWorks();
-    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
-    _scrollController.dispose();
     super.dispose();
-  }
-
-  void _onScroll() {
-    _viewModel.updateScrollPosition(_scrollController.position.pixels);
-    
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
-      _viewModel.loadWorks();
-    }
   }
 
   void _showPageJumpDialog(BuildContext context, HomeViewModel viewModel) {
@@ -132,7 +120,6 @@ class _HomeScreenState extends State<HomeScreen> {
             return RefreshIndicator(
               onRefresh: () => viewModel.loadWorks(refresh: true),
               child: CustomScrollView(
-                controller: _scrollController,
                 slivers: [
                   SliverPadding(
                     padding: _layoutStrategy.getPadding(context),

@@ -27,29 +27,7 @@ class HomeViewModel extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
   String? get error => _error;
-  int get currentPage {
-    // 如果没有数据，返回当前显示页码
-    if (works.isEmpty) return _displayPage;
-    
-    // 计算当前视口中心位置显示的作品
-    final viewportHeight = 200.0; // 假设视口高度
-    final centerPosition = _scrollPosition + (viewportHeight / 2);
-    final centerIndex = centerPosition ~/ _itemHeight;
-    
-    // 如果索引超出范围，返回当前显示页码
-    if (centerIndex >= works.length) return _displayPage;
-    
-    // 找到这个作品属于哪一页
-    final centerWork = works[centerIndex];
-    for (var page = 1; page <= _displayPage; page++) {
-      if (_pageWorks[page]?.contains(centerWork) ?? false) {
-        return page;
-      }
-    }
-    
-    // 如果找不到对应页码，返回当前显示页码
-    return _displayPage;
-  }
+  int get currentPage => _displayPage;
 
   int? get totalPages => _pagination?.totalCount != null && _pagination?.pageSize != null 
       ? (_pagination!.totalCount! / _pagination!.pageSize!).ceil()
@@ -135,14 +113,6 @@ class HomeViewModel extends ChangeNotifier {
 
   void onSearch() {
     // TODO: 实现搜索逻辑
-  }
-
-  double _scrollPosition = 0.0;
-  final double _itemHeight = 200.0;
-
-  void updateScrollPosition(double position) {
-    _scrollPosition = position;
-    notifyListeners();
   }
 
   // 跳转到指定页面
