@@ -20,8 +20,11 @@ User _$UserFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$User {
-  User? get user => throw _privateConstructorUsedError;
-  String? get token => throw _privateConstructorUsedError;
+  bool? get loggedIn => throw _privateConstructorUsedError;
+  String? get name => throw _privateConstructorUsedError;
+  String? get group => throw _privateConstructorUsedError;
+  dynamic get email => throw _privateConstructorUsedError;
+  String? get recommenderUuid => throw _privateConstructorUsedError;
 
   /// Serializes this User to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -37,9 +40,12 @@ abstract class $UserCopyWith<$Res> {
   factory $UserCopyWith(User value, $Res Function(User) then) =
       _$UserCopyWithImpl<$Res, User>;
   @useResult
-  $Res call({User? user, String? token});
-
-  $UserCopyWith<$Res>? get user;
+  $Res call(
+      {bool? loggedIn,
+      String? name,
+      String? group,
+      dynamic email,
+      String? recommenderUuid});
 }
 
 /// @nodoc
@@ -57,33 +63,34 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? user = freezed,
-    Object? token = freezed,
+    Object? loggedIn = freezed,
+    Object? name = freezed,
+    Object? group = freezed,
+    Object? email = freezed,
+    Object? recommenderUuid = freezed,
   }) {
     return _then(_value.copyWith(
-      user: freezed == user
-          ? _value.user
-          : user // ignore: cast_nullable_to_non_nullable
-              as User?,
-      token: freezed == token
-          ? _value.token
-          : token // ignore: cast_nullable_to_non_nullable
+      loggedIn: freezed == loggedIn
+          ? _value.loggedIn
+          : loggedIn // ignore: cast_nullable_to_non_nullable
+              as bool?,
+      name: freezed == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String?,
+      group: freezed == group
+          ? _value.group
+          : group // ignore: cast_nullable_to_non_nullable
+              as String?,
+      email: freezed == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
+              as dynamic,
+      recommenderUuid: freezed == recommenderUuid
+          ? _value.recommenderUuid
+          : recommenderUuid // ignore: cast_nullable_to_non_nullable
               as String?,
     ) as $Val);
-  }
-
-  /// Create a copy of User
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $UserCopyWith<$Res>? get user {
-    if (_value.user == null) {
-      return null;
-    }
-
-    return $UserCopyWith<$Res>(_value.user!, (value) {
-      return _then(_value.copyWith(user: value) as $Val);
-    });
   }
 }
 
@@ -94,10 +101,12 @@ abstract class _$$UserImplCopyWith<$Res> implements $UserCopyWith<$Res> {
       __$$UserImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({User? user, String? token});
-
-  @override
-  $UserCopyWith<$Res>? get user;
+  $Res call(
+      {bool? loggedIn,
+      String? name,
+      String? group,
+      dynamic email,
+      String? recommenderUuid});
 }
 
 /// @nodoc
@@ -112,17 +121,32 @@ class __$$UserImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? user = freezed,
-    Object? token = freezed,
+    Object? loggedIn = freezed,
+    Object? name = freezed,
+    Object? group = freezed,
+    Object? email = freezed,
+    Object? recommenderUuid = freezed,
   }) {
     return _then(_$UserImpl(
-      user: freezed == user
-          ? _value.user
-          : user // ignore: cast_nullable_to_non_nullable
-              as User?,
-      token: freezed == token
-          ? _value.token
-          : token // ignore: cast_nullable_to_non_nullable
+      loggedIn: freezed == loggedIn
+          ? _value.loggedIn
+          : loggedIn // ignore: cast_nullable_to_non_nullable
+              as bool?,
+      name: freezed == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String?,
+      group: freezed == group
+          ? _value.group
+          : group // ignore: cast_nullable_to_non_nullable
+              as String?,
+      email: freezed == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
+              as dynamic,
+      recommenderUuid: freezed == recommenderUuid
+          ? _value.recommenderUuid
+          : recommenderUuid // ignore: cast_nullable_to_non_nullable
               as String?,
     ));
   }
@@ -131,19 +155,26 @@ class __$$UserImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$UserImpl implements _User {
-  _$UserImpl({this.user, this.token});
+  _$UserImpl(
+      {this.loggedIn, this.name, this.group, this.email, this.recommenderUuid});
 
   factory _$UserImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserImplFromJson(json);
 
   @override
-  final User? user;
+  final bool? loggedIn;
   @override
-  final String? token;
+  final String? name;
+  @override
+  final String? group;
+  @override
+  final dynamic email;
+  @override
+  final String? recommenderUuid;
 
   @override
   String toString() {
-    return 'User(user: $user, token: $token)';
+    return 'User(loggedIn: $loggedIn, name: $name, group: $group, email: $email, recommenderUuid: $recommenderUuid)';
   }
 
   @override
@@ -151,13 +182,19 @@ class _$UserImpl implements _User {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$UserImpl &&
-            (identical(other.user, user) || other.user == user) &&
-            (identical(other.token, token) || other.token == token));
+            (identical(other.loggedIn, loggedIn) ||
+                other.loggedIn == loggedIn) &&
+            (identical(other.name, name) || other.name == name) &&
+            (identical(other.group, group) || other.group == group) &&
+            const DeepCollectionEquality().equals(other.email, email) &&
+            (identical(other.recommenderUuid, recommenderUuid) ||
+                other.recommenderUuid == recommenderUuid));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, user, token);
+  int get hashCode => Object.hash(runtimeType, loggedIn, name, group,
+      const DeepCollectionEquality().hash(email), recommenderUuid);
 
   /// Create a copy of User
   /// with the given fields replaced by the non-null parameter values.
@@ -176,14 +213,25 @@ class _$UserImpl implements _User {
 }
 
 abstract class _User implements User {
-  factory _User({final User? user, final String? token}) = _$UserImpl;
+  factory _User(
+      {final bool? loggedIn,
+      final String? name,
+      final String? group,
+      final dynamic email,
+      final String? recommenderUuid}) = _$UserImpl;
 
   factory _User.fromJson(Map<String, dynamic> json) = _$UserImpl.fromJson;
 
   @override
-  User? get user;
+  bool? get loggedIn;
   @override
-  String? get token;
+  String? get name;
+  @override
+  String? get group;
+  @override
+  dynamic get email;
+  @override
+  String? get recommenderUuid;
 
   /// Create a copy of User
   /// with the given fields replaced by the non-null parameter values.
