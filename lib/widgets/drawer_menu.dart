@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:asmrapp/common/constants/strings.dart';
 import 'package:asmrapp/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:asmrapp/presentation/widgets/auth/login_dialog.dart';
+import 'package:asmrapp/screens/favorites_screen.dart';
 
 class DrawerMenu extends StatelessWidget {
   const DrawerMenu({super.key});
@@ -62,7 +63,20 @@ class DrawerMenu extends StatelessWidget {
             title: const Text(Strings.favorites),
             onTap: () {
               Navigator.pop(context);
-              // TODO: 导航到收藏页面
+              // 检查用户是否已登录
+              final authVM = context.read<AuthViewModel>();
+              if (!authVM.isLoggedIn) {
+                // 如果未登录，显示登录对话框
+                _showLoginDialog(context);
+                return;
+              }
+              // 导航到收藏页面
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const FavoritesScreen(),
+                ),
+              );
             },
           ),
           ListTile(

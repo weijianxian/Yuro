@@ -3,6 +3,7 @@ import 'package:asmrapp/data/models/files/files.dart';
 import 'package:asmrapp/data/models/works/work.dart';
 import 'package:asmrapp/data/models/works/pagination.dart';
 import 'package:asmrapp/utils/logger.dart';
+import 'package:asmrapp/data/services/interceptors/auth_interceptor.dart';
 
 class WorksResponse {
   final List<Work> works;
@@ -17,7 +18,9 @@ class ApiService {
   ApiService()
       : _dio = Dio(BaseOptions(
           baseUrl: 'https://api.asmr.one/api',
-        ));
+        )) {
+    _dio.interceptors.add(AuthInterceptor());
+  }
 
   /// 获取作品文件列表
   Future<Files> getWorkFiles(String workId) async {
@@ -111,6 +114,35 @@ class ApiService {
       throw Exception('搜索失败: ${response.statusCode}');
     } catch (e) {
       throw Exception('搜索请求失败: $e');
+    }
+  }
+
+  /// 获取收藏列表
+  Future<WorksResponse> getFavorites({int page = 1}) async {
+    try {
+      final response = await _dio.get('/review', queryParameters: {
+        'page': page,
+        'order': 'updated_at',
+        'sort': 'desc',
+      });
+
+      if (response.statusCode == 200) {
+        final List<dynamic> works = response.data['works'] ?? [];
+        final pagination = Pagination.fromJson(response.data['pagination']);
+
+        return WorksResponse(
+          works: works.map((work) => Work.fromJson(work)).toList(),
+          pagination: pagination,
+        );
+      }
+
+      throw Exception('获取收藏列表失败: ${response.statusCode}');
+    } on DioException catch (e) {
+      AppLogger.error('网络请求失败', e, e.stackTrace);
+      throw Exception('网络请求失败: ${e.message}');
+    } catch (e, stackTrace) {
+      AppLogger.error('解析数据失败', e, stackTrace);
+      throw Exception('解析数据失败: $e');
     }
   }
 }
