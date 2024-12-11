@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:asmrapp/presentation/viewmodels/search_viewmodel.dart';
-import 'package:asmrapp/widgets/work_grid.dart';
+import 'package:asmrapp/widgets/work_grid_view.dart';
 import 'package:asmrapp/presentation/layouts/work_layout_strategy.dart';
-import 'package:asmrapp/screens/detail_screen.dart';
 import 'package:asmrapp/utils/logger.dart';
 
 class SearchScreen extends StatelessWidget {
@@ -75,63 +74,24 @@ class _SearchScreenContentState extends State<SearchScreenContent> {
       ),
       body: Consumer<SearchViewModel>(
         builder: (context, viewModel, child) {
-          if (viewModel.isLoading) {
-            return const Center(
-              child: CircularProgressIndicator(),
+          Widget? emptyWidget;
+          if (viewModel.works.isEmpty && viewModel.keyword.isEmpty) {
+            emptyWidget = const Center(
+              child: Text('输入关键词开始搜索'),
+            );
+          } else if (viewModel.works.isEmpty) {
+            emptyWidget = const Center(
+              child: Text('没有找到相关结果'),
             );
           }
 
-          if (viewModel.error != null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(viewModel.error!),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _onSearch,
-                    child: const Text('重试'),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          if (viewModel.works.isEmpty) {
-            if (viewModel.keyword.isEmpty) {
-              return Center(
-                child: Text(
-                  '输入关键词开始搜索',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-              );
-            }
-            return Center(
-              child: Text(
-                '没有找到相关结果',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-            );
-          }
-
-          return CustomScrollView(
-            slivers: [
-              SliverPadding(
-                padding: _layoutStrategy.getPadding(context),
-                sliver: WorkGrid(
-                  works: viewModel.works,
-                  layoutStrategy: _layoutStrategy,
-                  onWorkTap: (work) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DetailScreen(work: work),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
+          return WorkGridView(
+            works: viewModel.works,
+            isLoading: viewModel.isLoading,
+            error: viewModel.error,
+            onRetry: _onSearch,
+            customEmptyWidget: emptyWidget,
+            layoutStrategy: _layoutStrategy,
           );
         },
       ),
