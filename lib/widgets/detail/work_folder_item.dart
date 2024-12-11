@@ -42,13 +42,13 @@ class WorkFolderItem extends StatelessWidget {
   bool _shouldExpandFolder(Child folder) {
     // 首先检查是否包含MP3文件
     if (_containsAudioFile(folder, '.mp3')) {
-      AppLogger.debug('文件夹包含MP3文件: ${folder.title}');
+      // AppLogger.debug('文件夹包含MP3文件: ${folder.title}');
       return true;
     }
     
     // 如果没有MP3文件，检查是否包含WAV文件
     if (_containsAudioFile(folder, '.wav')) {
-      AppLogger.debug('文件夹包含WAV文件: ${folder.title}');
+      // AppLogger.debug('文件夹包含WAV文件: ${folder.title}');
       return true;
     }
     

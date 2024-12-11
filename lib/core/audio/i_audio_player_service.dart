@@ -1,18 +1,5 @@
 import 'package:just_audio/just_audio.dart';
-
-class AudioTrackInfo {
-  final String title;
-  final String artist;
-  final String coverUrl;
-  final String url;
-
-  AudioTrackInfo({
-    required this.title,
-    required this.artist,
-    required this.coverUrl,
-    required this.url,
-  });
-}
+import './models/audio_track_info.dart';
 
 abstract class IAudioPlayerService {
   Future<void> play(String url, {AudioTrackInfo? trackInfo});

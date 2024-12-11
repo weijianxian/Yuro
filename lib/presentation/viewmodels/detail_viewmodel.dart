@@ -7,6 +7,7 @@ import 'package:asmrapp/data/services/api_service.dart';
 import 'package:asmrapp/core/audio/i_audio_player_service.dart';
 import 'package:asmrapp/presentation/viewmodels/player_viewmodel.dart';
 import 'package:asmrapp/utils/logger.dart';
+import 'package:asmrapp/core/audio/models/audio_track_info.dart';
 
 class DetailViewModel extends ChangeNotifier {
   late final ApiService _apiService;

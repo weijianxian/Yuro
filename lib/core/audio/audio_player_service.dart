@@ -2,8 +2,14 @@ import 'package:just_audio/just_audio.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:asmrapp/utils/logger.dart';
 import './i_audio_player_service.dart';
+import './models/audio_track_info.dart';
+import './notification/audio_notification_service.dart';
 
 class AudioPlayerService implements IAudioPlayerService {
+  late final AudioPlayer _player;
+  late final AudioNotificationService _notificationService;
+  AudioTrackInfo? _currentTrack;
+  
   AudioPlayerService._internal() {
     _init();
   }
@@ -11,14 +17,15 @@ class AudioPlayerService implements IAudioPlayerService {
   static final AudioPlayerService _instance = AudioPlayerService._internal();
   factory AudioPlayerService() => _instance;
   
-  late final AudioPlayer _player;
-  AudioTrackInfo? _currentTrack;
-  
   Future<void> _init() async {
     _player = AudioPlayer();
+    _notificationService = AudioNotificationService(_player);
+    
     try {
       final session = await AudioSession.instance;
       await session.configure(const AudioSessionConfiguration.music());
+      await _notificationService.init();
+      
       _player.playerStateStream.listen((state) {
         AppLogger.debug('播放状态变化: $state');
       });
@@ -32,6 +39,7 @@ class AudioPlayerService implements IAudioPlayerService {
     try {
       if (trackInfo != null) {
         _currentTrack = trackInfo;
+        _notificationService.updateMetadata(trackInfo);
       }
       await _player.setUrl(url);
       await _player.play();
@@ -60,6 +68,7 @@ class AudioPlayerService implements IAudioPlayerService {
   
   @override
   Future<void> dispose() async {
+    await _notificationService.dispose();
     await _player.dispose();
   }
 
