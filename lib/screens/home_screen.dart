@@ -92,13 +92,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
                   ),
-                  if (viewModel.isLoading)
-                    const SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Center(child: CircularProgressIndicator()),
-                      ),
-                    ),
                 ],
               ),
             );
