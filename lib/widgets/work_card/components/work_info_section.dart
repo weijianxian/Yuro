@@ -1,3 +1,4 @@
+import 'package:asmrapp/data/models/works/tag.dart';
 import 'package:flutter/material.dart';
 import 'package:asmrapp/data/models/works/work.dart';
 import 'work_header.dart';
@@ -26,6 +27,14 @@ class WorkInfoSection extends StatelessWidget {
     }
   }
 
+  String _getLocalizedTagName(Tag tag) {
+    final zhName = tag.i18n?.zhCn?.name;
+    if (zhName != null) return zhName;
+    final jaName = tag.i18n?.jaJp?.name;
+    if (jaName != null) return jaName;
+    return tag.name ?? '';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -37,20 +46,6 @@ class WorkInfoSection extends StatelessWidget {
           const SizedBox(height: 4),
           Row(
             children: [
-              if (work.circle?.name != null) ...[
-                Text(
-                  work.circle!.name!,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontSize: 12,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                ),
-              ],
-              if (work.circle?.name != null && work.duration != null)
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4),
-                  child: Text('•'),
-                ),
               if (work.duration != null) ...[
                 Icon(
                   Icons.access_time,
@@ -69,7 +64,41 @@ class WorkInfoSection extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          WorkTags(work: work),
+          Wrap(
+            spacing: 4,
+            runSpacing: 2,
+            children: [
+              if (work.circle?.name != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    work.circle?.name ?? '',
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Colors.orange[700],
+                    ),
+                  ),
+                ),
+              ...work.tags?.map((tag) => Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      _getLocalizedTagName(tag),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  )).toList() ?? [],
+            ],
+          ),
           const SizedBox(height: 4),
           const Spacer(),
           WorkFooter(work: work),
