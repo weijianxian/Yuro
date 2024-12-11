@@ -19,7 +19,8 @@ class MiniPlayerProgress extends StatelessWidget {
           height: 2,
           child: LinearProgressIndicator(
             value: progress,
-            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+            backgroundColor:
+                Theme.of(context).colorScheme.surfaceContainerHighest,
             valueColor: AlwaysStoppedAnimation<Color>(
               Theme.of(context).colorScheme.primary,
             ),
@@ -28,4 +29,4 @@ class MiniPlayerProgress extends StatelessWidget {
       },
     );
   }
-} 
+}

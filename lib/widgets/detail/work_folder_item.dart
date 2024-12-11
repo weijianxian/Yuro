@@ -20,7 +20,7 @@ class WorkFolderItem extends StatelessWidget {
 
   bool _containsAudioFile(Child folder, [String? specificFormat]) {
     if (folder.children == null) return false;
-    
+
     for (final child in folder.children!) {
       if (child.type == 'folder') {
         if (_containsAudioFile(child, specificFormat)) return true;
@@ -45,13 +45,13 @@ class WorkFolderItem extends StatelessWidget {
       // AppLogger.debug('文件夹包含MP3文件: ${folder.title}');
       return true;
     }
-    
+
     // 如果没有MP3文件，检查是否包含WAV文件
     if (_containsAudioFile(folder, '.wav')) {
       // AppLogger.debug('文件夹包含WAV文件: ${folder.title}');
       return true;
     }
-    
+
     return false;
   }
 
@@ -70,18 +70,19 @@ class WorkFolderItem extends StatelessWidget {
           leading: const Icon(Icons.folder, color: Colors.amber),
           initiallyExpanded: shouldExpand,
           children: folder.children
-              ?.map((child) => child.type == 'folder'
-                  ? WorkFolderItem(
-                      folder: child,
-                      indentation: indentation + 16.0,
-                      onFileTap: onFileTap,
-                    )
-                  : WorkFileItem(
-                      file: child,
-                      indentation: indentation + 16.0,
-                      onFileTap: onFileTap,
-                    ))
-              .toList() ?? [],
+                  ?.map((child) => child.type == 'folder'
+                      ? WorkFolderItem(
+                          folder: child,
+                          indentation: indentation + 16.0,
+                          onFileTap: onFileTap,
+                        )
+                      : WorkFileItem(
+                          file: child,
+                          indentation: indentation + 16.0,
+                          onFileTap: onFileTap,
+                        ))
+                  .toList() ??
+              [],
           onExpansionChanged: (expanded) {
             AppLogger.debug(
               '${expanded ? "展开" : "折叠"}文件夹: ${folder.title}',
@@ -91,4 +92,4 @@ class WorkFolderItem extends StatelessWidget {
       ),
     );
   }
-} 
+}

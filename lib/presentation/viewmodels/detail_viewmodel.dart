@@ -14,7 +14,7 @@ class DetailViewModel extends ChangeNotifier {
   late final IAudioPlayerService _audioService;
   late final PlayerViewModel _miniPlayerViewModel;
   final Work work;
-  
+
   Files? _files;
   bool _isLoading = false;
   String? _error;
@@ -54,11 +54,11 @@ class DetailViewModel extends ChangeNotifier {
 
   Future<void> playFile(Child file, BuildContext context) async {
     if (_disposed) return;
-    
+
     if (file.mediaDownloadUrl == null) {
       throw Exception('无法播放：文件URL不存在');
     }
-    
+
     try {
       final trackInfo = AudioTrackInfo(
         title: file.title ?? '',
@@ -71,7 +71,7 @@ class DetailViewModel extends ChangeNotifier {
         file.mediaDownloadUrl!,
         trackInfo: trackInfo,
       );
-      
+
       if (!_disposed) {
         _miniPlayerViewModel.setTrack(Track(
           title: trackInfo.title,
@@ -92,4 +92,4 @@ class DetailViewModel extends ChangeNotifier {
     _disposed = true;
     super.dispose();
   }
-} 
+}

@@ -31,13 +31,14 @@ class PaginationControls extends StatelessWidget {
           Text('$currentPage/${totalPages ?? "?"}'),
           const SizedBox(width: 16),
           IconButton(
-            onPressed: totalPages != null && currentPage < totalPages! && !isLoading
-                ? () => onPageChanged(currentPage + 1)
-                : null,
+            onPressed:
+                totalPages != null && currentPage < totalPages! && !isLoading
+                    ? () => onPageChanged(currentPage + 1)
+                    : null,
             icon: const Icon(Icons.chevron_right),
           ),
         ],
       ),
     );
   }
-} 
+}

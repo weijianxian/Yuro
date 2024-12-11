@@ -7,33 +7,34 @@ import 'package:asmrapp/utils/logger.dart';
 
 class SearchViewModel extends ChangeNotifier {
   final _apiService = GetIt.I<ApiService>();
-  
+
   List<Work> _works = [];
   List<Work> get works => _works;
-  
+
   String _keyword = '';
   String get keyword => _keyword;
-  
+
   bool _isLoading = false;
   bool get isLoading => _isLoading;
-  
+
   String? _error;
   String? get error => _error;
 
   Pagination? _pagination;
-  int get totalPages => _pagination?.totalCount != null && _pagination?.pageSize != null 
-      ? (_pagination!.totalCount! / _pagination!.pageSize!).ceil()
-      : 1;
+  int get totalPages =>
+      _pagination?.totalCount != null && _pagination?.pageSize != null
+          ? (_pagination!.totalCount! / _pagination!.pageSize!).ceil()
+          : 1;
   int _currentPage = 1;
   int get currentPage => _currentPage;
 
   bool _hasSubtitle = false;
   bool get hasSubtitle => _hasSubtitle;
 
-  String _order = 'create_date';  // 默认按创建时间
+  String _order = 'create_date'; // 默认按创建时间
   String get order => _order;
-  
-  String _sort = 'desc';  // 默认降序
+
+  String _sort = 'desc'; // 默认降序
   String get sort => _sort;
 
   void toggleSubtitle() {
@@ -56,7 +57,7 @@ class SearchViewModel extends ChangeNotifier {
   /// 执行搜索
   Future<void> search(String keyword, {int page = 1}) async {
     if (keyword.isEmpty) return;
-    
+
     _keyword = keyword;
     _isLoading = true;
     _error = null;
@@ -69,9 +70,9 @@ class SearchViewModel extends ChangeNotifier {
         page: page,
         order: _order,
         sort: _sort,
-        subtitle: _hasSubtitle ? 1 : 0,  // 添加字幕过滤
+        subtitle: _hasSubtitle ? 1 : 0, // 添加字幕过滤
       );
-      
+
       _works = response.works;
       _pagination = response.pagination;
       _currentPage = page;
@@ -100,4 +101,4 @@ class SearchViewModel extends ChangeNotifier {
     _currentPage = 1;
     notifyListeners();
   }
-} 
+}

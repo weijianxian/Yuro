@@ -30,23 +30,24 @@ class TranslationInfo with _$TranslationInfo {
       _$TranslationInfoFromJson(json);
 }
 
-Map<String, TranslationBonusLang>? _translationBonusLangsFromJson(dynamic json) {
+Map<String, TranslationBonusLang>? _translationBonusLangsFromJson(
+    dynamic json) {
   if (json == null) return null;
   if (json is List && json.isEmpty) return {};
-  
+
   if (json is Map<String, dynamic>) {
     return json.map((key, value) => MapEntry(
           key,
           TranslationBonusLang.fromJson(value as Map<String, dynamic>),
         ));
   }
-  
+
   return {};
 }
 
 dynamic _translationBonusLangsToJson(Map<String, TranslationBonusLang>? map) {
   if (map == null) return null;
   if (map.isEmpty) return [];
-  
+
   return map.map((key, value) => MapEntry(key, value.toJson()));
 }

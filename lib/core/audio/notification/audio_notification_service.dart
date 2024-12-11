@@ -74,7 +74,7 @@ class AudioNotificationService {
       speed: _player.speed,
       queueIndex: 0,
     );
-    
+
     _playbackState.add(playbackState);
     if (_audioHandler != null) {
       (_audioHandler as BaseAudioHandler).playbackState.add(playbackState);
@@ -89,7 +89,7 @@ class AudioNotificationService {
       artUri: Uri.parse(trackInfo.coverUrl),
       duration: trackInfo.duration,
     );
-    
+
     _mediaItem.add(mediaItem);
     if (_audioHandler != null) {
       (_audioHandler as BaseAudioHandler).mediaItem.add(mediaItem);
@@ -114,4 +114,4 @@ class AudioNotificationService {
     await _playbackState.close();
     await _mediaItem.close();
   }
-} 
+}

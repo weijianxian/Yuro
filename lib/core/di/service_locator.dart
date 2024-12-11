@@ -11,14 +11,14 @@ Future<void> setupServiceLocator() async {
   getIt.registerLazySingleton<IAudioPlayerService>(
     () => AudioPlayerService(),
   );
-  
+
   // API 服务
   getIt.registerLazySingleton<ApiService>(
     () => ApiService(),
   );
-  
+
   // 添加 PlayerViewModel 的注册
   getIt.registerLazySingleton<PlayerViewModel>(
     () => PlayerViewModel(),
   );
-} 
+}

@@ -4,19 +4,21 @@ import 'package:asmrapp/utils/logger.dart';
 
 class AudioPlayerHandler extends BaseAudioHandler {
   final AudioPlayer _player;
-  
+
   AudioPlayerHandler(this._player) {
     AppLogger.debug('AudioPlayerHandler 初始化');
     _player.playbackEventStream.listen(_broadcastState);
     _player.playerStateStream.listen((state) {
-      AppLogger.debug('播放器状态变化: playing=${state.playing}, state=${state.processingState}');
+      AppLogger.debug(
+          '播放器状态变化: playing=${state.playing}, state=${state.processingState}');
       _broadcastState(_player.playbackEvent);
     });
   }
 
   void _broadcastState(PlaybackEvent event) {
-    AppLogger.debug('广播播放状态: position=${_player.position}, buffered=${_player.bufferedPosition}');
-    
+    AppLogger.debug(
+        '广播播放状态: position=${_player.position}, buffered=${_player.bufferedPosition}');
+
     final state = PlaybackState(
       controls: [
         MediaControl.skipToPrevious,
@@ -43,7 +45,8 @@ class AudioPlayerHandler extends BaseAudioHandler {
       queueIndex: 0,
     );
 
-    AppLogger.debug('更新播放状态: playing=${_player.playing}, state=${_player.processingState}');
+    AppLogger.debug(
+        '更新播放状态: playing=${_player.playing}, state=${_player.processingState}');
     playbackState.add(state);
   }
 
@@ -70,4 +73,4 @@ class AudioPlayerHandler extends BaseAudioHandler {
     AppLogger.debug('AudioHandler: 停止命令');
     await _player.stop();
   }
-} 
+}

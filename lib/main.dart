@@ -6,10 +6,10 @@ import 'core/di/service_locator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // 初始化服务定位器
   await setupServiceLocator();
-  
+
   runApp(const MyApp());
 }
 

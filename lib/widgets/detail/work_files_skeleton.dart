@@ -84,4 +84,4 @@ class WorkFilesSkeleton extends StatelessWidget {
       ),
     );
   }
-} 
+}

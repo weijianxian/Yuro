@@ -13,10 +13,11 @@ class WorksResponse {
 
 class ApiService {
   final Dio _dio;
-  
-  ApiService() : _dio = Dio(BaseOptions(
-    baseUrl: 'https://api.asmr.one/api',
-  ));
+
+  ApiService()
+      : _dio = Dio(BaseOptions(
+          baseUrl: 'https://api.asmr.one/api',
+        ));
 
   /// 获取作品文件列表
   Future<Files> getWorkFiles(String workId) async {
@@ -24,7 +25,7 @@ class ApiService {
       final response = await _dio.get('/tracks/$workId', queryParameters: {
         'v': '1',
       });
-      
+
       if (response.statusCode == 200) {
         final filesData = {
           'type': 'root',
@@ -34,7 +35,7 @@ class ApiService {
 
         return Files.fromJson(filesData);
       }
-      
+
       throw Exception('获取文件列表失败: ${response.statusCode}');
     } on DioException catch (e) {
       AppLogger.error('网络请求失败', e, e.stackTrace);
@@ -51,17 +52,17 @@ class ApiService {
       final response = await _dio.get('/works', queryParameters: {
         'page': page,
       });
-      
+
       if (response.statusCode == 200) {
         final List<dynamic> works = response.data['works'] ?? [];
         final pagination = Pagination.fromJson(response.data['pagination']);
-        
+
         return WorksResponse(
           works: works.map((work) => Work.fromJson(work)).toList(),
           pagination: pagination,
         );
       }
-      
+
       throw Exception('获取作品列表失败: ${response.statusCode}');
     } on DioException catch (e) {
       AppLogger.error('网络请求失败', e, e.stackTrace);
@@ -94,7 +95,7 @@ class ApiService {
 
       if (response.statusCode == 200) {
         AppLogger.debug('搜索返回数据: ${response.data}');
-        
+
         final works = (response.data['works'] as List)
             .map((work) => Work.fromJson(work))
             .toList();

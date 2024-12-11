@@ -69,4 +69,4 @@ class MiniPlayerCover extends StatelessWidget {
       child: const Icon(Icons.broken_image, color: Colors.grey),
     );
   }
-} 
+}

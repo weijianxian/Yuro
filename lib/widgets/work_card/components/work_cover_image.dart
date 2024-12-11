@@ -28,7 +28,8 @@ class WorkCoverImage extends StatelessWidget {
               width: double.infinity,
               height: double.infinity,
               placeholder: (context, url) => Shimmer.fromColors(
-                baseColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                baseColor:
+                    Theme.of(context).colorScheme.surfaceContainerHighest,
                 highlightColor: Theme.of(context).colorScheme.surface,
                 child: Container(
                   color: Colors.white,

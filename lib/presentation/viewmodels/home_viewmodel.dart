@@ -16,15 +16,16 @@ class HomeViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
   int get currentPage => _currentPage;
-  int? get totalPages => _pagination?.totalCount != null && _pagination?.pageSize != null 
-      ? (_pagination!.totalCount! / _pagination!.pageSize!).ceil()
-      : null;
+  int? get totalPages =>
+      _pagination?.totalCount != null && _pagination?.pageSize != null
+          ? (_pagination!.totalCount! / _pagination!.pageSize!).ceil()
+          : null;
 
   /// 加载指定页面的数据
   Future<void> loadPage(int page) async {
     if (_isLoading) return;
     if (page < 1 || (totalPages != null && page > totalPages!)) return;
-    
+
     _isLoading = true;
     _error = null;
     notifyListeners();

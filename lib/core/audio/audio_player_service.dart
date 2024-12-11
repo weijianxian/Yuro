@@ -11,24 +11,24 @@ class AudioPlayerService implements IAudioPlayerService {
   late final AudioNotificationService _notificationService;
   late final AudioCacheRepository _cacheRepository;
   AudioTrackInfo? _currentTrack;
-  
+
   AudioPlayerService._internal() {
     _init();
   }
-  
+
   static final AudioPlayerService _instance = AudioPlayerService._internal();
   factory AudioPlayerService() => _instance;
-  
+
   Future<void> _init() async {
     _player = AudioPlayer();
     _notificationService = AudioNotificationService(_player);
     _cacheRepository = AudioCacheRepository();
-    
+
     try {
       final session = await AudioSession.instance;
       await session.configure(const AudioSessionConfiguration.music());
       await _notificationService.init();
-      
+
       _player.playerStateStream.listen((state) {
         AppLogger.debug('播放状态变化: $state');
       });
@@ -42,29 +42,29 @@ class AudioPlayerService implements IAudioPlayerService {
     try {
       if (trackInfo != null) {
         _currentTrack = trackInfo;
-        
+
         AppLogger.debug('准备播放URL: $url');
-        
+
         // 使用缓存音频源
         final audioSource = await _cacheRepository.getAudioSource(url);
         AppLogger.debug('创建音频源成功: $url');
-        
+
         try {
           await _player.stop(); // 先停止当前播放
           AppLogger.debug('停止当前播放');
-          
+
           await _player.setAudioSource(audioSource);
           AppLogger.debug('设置音频源成功');
         } catch (e, stack) {
           AppLogger.error('设置音频源失败', e, stack);
           throw Exception('设置音频源失败: $e');
         }
-        
+
         // 等待获取到音频时长后再更新通知栏
         try {
           final duration = _player.duration;
           AppLogger.debug('获取音频时长成功: $duration');
-          
+
           final updatedTrackInfo = AudioTrackInfo(
             title: trackInfo.title,
             artist: trackInfo.artist,
@@ -78,7 +78,7 @@ class AudioPlayerService implements IAudioPlayerService {
           // 不抛出异常，继续尝试播放
         }
       }
-      
+
       try {
         await _player.play();
         AppLogger.debug('开始播放成功');
@@ -108,7 +108,7 @@ class AudioPlayerService implements IAudioPlayerService {
     await _player.stop();
     _currentTrack = null;
   }
-  
+
   @override
   Future<void> dispose() async {
     await _notificationService.dispose();

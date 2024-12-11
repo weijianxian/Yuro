@@ -18,12 +18,12 @@ class Track {
 
 class PlayerViewModel extends ChangeNotifier {
   final IAudioPlayerService _audioService = GetIt.I<IAudioPlayerService>();
-  
+
   bool _isPlaying = false;
   Track? _currentTrack;
   Duration? _position;
   Duration? _duration;
-  
+
   final List<StreamSubscription> _subscriptions = [];
 
   PlayerViewModel() {

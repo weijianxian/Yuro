@@ -12,4 +12,4 @@ class AudioTrackInfo {
     required this.url,
     this.duration,
   });
-} 
+}

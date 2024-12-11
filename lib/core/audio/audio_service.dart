@@ -6,6 +6,6 @@ abstract class AudioService {
   Future<void> resume();
   Future<void> stop();
   Future<void> dispose();
-  
+
   Stream<PlayerState> get playerState;
-} 
+}

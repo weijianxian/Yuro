@@ -37,4 +37,4 @@ class AudioPlayerService implements AudioService {
 
   @override
   Stream<PlayerState> get playerState => _player.playerStateStream;
-} 
+}

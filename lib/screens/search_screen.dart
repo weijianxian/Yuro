@@ -82,7 +82,6 @@ class _SearchScreenContentState extends State<SearchScreenContent> {
 
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       body: Column(
         children: [
@@ -101,12 +100,16 @@ class _SearchScreenContentState extends State<SearchScreenContent> {
                     decoration: InputDecoration(
                       hintText: '搜索...',
                       filled: true,
-                      fillColor: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+                      fillColor: Theme.of(context)
+                          .colorScheme
+                          .surfaceVariant
+                          .withOpacity(0.5),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(24),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
                       suffixIcon: _searchController.text.isNotEmpty
                           ? IconButton(
                               icon: const Icon(Icons.clear, size: 20),
@@ -141,10 +144,13 @@ class _SearchScreenContentState extends State<SearchScreenContent> {
                       const SizedBox(width: 8),
                       // 排序选项
                       Consumer<SearchViewModel>(
-                        builder: (context, viewModel, _) => PopupMenuButton<(String, String)>(
+                        builder: (context, viewModel, _) =>
+                            PopupMenuButton<(String, String)>(
                           child: Chip(
-                            label: Text(_getOrderText(viewModel.order, viewModel.sort)),
-                            deleteIcon: const Icon(Icons.arrow_drop_down, size: 18),
+                            label: Text(
+                                _getOrderText(viewModel.order, viewModel.sort)),
+                            deleteIcon:
+                                const Icon(Icons.arrow_drop_down, size: 18),
                             onDeleted: null,
                           ),
                           itemBuilder: (context) => [
@@ -193,7 +199,8 @@ class _SearchScreenContentState extends State<SearchScreenContent> {
                               child: Text('随机排序'),
                             ),
                           ],
-                          onSelected: (value) => viewModel.setOrder(value.$1, value.$2),
+                          onSelected: (value) =>
+                              viewModel.setOrder(value.$1, value.$2),
                         ),
                       ),
                     ],
@@ -240,4 +247,4 @@ class _SearchScreenContentState extends State<SearchScreenContent> {
       ),
     );
   }
-} 
+}

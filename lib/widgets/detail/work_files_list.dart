@@ -9,7 +9,7 @@ class WorkFilesList extends StatelessWidget {
   final Function(Child file)? onFileTap;
 
   const WorkFilesList({
-    super.key, 
+    super.key,
     required this.files,
     this.onFileTap,
   });
@@ -26,24 +26,27 @@ class WorkFilesList extends StatelessWidget {
             child: Text(
               '文件列表',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ),
           const Divider(height: 1),
-          ...files.children?.map((child) => child.type == 'folder'
-              ? WorkFolderItem(
-                  folder: child,
-                  indentation: 0,
-                  onFileTap: onFileTap,
-                )
-              : WorkFileItem(
-                  file: child,
-                  indentation: 0,
-                  onFileTap: onFileTap,
-                )).toList() ?? [],
+          ...files.children
+                  ?.map((child) => child.type == 'folder'
+                      ? WorkFolderItem(
+                          folder: child,
+                          indentation: 0,
+                          onFileTap: onFileTap,
+                        )
+                      : WorkFileItem(
+                          file: child,
+                          indentation: 0,
+                          onFileTap: onFileTap,
+                        ))
+                  .toList() ??
+              [],
         ],
       ),
     );
   }
-} 
+}

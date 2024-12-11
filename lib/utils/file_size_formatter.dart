@@ -8,4 +8,4 @@ class FileSizeFormatter {
     }
     return '${(size / kb).toStringAsFixed(2)} KB';
   }
-} 
+}

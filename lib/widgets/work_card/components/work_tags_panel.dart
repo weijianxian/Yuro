@@ -53,7 +53,7 @@ class WorkTagsPanel extends StatelessWidget {
                 ),
               ),
             )),
-                    if (work.hasSubtitle == true)
+        if (work.hasSubtitle == true)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
@@ -68,21 +68,27 @@ class WorkTagsPanel extends StatelessWidget {
               ),
             ),
           ),
-        ...work.tags?.map((tag) => Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                _getLocalizedTagName(tag),
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            )).toList() ?? [],
+        ...work.tags
+                ?.map((tag) => Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        _getLocalizedTagName(tag),
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ))
+                .toList() ??
+            [],
       ],
     );
   }
-} 
+}

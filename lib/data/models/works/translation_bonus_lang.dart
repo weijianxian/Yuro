@@ -17,4 +17,4 @@ class TranslationBonusLang with _$TranslationBonusLang {
 
   factory TranslationBonusLang.fromJson(Map<String, dynamic> json) =>
       _$TranslationBonusLangFromJson(json);
-} 
+}

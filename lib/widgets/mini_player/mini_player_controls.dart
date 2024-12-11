@@ -20,4 +20,4 @@ class MiniPlayerControls extends StatelessWidget {
       },
     );
   }
-} 
+}

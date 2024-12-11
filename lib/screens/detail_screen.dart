@@ -8,7 +8,6 @@ import 'package:asmrapp/widgets/detail/work_files_list.dart';
 import 'package:asmrapp/widgets/detail/work_files_skeleton.dart';
 import 'package:asmrapp/presentation/viewmodels/detail_viewmodel.dart';
 
-
 class DetailScreen extends StatelessWidget {
   final Work work;
 
@@ -41,12 +40,13 @@ class DetailScreen extends StatelessWidget {
                   if (viewModel.isLoading) {
                     return const WorkFilesSkeleton();
                   }
-                  
+
                   if (viewModel.error != null) {
                     return Center(
                       child: Text(
                         viewModel.error!,
-                        style: TextStyle(color: Theme.of(context).colorScheme.error),
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.error),
                       ),
                     );
                   }
