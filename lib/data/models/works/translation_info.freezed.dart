@@ -37,8 +37,11 @@ mixin _$TranslationInfo {
   String? get originalWorkno => throw _privateConstructorUsedError;
   @JsonKey(name: 'is_translation_agree')
   bool? get isTranslationAgree => throw _privateConstructorUsedError;
-  @JsonKey(name: 'translation_bonus_langs')
-  List<dynamic>? get translationBonusLangs =>
+  @JsonKey(
+      name: 'translation_bonus_langs',
+      fromJson: _translationBonusLangsFromJson,
+      toJson: _translationBonusLangsToJson)
+  Map<String, TranslationBonusLang>? get translationBonusLangs =>
       throw _privateConstructorUsedError;
   @JsonKey(name: 'is_translation_bonus_child')
   bool? get isTranslationBonusChild => throw _privateConstructorUsedError;
@@ -71,8 +74,11 @@ abstract class $TranslationInfoCopyWith<$Res> {
       @JsonKey(name: 'parent_workno') String? parentWorkno,
       @JsonKey(name: 'original_workno') String? originalWorkno,
       @JsonKey(name: 'is_translation_agree') bool? isTranslationAgree,
-      @JsonKey(name: 'translation_bonus_langs')
-      List<dynamic>? translationBonusLangs,
+      @JsonKey(
+          name: 'translation_bonus_langs',
+          fromJson: _translationBonusLangsFromJson,
+          toJson: _translationBonusLangsToJson)
+      Map<String, TranslationBonusLang>? translationBonusLangs,
       @JsonKey(name: 'is_translation_bonus_child')
       bool? isTranslationBonusChild,
       @JsonKey(name: 'production_trade_price_rate')
@@ -147,7 +153,7 @@ class _$TranslationInfoCopyWithImpl<$Res, $Val extends TranslationInfo>
       translationBonusLangs: freezed == translationBonusLangs
           ? _value.translationBonusLangs
           : translationBonusLangs // ignore: cast_nullable_to_non_nullable
-              as List<dynamic>?,
+              as Map<String, TranslationBonusLang>?,
       isTranslationBonusChild: freezed == isTranslationBonusChild
           ? _value.isTranslationBonusChild
           : isTranslationBonusChild // ignore: cast_nullable_to_non_nullable
@@ -178,8 +184,11 @@ abstract class _$$TranslationInfoImplCopyWith<$Res>
       @JsonKey(name: 'parent_workno') String? parentWorkno,
       @JsonKey(name: 'original_workno') String? originalWorkno,
       @JsonKey(name: 'is_translation_agree') bool? isTranslationAgree,
-      @JsonKey(name: 'translation_bonus_langs')
-      List<dynamic>? translationBonusLangs,
+      @JsonKey(
+          name: 'translation_bonus_langs',
+          fromJson: _translationBonusLangsFromJson,
+          toJson: _translationBonusLangsToJson)
+      Map<String, TranslationBonusLang>? translationBonusLangs,
       @JsonKey(name: 'is_translation_bonus_child')
       bool? isTranslationBonusChild,
       @JsonKey(name: 'production_trade_price_rate')
@@ -252,7 +261,7 @@ class __$$TranslationInfoImplCopyWithImpl<$Res>
       translationBonusLangs: freezed == translationBonusLangs
           ? _value._translationBonusLangs
           : translationBonusLangs // ignore: cast_nullable_to_non_nullable
-              as List<dynamic>?,
+              as Map<String, TranslationBonusLang>?,
       isTranslationBonusChild: freezed == isTranslationBonusChild
           ? _value.isTranslationBonusChild
           : isTranslationBonusChild // ignore: cast_nullable_to_non_nullable
@@ -278,8 +287,11 @@ class _$TranslationInfoImpl implements _TranslationInfo {
       @JsonKey(name: 'parent_workno') this.parentWorkno,
       @JsonKey(name: 'original_workno') this.originalWorkno,
       @JsonKey(name: 'is_translation_agree') this.isTranslationAgree,
-      @JsonKey(name: 'translation_bonus_langs')
-      final List<dynamic>? translationBonusLangs,
+      @JsonKey(
+          name: 'translation_bonus_langs',
+          fromJson: _translationBonusLangsFromJson,
+          toJson: _translationBonusLangsToJson)
+      final Map<String, TranslationBonusLang>? translationBonusLangs,
       @JsonKey(name: 'is_translation_bonus_child') this.isTranslationBonusChild,
       @JsonKey(name: 'production_trade_price_rate')
       this.productionTradePriceRate})
@@ -323,16 +335,19 @@ class _$TranslationInfoImpl implements _TranslationInfo {
   @override
   @JsonKey(name: 'is_translation_agree')
   final bool? isTranslationAgree;
-  final List<dynamic>? _translationBonusLangs;
+  final Map<String, TranslationBonusLang>? _translationBonusLangs;
   @override
-  @JsonKey(name: 'translation_bonus_langs')
-  List<dynamic>? get translationBonusLangs {
+  @JsonKey(
+      name: 'translation_bonus_langs',
+      fromJson: _translationBonusLangsFromJson,
+      toJson: _translationBonusLangsToJson)
+  Map<String, TranslationBonusLang>? get translationBonusLangs {
     final value = _translationBonusLangs;
     if (value == null) return null;
-    if (_translationBonusLangs is EqualUnmodifiableListView)
+    if (_translationBonusLangs is EqualUnmodifiableMapView)
       return _translationBonusLangs;
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(value);
+    return EqualUnmodifiableMapView(value);
   }
 
   @override
@@ -423,8 +438,11 @@ abstract class _TranslationInfo implements TranslationInfo {
       @JsonKey(name: 'parent_workno') final String? parentWorkno,
       @JsonKey(name: 'original_workno') final String? originalWorkno,
       @JsonKey(name: 'is_translation_agree') final bool? isTranslationAgree,
-      @JsonKey(name: 'translation_bonus_langs')
-      final List<dynamic>? translationBonusLangs,
+      @JsonKey(
+          name: 'translation_bonus_langs',
+          fromJson: _translationBonusLangsFromJson,
+          toJson: _translationBonusLangsToJson)
+      final Map<String, TranslationBonusLang>? translationBonusLangs,
       @JsonKey(name: 'is_translation_bonus_child')
       final bool? isTranslationBonusChild,
       @JsonKey(name: 'production_trade_price_rate')
@@ -460,8 +478,11 @@ abstract class _TranslationInfo implements TranslationInfo {
   @JsonKey(name: 'is_translation_agree')
   bool? get isTranslationAgree;
   @override
-  @JsonKey(name: 'translation_bonus_langs')
-  List<dynamic>? get translationBonusLangs;
+  @JsonKey(
+      name: 'translation_bonus_langs',
+      fromJson: _translationBonusLangsFromJson,
+      toJson: _translationBonusLangsToJson)
+  Map<String, TranslationBonusLang>? get translationBonusLangs;
   @override
   @JsonKey(name: 'is_translation_bonus_child')
   bool? get isTranslationBonusChild;
