@@ -127,7 +127,7 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   void onWorkTap(Work work) {
-    // TODO: 实现作品点击逻辑
+    // TODO: 实现品点击逻辑
   }
 
   void onSearch() {
@@ -140,5 +140,33 @@ class HomeViewModel extends ChangeNotifier {
   void updateScrollPosition(double position) {
     _scrollPosition = position;
     notifyListeners();
+  }
+
+  // 跳转到指定页面
+  Future<void> jumpToPage(int page) async {
+    if (page < 1 || page > (totalPages ?? 1)) return;
+    
+    AppLogger.info('跳转到第$page页');
+    
+    // 清空现有数据
+    _pageWorks.clear();
+    _displayPage = page;
+    
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final response = await _apiService.getWorks(page: page);
+      _pageWorks[page] = response.works;
+      _pagination = response.pagination;
+      AppLogger.info('页面加载成功: ${response.works.length}个作品');
+    } catch (e) {
+      AppLogger.error('加载页面失败', e);
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 }

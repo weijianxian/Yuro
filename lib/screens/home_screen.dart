@@ -42,6 +42,41 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _showPageJumpDialog(BuildContext context, HomeViewModel viewModel) {
+    final controller = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('跳转到指定页面'),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            labelText: '页码 (1-${viewModel.totalPages})',
+            border: const OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () {
+              final page = int.tryParse(controller.text);
+              if (page != null) {
+                viewModel.jumpToPage(page);
+              }
+              Navigator.pop(context);
+            },
+            child: const Text('确定'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
@@ -54,9 +89,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 const Text(Strings.appName),
                 const SizedBox(width: 12),
                 if (viewModel.totalPages != null)
-                  Text(
-                    '(${viewModel.currentPage}/${viewModel.totalPages})',
-                    style: Theme.of(context).textTheme.bodyMedium,
+                  InkWell(
+                    onTap: () => _showPageJumpDialog(context, viewModel),
+                    child: Text(
+                      '(${viewModel.currentPage}/${viewModel.totalPages})',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
                   ),
               ],
             ),
