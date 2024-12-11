@@ -39,6 +39,20 @@ class WorkTagsPanel extends StatelessWidget {
               ),
             ),
           ),
+        ...?work.vas?.map((va) => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.green.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                va['name'] ?? '',
+                style: TextStyle(
+                  fontSize: 10,
+                  color: Colors.green[700],
+                ),
+              ),
+            )),
         ...work.tags?.map((tag) => Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
