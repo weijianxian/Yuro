@@ -4,10 +4,12 @@ import 'package:asmrapp/utils/logger.dart';
 import './i_audio_player_service.dart';
 import './models/audio_track_info.dart';
 import './notification/audio_notification_service.dart';
+import '../../data/repositories/audio/audio_cache_repository.dart';
 
 class AudioPlayerService implements IAudioPlayerService {
   late final AudioPlayer _player;
   late final AudioNotificationService _notificationService;
+  late final AudioCacheRepository _cacheRepository;
   AudioTrackInfo? _currentTrack;
   
   AudioPlayerService._internal() {
@@ -20,6 +22,7 @@ class AudioPlayerService implements IAudioPlayerService {
   Future<void> _init() async {
     _player = AudioPlayer();
     _notificationService = AudioNotificationService(_player);
+    _cacheRepository = AudioCacheRepository();
     
     try {
       final session = await AudioSession.instance;
@@ -39,24 +42,53 @@ class AudioPlayerService implements IAudioPlayerService {
     try {
       if (trackInfo != null) {
         _currentTrack = trackInfo;
-        await _player.setUrl(url);
+        
+        AppLogger.debug('准备播放URL: $url');
+        
+        // 使用缓存音频源
+        final audioSource = await _cacheRepository.getAudioSource(url);
+        AppLogger.debug('创建音频源成功: $url');
+        
+        try {
+          await _player.stop(); // 先停止当前播放
+          AppLogger.debug('停止当前播放');
+          
+          await _player.setAudioSource(audioSource);
+          AppLogger.debug('设置音频源成功');
+        } catch (e, stack) {
+          AppLogger.error('设置音频源失败', e, stack);
+          throw Exception('设置音频源失败: $e');
+        }
         
         // 等待获取到音频时长后再更新通知栏
-        final duration = await _player.duration;
-        final updatedTrackInfo = AudioTrackInfo(
-          title: trackInfo.title,
-          artist: trackInfo.artist,
-          coverUrl: trackInfo.coverUrl,
-          url: trackInfo.url,
-          duration: duration,  // 使用实际获取到的时长
-        );
-        _notificationService.updateMetadata(updatedTrackInfo);
+        try {
+          final duration = await _player.duration;
+          AppLogger.debug('获取音频时长成功: $duration');
+          
+          final updatedTrackInfo = AudioTrackInfo(
+            title: trackInfo.title,
+            artist: trackInfo.artist,
+            coverUrl: trackInfo.coverUrl,
+            url: trackInfo.url,
+            duration: duration,
+          );
+          _notificationService.updateMetadata(updatedTrackInfo);
+        } catch (e, stack) {
+          AppLogger.error('获取音频时长失败', e, stack);
+          // 不抛出异常，继续尝试播放
+        }
       }
       
-      await _player.play();
-    } catch (e) {
+      try {
+        await _player.play();
+        AppLogger.debug('开始播放成功');
+      } catch (e, stack) {
+        AppLogger.error('开始播放失败', e, stack);
+        throw Exception('开始播放失败: $e');
+      }
+    } catch (e, stack) {
       _currentTrack = null;
-      AppLogger.error('播放失败', e);
+      AppLogger.error('播放失败', e, stack);
       rethrow;
     }
   }
