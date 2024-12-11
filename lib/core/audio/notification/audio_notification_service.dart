@@ -35,37 +35,50 @@ class AudioNotificationService {
 
   void _setupPlayerStateListener() {
     _player.playerStateStream.listen((state) {
-      final playbackState = PlaybackState(
-        controls: [
-          MediaControl.skipToPrevious,
-          state.playing ? MediaControl.pause : MediaControl.play,
-          MediaControl.skipToNext,
-        ],
-        systemActions: const {
-          MediaAction.seek,
-          MediaAction.seekForward,
-          MediaAction.seekBackward,
-        },
-        androidCompactActionIndices: const [0, 1, 2],
-        processingState: const {
-          ProcessingState.idle: AudioProcessingState.idle,
-          ProcessingState.loading: AudioProcessingState.loading,
-          ProcessingState.buffering: AudioProcessingState.buffering,
-          ProcessingState.ready: AudioProcessingState.ready,
-          ProcessingState.completed: AudioProcessingState.completed,
-        }[state.processingState]!,
-        playing: state.playing,
-        updatePosition: _player.position,
-        bufferedPosition: _player.bufferedPosition,
-        speed: _player.speed,
-        queueIndex: 0,
-      );
-      
-      _playbackState.add(playbackState);
-      if (_audioHandler != null) {
-        (_audioHandler as BaseAudioHandler).playbackState.add(playbackState);
-      }
+      _updatePlaybackState();
     });
+
+    _player.positionStream.listen((_) {
+      _updatePlaybackState();
+    });
+
+    _player.durationStream.listen((_) {
+      _updatePlaybackState();
+      _updateMediaItem();
+    });
+  }
+
+  void _updatePlaybackState() {
+    final playbackState = PlaybackState(
+      controls: [
+        MediaControl.skipToPrevious,
+        _player.playing ? MediaControl.pause : MediaControl.play,
+        MediaControl.skipToNext,
+      ],
+      systemActions: const {
+        MediaAction.seek,
+        MediaAction.seekForward,
+        MediaAction.seekBackward,
+      },
+      androidCompactActionIndices: const [0, 1, 2],
+      processingState: const {
+        ProcessingState.idle: AudioProcessingState.idle,
+        ProcessingState.loading: AudioProcessingState.loading,
+        ProcessingState.buffering: AudioProcessingState.buffering,
+        ProcessingState.ready: AudioProcessingState.ready,
+        ProcessingState.completed: AudioProcessingState.completed,
+      }[_player.processingState]!,
+      playing: _player.playing,
+      updatePosition: _player.position,
+      bufferedPosition: _player.bufferedPosition,
+      speed: _player.speed,
+      queueIndex: 0,
+    );
+    
+    _playbackState.add(playbackState);
+    if (_audioHandler != null) {
+      (_audioHandler as BaseAudioHandler).playbackState.add(playbackState);
+    }
   }
 
   void updateMetadata(AudioTrackInfo trackInfo) {
@@ -74,11 +87,25 @@ class AudioNotificationService {
       title: trackInfo.title,
       artist: trackInfo.artist,
       artUri: Uri.parse(trackInfo.coverUrl),
+      duration: trackInfo.duration,
     );
     
     _mediaItem.add(mediaItem);
     if (_audioHandler != null) {
       (_audioHandler as BaseAudioHandler).mediaItem.add(mediaItem);
+    }
+  }
+
+  void _updateMediaItem() {
+    final currentItem = _mediaItem.valueOrNull;
+    if (currentItem != null) {
+      final updatedItem = currentItem.copyWith(
+        duration: _player.duration,
+      );
+      _mediaItem.add(updatedItem);
+      if (_audioHandler != null) {
+        (_audioHandler as BaseAudioHandler).mediaItem.add(updatedItem);
+      }
     }
   }
 

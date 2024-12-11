@@ -39,9 +39,20 @@ class AudioPlayerService implements IAudioPlayerService {
     try {
       if (trackInfo != null) {
         _currentTrack = trackInfo;
-        _notificationService.updateMetadata(trackInfo);
+        await _player.setUrl(url);
+        
+        // 等待获取到音频时长后再更新通知栏
+        final duration = await _player.duration;
+        final updatedTrackInfo = AudioTrackInfo(
+          title: trackInfo.title,
+          artist: trackInfo.artist,
+          coverUrl: trackInfo.coverUrl,
+          url: trackInfo.url,
+          duration: duration,  // 使用实际获取到的时长
+        );
+        _notificationService.updateMetadata(updatedTrackInfo);
       }
-      await _player.setUrl(url);
+      
       await _player.play();
     } catch (e) {
       _currentTrack = null;
