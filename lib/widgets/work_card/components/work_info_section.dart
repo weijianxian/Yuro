@@ -1,7 +1,5 @@
-import 'package:asmrapp/data/models/works/tag.dart';
 import 'package:flutter/material.dart';
 import 'package:asmrapp/data/models/works/work.dart';
-import 'work_header.dart';
 import 'work_title.dart';
 import 'work_tags_panel.dart';
 import 'work_footer.dart';
