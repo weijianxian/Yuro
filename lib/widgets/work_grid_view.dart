@@ -13,6 +13,7 @@ class WorkGridView extends StatelessWidget {
   final Widget? customEmptyWidget;
   final WorkLayoutStrategy layoutStrategy;
   final ScrollController? scrollController;
+  final Widget? bottomWidget;
 
   const WorkGridView({
     super.key,
@@ -24,6 +25,7 @@ class WorkGridView extends StatelessWidget {
     this.customEmptyWidget,
     this.layoutStrategy = const WorkLayoutStrategy(),
     this.scrollController,
+    this.bottomWidget,
   });
 
   @override
@@ -85,6 +87,10 @@ class WorkGridView extends StatelessWidget {
             },
           ),
         ),
+        if (bottomWidget != null)
+          SliverToBoxAdapter(
+            child: bottomWidget!,
+          ),
       ],
     );
   }

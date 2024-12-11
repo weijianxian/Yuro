@@ -71,25 +71,19 @@ class _HomeScreenState extends State<HomeScreen> {
           builder: (context, viewModel, child) {
             return RefreshIndicator(
               onRefresh: () => viewModel.loadWorks(refresh: true),
-              child: Column(
-                children: [
-                  Expanded(
-                    child: WorkGridView(
-                      works: viewModel.works,
-                      isLoading: viewModel.works.isEmpty && viewModel.isLoading,
-                      error: viewModel.error,
-                      onRetry: () => viewModel.loadWorks(refresh: true),
-                      layoutStrategy: _layoutStrategy,
-                      scrollController: _scrollController,
-                    ),
-                  ),
-                  PaginationControls(
-                    currentPage: viewModel.currentPage,
-                    totalPages: viewModel.totalPages,
-                    isLoading: viewModel.isLoading,
-                    onPageChanged: _onPageChanged,
-                  ),
-                ],
+              child: WorkGridView(
+                works: viewModel.works,
+                isLoading: viewModel.works.isEmpty && viewModel.isLoading,
+                error: viewModel.error,
+                onRetry: () => viewModel.loadWorks(refresh: true),
+                layoutStrategy: _layoutStrategy,
+                scrollController: _scrollController,
+                bottomWidget: PaginationControls(
+                  currentPage: viewModel.currentPage,
+                  totalPages: viewModel.totalPages,
+                  isLoading: viewModel.isLoading,
+                  onPageChanged: _onPageChanged,
+                ),
               ),
             );
           },
