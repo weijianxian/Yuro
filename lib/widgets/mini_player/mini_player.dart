@@ -3,6 +3,7 @@ import 'package:asmrapp/presentation/viewmodels/player_viewmodel.dart';
 import 'mini_player_controls.dart';
 import 'mini_player_progress.dart';
 import 'package:get_it/get_it.dart';
+import 'mini_player_cover.dart';
 
 class MiniPlayer extends StatelessWidget {
   const MiniPlayer({super.key});
@@ -31,6 +32,12 @@ class MiniPlayer extends StatelessWidget {
               Expanded(
                 child: Row(
                   children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+                      child: MiniPlayerCover(
+                        coverUrl: viewModel.currentTrack?.coverUrl,
+                      ),
+                    ),
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
