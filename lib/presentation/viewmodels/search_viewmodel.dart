@@ -27,6 +27,32 @@ class SearchViewModel extends ChangeNotifier {
   int _currentPage = 1;
   int get currentPage => _currentPage;
 
+  bool _hasSubtitle = false;
+  bool get hasSubtitle => _hasSubtitle;
+
+  String _order = 'create_date';  // 默认按创建时间
+  String get order => _order;
+  
+  String _sort = 'desc';  // 默认降序
+  String get sort => _sort;
+
+  void toggleSubtitle() {
+    _hasSubtitle = !_hasSubtitle;
+    notifyListeners();
+    if (_keyword.isNotEmpty) {
+      search(_keyword);
+    }
+  }
+
+  void setOrder(String order, String sort) {
+    _order = order;
+    _sort = sort;
+    notifyListeners();
+    if (_keyword.isNotEmpty) {
+      search(_keyword);
+    }
+  }
+
   /// 执行搜索
   Future<void> search(String keyword, {int page = 1}) async {
     if (keyword.isEmpty) return;
@@ -41,6 +67,9 @@ class SearchViewModel extends ChangeNotifier {
       final response = await _apiService.searchWorks(
         keyword: keyword,
         page: page,
+        order: _order,
+        sort: _sort,
+        subtitle: _hasSubtitle ? 1 : 0,  // 添加字幕过滤
       );
       
       _works = response.works;

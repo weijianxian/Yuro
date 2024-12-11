@@ -78,6 +78,7 @@ class ApiService {
     int page = 1,
     String order = 'create_date',
     String sort = 'desc',
+    int subtitle = 0,
   }) async {
     try {
       final response = await _dio.get(
@@ -86,7 +87,7 @@ class ApiService {
           'page': page,
           'order': order,
           'sort': sort,
-          'subtitle': 1,
+          'subtitle': subtitle,
           'includeTranslationWorks': true,
         },
       );
