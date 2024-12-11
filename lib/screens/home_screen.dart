@@ -17,6 +17,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _layoutStrategy = const WorkLayoutStrategy();
+  final _scrollController = ScrollController();
   late HomeViewModel _viewModel;
 
   @override
@@ -28,7 +29,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onPageChanged(int page) async {
+    await _viewModel.loadPage(page);
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
   }
 
   @override
@@ -77,6 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
             return RefreshIndicator(
               onRefresh: () => viewModel.loadWorks(refresh: true),
               child: CustomScrollView(
+                controller: _scrollController,
                 slivers: [
                   SliverPadding(
                     padding: _layoutStrategy.getPadding(context),
@@ -98,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       currentPage: viewModel.currentPage,
                       totalPages: viewModel.totalPages,
                       isLoading: viewModel.isLoading,
-                      onPageChanged: viewModel.loadPage,
+                      onPageChanged: _onPageChanged,
                     ),
                   ),
                 ],
