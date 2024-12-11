@@ -12,6 +12,7 @@ class WorkGridView extends StatelessWidget {
   final String? emptyMessage;
   final Widget? customEmptyWidget;
   final WorkLayoutStrategy layoutStrategy;
+  final ScrollController? scrollController;
 
   const WorkGridView({
     super.key,
@@ -22,6 +23,7 @@ class WorkGridView extends StatelessWidget {
     this.emptyMessage,
     this.customEmptyWidget,
     this.layoutStrategy = const WorkLayoutStrategy(),
+    this.scrollController,
   });
 
   @override
@@ -66,6 +68,7 @@ class WorkGridView extends StatelessWidget {
     }
 
     return CustomScrollView(
+      controller: scrollController,
       slivers: [
         SliverPadding(
           padding: layoutStrategy.getPadding(context),

@@ -80,6 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       error: viewModel.error,
                       onRetry: () => viewModel.loadWorks(refresh: true),
                       layoutStrategy: _layoutStrategy,
+                      scrollController: _scrollController,
                     ),
                   ),
                   PaginationControls(
