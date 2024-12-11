@@ -1,42 +1,66 @@
 # 音频核心功能
 
-此目录包含所有音频播放相关的核心功能实现。
+此文档仅供参考，实际实现可能随项目发展而变化。
 
-## 文件结构
+## 当前架构
 
-- `i_audio_player_service.dart` - 音频服务接口定义
-- `audio_player_service.dart` - 音频服务实现（单例）
-- `playlist_manager.dart` - 播放列表管理（待实现）
-- `audio_state.dart` - 音频播放状态定义（待实现）
+### 1. 音频服务 (AudioPlayerService)
+- 单例模式实现
+- 基于 just_audio 包
+- 通过 GetIt 注入管理
 
-## 职责
+<pre>
+class AudioPlayerService implements IAudioPlayerService {
+  late final AudioPlayer _player;
+  AudioTrackInfo? _currentTrack;
+  
+  // 单例实现
+  static final AudioPlayerService _instance = AudioPlayerService._internal();
+  factory AudioPlayerService() => _instance;
+}
+</pre>
 
-### 音频服务接口 (IAudioPlayerService)
-- 定义音频播放的核心接口
-- 提供播放控制方法
-- 提供状态监听流
+### 2. 音频状态管理 (MiniPlayerViewModel)
+- 通过 GetIt 实现全局单例
+- 使用 ChangeNotifier 管理状态
+- 负责 UI 和音频服务的交互
 
-### 音频服务实现 (AudioPlayerService)
-- 基于 just_audio 实现音频播放功能
-- 维护全局单例播放器实例
-- 处理音频会话和状态管理
+<pre>
+class MiniPlayerViewModel extends ChangeNotifier {
+  final IAudioPlayerService _audioService = GetIt.I<IAudioPlayerService>();
+  Track? _currentTrack;
+  bool _isPlaying = false;
+  Duration? _position;
+  Duration? _duration;
+}
+</pre>
 
-### 播放列表管理 (待实现)
-- 播放队列管理
-- 播放模式控制
-- 播放历史记录
+### 3. UI 组件
+- MiniPlayer: 迷你播放器组件
+- MiniPlayerControls: 播放控制组件
+- MiniPlayerProgress: 进度条组件
 
-### 状态管理 (待实现)
-- 播放状态定义
-- 缓冲状态管理
-- 错误状态处理
+### 4. 依赖注入
+通过 GetIt 管理所有依赖：
+<pre>
+void setupServiceLocator() {
+  getIt.registerLazySingleton<IAudioPlayerService>(() => AudioPlayerService());
+  getIt.registerLazySingleton<MiniPlayerViewModel>(() => MiniPlayerViewModel());
+}
+</pre>
 
-## 依赖注入
+## 待实现功能
 
-通过 GetIt 进行依赖注入管理：
-- 注册为懒加载单例
-- 支持依赖替换（便于测试）
-- 统一的生命周期管理
+1. 播放列表管理
+2. 播放模式控制
+3. 音频缓存
+4. 播放历史记录
+5. 完整播放器界面
 
-## 使用方式
+## 注意事项
+
+- 此架构文档仅供参考
+- 可根据需求随时调整
+- 优先考虑实际开发需求
+- 保持灵活性和可扩展性
  
