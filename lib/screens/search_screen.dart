@@ -62,62 +62,80 @@ class _SearchScreenContentState extends State<SearchScreenContent> {
     final colorScheme = Theme.of(context).colorScheme;
     
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: colorScheme.surface,
-        title: TextField(
-          controller: _searchController,
-          decoration: InputDecoration(
-            hintText: '搜索...',
-            border: InputBorder.none,
-            suffixIcon: IconButton(
-              icon: const Icon(Icons.clear),
-              onPressed: () {
-                _searchController.clear();
-                context.read<SearchViewModel>().clear();
+      body: Column(
+        children: [
+          Container(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top + 8,
+              bottom: 8,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: '搜索...',
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, size: 20),
+                          onPressed: () {
+                            _searchController.clear();
+                            context.read<SearchViewModel>().clear();
+                          },
+                        )
+                      : null,
+                  prefixIcon: const Icon(Icons.search, size: 20),
+                  isDense: true,
+                ),
+                textInputAction: TextInputAction.search,
+                onSubmitted: (_) => _onSearch(),
+                onChanged: (value) => setState(() {}),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Consumer<SearchViewModel>(
+              builder: (context, viewModel, child) {
+                Widget? emptyWidget;
+                if (viewModel.works.isEmpty && viewModel.keyword.isEmpty) {
+                  emptyWidget = const Center(
+                    child: Text('输入关键词开始搜索'),
+                  );
+                } else if (viewModel.works.isEmpty) {
+                  emptyWidget = const Center(
+                    child: Text('没有找到相关结果'),
+                  );
+                }
+
+                return WorkGridView(
+                  works: viewModel.works,
+                  isLoading: viewModel.isLoading,
+                  error: viewModel.error,
+                  onRetry: _onSearch,
+                  customEmptyWidget: emptyWidget,
+                  layoutStrategy: _layoutStrategy,
+                  scrollController: _scrollController,
+                  bottomWidget: viewModel.works.isNotEmpty
+                      ? PaginationControls(
+                          currentPage: viewModel.currentPage,
+                          totalPages: viewModel.totalPages,
+                          isLoading: viewModel.isLoading,
+                          onPageChanged: _onPageChanged,
+                        )
+                      : null,
+                );
               },
             ),
           ),
-          textInputAction: TextInputAction.search,
-          onSubmitted: (_) => _onSearch(),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: _onSearch,
-          ),
         ],
-      ),
-      body: Consumer<SearchViewModel>(
-        builder: (context, viewModel, child) {
-          Widget? emptyWidget;
-          if (viewModel.works.isEmpty && viewModel.keyword.isEmpty) {
-            emptyWidget = const Center(
-              child: Text('输入关键词开始搜索'),
-            );
-          } else if (viewModel.works.isEmpty) {
-            emptyWidget = const Center(
-              child: Text('没有找到相关结果'),
-            );
-          }
-
-          return WorkGridView(
-            works: viewModel.works,
-            isLoading: viewModel.isLoading,
-            error: viewModel.error,
-            onRetry: _onSearch,
-            customEmptyWidget: emptyWidget,
-            layoutStrategy: _layoutStrategy,
-            scrollController: _scrollController,
-            bottomWidget: viewModel.works.isNotEmpty
-                ? PaginationControls(
-                    currentPage: viewModel.currentPage,
-                    totalPages: viewModel.totalPages,
-                    isLoading: viewModel.isLoading,
-                    onPageChanged: _onPageChanged,
-                  )
-                : null,
-          );
-        },
       ),
     );
   }
