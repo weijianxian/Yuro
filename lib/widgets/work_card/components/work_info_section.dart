@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:asmrapp/data/models/works/work.dart';
 import 'work_header.dart';
 import 'work_title.dart';
-import 'work_tags.dart';
+import 'work_tags_panel.dart';
 import 'work_footer.dart';
 
 class WorkInfoSection extends StatelessWidget {
@@ -25,14 +25,6 @@ class WorkInfoSection extends StatelessWidget {
     } else {
       return '${minutes}m';
     }
-  }
-
-  String _getLocalizedTagName(Tag tag) {
-    final zhName = tag.i18n?.zhCn?.name;
-    if (zhName != null) return zhName;
-    final jaName = tag.i18n?.jaJp?.name;
-    if (jaName != null) return jaName;
-    return tag.name ?? '';
   }
 
   @override
@@ -64,41 +56,7 @@ class WorkInfoSection extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Wrap(
-            spacing: 4,
-            runSpacing: 2,
-            children: [
-              if (work.circle?.name != null)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    work.circle?.name ?? '',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Colors.orange[700],
-                    ),
-                  ),
-                ),
-              ...work.tags?.map((tag) => Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      _getLocalizedTagName(tag),
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  )).toList() ?? [],
-            ],
-          ),
+          WorkTagsPanel(work: work),
           const SizedBox(height: 4),
           const Spacer(),
           WorkFooter(work: work),
