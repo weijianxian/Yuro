@@ -30,12 +30,12 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      AppLogger.info('加载作品列表: 第$page页');
+      // AppLogger.info('加载作品列表: 第$page页');
       final response = await _apiService.getWorks(page: page);
       _works = response.works;
       _pagination = response.pagination;
       _currentPage = page;
-      AppLogger.info('作品列表加载成功: ${response.works.length}个作品');
+      AppLogger.info('第$page页作品列表加载成功: ${response.works.length}个作品');
     } catch (e) {
       AppLogger.error('加载作品列表失败', e);
       _error = e.toString();
