@@ -20,8 +20,9 @@ class WorkInfoSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          WorkHeader(work: work),
-          const SizedBox(height: 4),
+          // 评分大部分没有，不展示了
+          // WorkHeader(work: work),
+          // const SizedBox(height: 4),
           WorkTitle(work: work),
           const SizedBox(height: 4),
           Text(
