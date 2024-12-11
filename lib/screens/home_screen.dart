@@ -76,34 +76,30 @@ class _HomeScreenState extends State<HomeScreen> {
 
             return RefreshIndicator(
               onRefresh: () => viewModel.loadWorks(refresh: true),
-              child: Column(
-                children: [
-                  Expanded(
-                    child: CustomScrollView(
-                      slivers: [
-                        SliverPadding(
-                          padding: _layoutStrategy.getPadding(context),
-                          sliver: WorkGrid(
-                            works: viewModel.works,
-                            layoutStrategy: _layoutStrategy,
-                            onWorkTap: (work) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => DetailScreen(work: work),
-                                ),
-                              );
-                            },
+              child: CustomScrollView(
+                slivers: [
+                  SliverPadding(
+                    padding: _layoutStrategy.getPadding(context),
+                    sliver: WorkGrid(
+                      works: viewModel.works,
+                      layoutStrategy: _layoutStrategy,
+                      onWorkTap: (work) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DetailScreen(work: work),
                           ),
-                        ),
-                      ],
+                        );
+                      },
                     ),
                   ),
-                  PaginationControls(
-                    currentPage: viewModel.currentPage,
-                    totalPages: viewModel.totalPages,
-                    isLoading: viewModel.isLoading,
-                    onPageChanged: viewModel.loadPage,
+                  SliverToBoxAdapter(
+                    child: PaginationControls(
+                      currentPage: viewModel.currentPage,
+                      totalPages: viewModel.totalPages,
+                      isLoading: viewModel.isLoading,
+                      onPageChanged: viewModel.loadPage,
+                    ),
                   ),
                 ],
               ),
