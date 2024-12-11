@@ -1,7 +1,15 @@
 import 'package:dio/dio.dart';
 import 'package:asmrapp/data/models/files/files.dart';
 import 'package:asmrapp/data/models/works/work.dart';
+import 'package:asmrapp/data/models/works/pagination.dart';
 import 'package:asmrapp/utils/logger.dart';
+
+class WorksResponse {
+  final List<Work> works;
+  final Pagination pagination;
+
+  WorksResponse({required this.works, required this.pagination});
+}
 
 class ApiService {
   final Dio _dio;
@@ -38,7 +46,7 @@ class ApiService {
   }
 
   /// 获取作品列表
-  Future<List<Work>> getWorks({int page = 1}) async {
+  Future<WorksResponse> getWorks({int page = 1}) async {
     try {
       final response = await _dio.get('/works', queryParameters: {
         'page': page,
@@ -46,7 +54,12 @@ class ApiService {
       
       if (response.statusCode == 200) {
         final List<dynamic> works = response.data['works'] ?? [];
-        return works.map((work) => Work.fromJson(work)).toList();
+        final pagination = Pagination.fromJson(response.data['pagination']);
+        
+        return WorksResponse(
+          works: works.map((work) => Work.fromJson(work)).toList(),
+          pagination: pagination,
+        );
       }
       
       throw Exception('获取作品列表失败: ${response.statusCode}');

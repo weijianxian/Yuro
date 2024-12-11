@@ -46,7 +46,19 @@ class _HomeScreenState extends State<HomeScreen> {
       value: _viewModel,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text(Strings.appName),
+          title: Consumer<HomeViewModel>(
+            builder: (context, viewModel, child) => Row(
+              children: [
+                const Text(Strings.appName),
+                const SizedBox(width: 12),
+                if (viewModel.totalPages != null)
+                  Text(
+                    '(${viewModel.currentPage}/${viewModel.totalPages})',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+              ],
+            ),
+          ),
           actions: [
             IconButton(
               icon: const Icon(Icons.search),
