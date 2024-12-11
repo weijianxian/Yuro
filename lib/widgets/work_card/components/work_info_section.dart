@@ -53,22 +53,6 @@ class WorkInfoSection extends StatelessWidget {
                       ),
                 ),
               ],
-              const Spacer(),
-              if (work.hasSubtitle == true)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    '字幕',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Colors.blue[700],
-                    ),
-                  ),
-                ),
             ],
           ),
           const SizedBox(height: 8),
