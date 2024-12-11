@@ -71,4 +71,42 @@ class ApiService {
       throw Exception('解析数据失败: $e');
     }
   }
+
+  /// 搜索作品
+  Future<WorksResponse> searchWorks({
+    required String keyword,
+    int page = 1,
+    String order = 'create_date',
+    String sort = 'desc',
+  }) async {
+    try {
+      final response = await _dio.get(
+        '/search/${Uri.encodeComponent(keyword)}',
+        queryParameters: {
+          'page': page,
+          'order': order,
+          'sort': sort,
+          'subtitle': 1,
+          'includeTranslationWorks': true,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final works = (response.data['works'] as List)
+            .map((work) => Work.fromJson(work))
+            .toList();
+
+        final pagination = Pagination.fromJson(response.data['pagination']);
+
+        return WorksResponse(
+          works: works,
+          pagination: pagination,
+        );
+      }
+
+      throw Exception('搜索失败: ${response.statusCode}');
+    } catch (e) {
+      throw Exception('搜索请求失败: $e');
+    }
+  }
 }

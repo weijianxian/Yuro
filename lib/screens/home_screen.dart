@@ -7,6 +7,7 @@ import 'package:asmrapp/presentation/viewmodels/home_viewmodel.dart';
 import 'package:asmrapp/presentation/layouts/work_layout_strategy.dart';
 import 'package:asmrapp/screens/detail_screen.dart';
 import 'package:asmrapp/widgets/pagination_controls.dart';
+import 'package:asmrapp/screens/search_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -61,7 +62,14 @@ class _HomeScreenState extends State<HomeScreen> {
             IconButton(
               icon: const Icon(Icons.search),
               tooltip: Strings.search,
-              onPressed: _viewModel.onSearch,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SearchScreen(),
+                  ),
+                );
+              },
             ),
           ],
         ),
