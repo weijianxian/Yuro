@@ -34,6 +34,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onScroll() {
+    _viewModel.updateScrollPosition(_scrollController.position.pixels);
+    
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       _viewModel.loadWorks();
