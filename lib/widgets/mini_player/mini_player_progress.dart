@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:asmrapp/presentation/viewmodels/mini_player_viewmodel.dart';
+import 'package:asmrapp/presentation/viewmodels/player_viewmodel.dart';
 
 class MiniPlayerProgress extends StatelessWidget {
   const MiniPlayerProgress({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final viewModel = GetIt.I<MiniPlayerViewModel>();
+    final viewModel = GetIt.I<PlayerViewModel>();
     return ListenableBuilder(
       listenable: viewModel,
       builder: (context, _) {

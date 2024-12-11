@@ -16,7 +16,7 @@ class Track {
   });
 }
 
-class MiniPlayerViewModel extends ChangeNotifier {
+class PlayerViewModel extends ChangeNotifier {
   final IAudioPlayerService _audioService = GetIt.I<IAudioPlayerService>();
   
   bool _isPlaying = false;
@@ -26,7 +26,7 @@ class MiniPlayerViewModel extends ChangeNotifier {
   
   final List<StreamSubscription> _subscriptions = [];
 
-  MiniPlayerViewModel() {
+  PlayerViewModel() {
     _initStreams();
     _initCurrentTrack();
   }

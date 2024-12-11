@@ -5,13 +5,13 @@ import 'package:asmrapp/data/models/files/child.dart';
 import 'package:asmrapp/data/models/works/work.dart';
 import 'package:asmrapp/data/services/api_service.dart';
 import 'package:asmrapp/core/audio/i_audio_player_service.dart';
-import 'package:asmrapp/presentation/viewmodels/mini_player_viewmodel.dart';
+import 'package:asmrapp/presentation/viewmodels/player_viewmodel.dart';
 import 'package:asmrapp/utils/logger.dart';
 
 class DetailViewModel extends ChangeNotifier {
   late final ApiService _apiService;
   late final IAudioPlayerService _audioService;
-  late final MiniPlayerViewModel _miniPlayerViewModel;
+  late final PlayerViewModel _miniPlayerViewModel;
   final Work work;
   
   Files? _files;
@@ -24,7 +24,7 @@ class DetailViewModel extends ChangeNotifier {
   }) {
     _audioService = GetIt.I<IAudioPlayerService>();
     _apiService = GetIt.I<ApiService>();
-    _miniPlayerViewModel = GetIt.I<MiniPlayerViewModel>();
+    _miniPlayerViewModel = GetIt.I<PlayerViewModel>();
   }
 
   Files? get files => _files;

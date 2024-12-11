@@ -20,13 +20,13 @@ class AudioPlayerService implements IAudioPlayerService {
 }
 </pre>
 
-### 2. 音频状态管理 (MiniPlayerViewModel)
+### 2. 音频状态管理 (PlayerViewModel)
 - 通过 GetIt 实现全局单例
 - 使用 ChangeNotifier 管理状态
-- 负责 UI 和音频服务的交互
+- 负责所有播放相关的状态管理和UI交互
 
 <pre>
-class MiniPlayerViewModel extends ChangeNotifier {
+class PlayerViewModel extends ChangeNotifier {
   final IAudioPlayerService _audioService = GetIt.I<IAudioPlayerService>();
   Track? _currentTrack;
   bool _isPlaying = false;
@@ -45,7 +45,7 @@ class MiniPlayerViewModel extends ChangeNotifier {
 <pre>
 void setupServiceLocator() {
   getIt.registerLazySingleton<IAudioPlayerService>(() => AudioPlayerService());
-  getIt.registerLazySingleton<MiniPlayerViewModel>(() => MiniPlayerViewModel());
+  getIt.registerLazySingleton<PlayerViewModel>(() => PlayerViewModel());
 }
 </pre>
 

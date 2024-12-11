@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:asmrapp/presentation/viewmodels/mini_player_viewmodel.dart';
+import 'package:asmrapp/presentation/viewmodels/player_viewmodel.dart';
 import 'mini_player_controls.dart';
 import 'mini_player_progress.dart';
 import 'package:get_it/get_it.dart';
@@ -9,7 +9,7 @@ class MiniPlayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final viewModel = GetIt.I<MiniPlayerViewModel>();
+    final viewModel = GetIt.I<PlayerViewModel>();
     return ListenableBuilder(
       listenable: viewModel,
       builder: (context, _) {

@@ -7,7 +7,6 @@ import 'package:asmrapp/widgets/detail/work_info.dart';
 import 'package:asmrapp/widgets/detail/work_files_list.dart';
 import 'package:asmrapp/widgets/detail/work_files_skeleton.dart';
 import 'package:asmrapp/presentation/viewmodels/detail_viewmodel.dart';
-import 'package:asmrapp/presentation/viewmodels/mini_player_viewmodel.dart';
 
 
 class DetailScreen extends StatelessWidget {
