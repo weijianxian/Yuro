@@ -60,9 +60,21 @@ class _SearchScreenContentState extends State<SearchScreenContent> {
   String _getOrderText(String order, String sort) {
     switch (order) {
       case 'create_date':
-        return sort == 'desc' ? '最新发布' : '最早发布';
+        return sort == 'desc' ? '最新收录' : '最早收录';
+      case 'release':
+        return sort == 'desc' ? '发售日期倒序' : '发售日期顺序';
       case 'dl_count':
-        return sort == 'desc' ? '下载最多' : '下载最少';
+        return sort == 'desc' ? '销量倒序' : '销量顺序';
+      case 'price':
+        return sort == 'desc' ? '价格倒序' : '价格顺序';
+      case 'rate_average_2dp':
+        return '评价倒序';
+      case 'review_count':
+        return '评论数量倒序';
+      case 'id':
+        return sort == 'desc' ? 'RJ号倒序' : 'RJ号顺序';
+      case 'random':
+        return '随机排序';
       default:
         return '排序';
     }
@@ -139,19 +151,47 @@ class _SearchScreenContentState extends State<SearchScreenContent> {
                           itemBuilder: (context) => [
                             const PopupMenuItem(
                               value: ('create_date', 'desc'),
-                              child: Text('最新发布'),
+                              child: Text('最新收录'),
                             ),
                             const PopupMenuItem(
-                              value: ('create_date', 'asc'),
-                              child: Text('最早发布'),
+                              value: ('release', 'desc'),
+                              child: Text('发售日期倒序'),
+                            ),
+                            const PopupMenuItem(
+                              value: ('release', 'asc'),
+                              child: Text('发售日期顺序'),
                             ),
                             const PopupMenuItem(
                               value: ('dl_count', 'desc'),
-                              child: Text('下载最多'),
+                              child: Text('销量倒序'),
                             ),
                             const PopupMenuItem(
-                              value: ('dl_count', 'asc'),
-                              child: Text('下载最少'),
+                              value: ('price', 'asc'),
+                              child: Text('价格顺序'),
+                            ),
+                            const PopupMenuItem(
+                              value: ('price', 'desc'),
+                              child: Text('价格倒序'),
+                            ),
+                            const PopupMenuItem(
+                              value: ('rate_average_2dp', 'desc'),
+                              child: Text('评价倒序'),
+                            ),
+                            const PopupMenuItem(
+                              value: ('review_count', 'desc'),
+                              child: Text('评论数量倒序'),
+                            ),
+                            const PopupMenuItem(
+                              value: ('id', 'desc'),
+                              child: Text('RJ号倒序'),
+                            ),
+                            const PopupMenuItem(
+                              value: ('id', 'asc'),
+                              child: Text('RJ号顺序'),
+                            ),
+                            const PopupMenuItem(
+                              value: ('random', 'desc'),
+                              child: Text('随机排序'),
                             ),
                           ],
                           onSelected: (value) => viewModel.setOrder(value.$1, value.$2),

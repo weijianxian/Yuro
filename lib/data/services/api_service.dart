@@ -93,6 +93,8 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
+        AppLogger.debug('搜索返回数据: ${response.data}');
+        
         final works = (response.data['works'] as List)
             .map((work) => Work.fromJson(work))
             .toList();
