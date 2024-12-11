@@ -34,10 +34,24 @@ class WorkInfoSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           WorkTitle(work: work),
-          if (work.duration != null) ...[
-            const SizedBox(height: 4),
-            Row(
-              children: [
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              if (work.circle?.name != null) ...[
+                Text(
+                  work.circle!.name!,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+              ],
+              if (work.circle?.name != null && work.duration != null)
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 4),
+                  child: Text('•'),
+                ),
+              if (work.duration != null) ...[
                 Icon(
                   Icons.access_time,
                   size: 14,
@@ -52,14 +66,7 @@ class WorkInfoSection extends StatelessWidget {
                       ),
                 ),
               ],
-            ),
-          ],
-          const SizedBox(height: 4),
-          Text(
-            work.circle?.name ?? '',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontSize: 12,
-                ),
+            ],
           ),
           const SizedBox(height: 8),
           WorkTags(work: work),
