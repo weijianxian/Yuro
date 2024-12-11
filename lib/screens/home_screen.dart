@@ -6,6 +6,7 @@ import 'package:asmrapp/common/constants/strings.dart';
 import 'package:asmrapp/presentation/viewmodels/home_viewmodel.dart';
 import 'package:asmrapp/presentation/layouts/work_layout_strategy.dart';
 import 'package:asmrapp/screens/detail_screen.dart';
+import 'package:asmrapp/widgets/pagination_controls.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -75,22 +76,34 @@ class _HomeScreenState extends State<HomeScreen> {
 
             return RefreshIndicator(
               onRefresh: () => viewModel.loadWorks(refresh: true),
-              child: CustomScrollView(
-                slivers: [
-                  SliverPadding(
-                    padding: _layoutStrategy.getPadding(context),
-                    sliver: WorkGrid(
-                      works: viewModel.works,
-                      layoutStrategy: _layoutStrategy,
-                      onWorkTap: (work) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => DetailScreen(work: work),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: CustomScrollView(
+                      slivers: [
+                        SliverPadding(
+                          padding: _layoutStrategy.getPadding(context),
+                          sliver: WorkGrid(
+                            works: viewModel.works,
+                            layoutStrategy: _layoutStrategy,
+                            onWorkTap: (work) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => DetailScreen(work: work),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
+                        ),
+                      ],
                     ),
+                  ),
+                  PaginationControls(
+                    currentPage: viewModel.currentPage,
+                    totalPages: viewModel.totalPages,
+                    isLoading: viewModel.isLoading,
+                    onPageChanged: viewModel.loadPage,
                   ),
                 ],
               ),
