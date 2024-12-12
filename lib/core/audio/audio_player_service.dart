@@ -197,7 +197,7 @@ class AudioPlayerService implements IAudioPlayerService {
 
       AppLogger.debug('准备开始播放音频');
       // 使用现有的播放方法
-      await play(context.currentFile.mediaDownloadUrl!, trackInfo: trackInfo);
+      play(context.currentFile.mediaDownloadUrl!, trackInfo: trackInfo);
 
       // 如果有字幕，加载字幕
       if (subtitleUrl != null) {
