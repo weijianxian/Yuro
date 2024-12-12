@@ -3,6 +3,8 @@ import 'package:get_it/get_it.dart';
 import 'package:asmrapp/presentation/viewmodels/player_viewmodel.dart';
 import 'package:asmrapp/widgets/player/player_controls.dart';
 import 'package:asmrapp/widgets/player/player_progress.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shimmer/shimmer.dart';
 
 class PlayerScreen extends StatelessWidget {
   const PlayerScreen({super.key});
@@ -36,17 +38,36 @@ class PlayerScreen extends StatelessWidget {
                     color: Colors.grey[300],
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: viewModel.currentTrack?.coverUrl != null
-                      ? Image.network(
-                          viewModel.currentTrack!.coverUrl,
-                          fit: BoxFit.cover,
-                        )
-                      : const Icon(Icons.music_note, size: 100),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: viewModel.currentTrack?.coverUrl != null
+                        ? CachedNetworkImage(
+                            imageUrl: viewModel.currentTrack!.coverUrl,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Shimmer.fromColors(
+                              baseColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                              highlightColor: Theme.of(context).colorScheme.surface,
+                              child: Container(
+                                color: Colors.white,
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              color: Theme.of(context).colorScheme.errorContainer,
+                              child: Center(
+                                child: Icon(
+                                  Icons.error_outline,
+                                  color: Theme.of(context).colorScheme.error,
+                                ),
+                              ),
+                            ),
+                          )
+                        : const Icon(Icons.music_note, size: 100),
+                  ),
                 ),
                 const SizedBox(height: 32),
                 // 标题和艺术家
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Column(
                     children: [
                       Text(
