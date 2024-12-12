@@ -4,6 +4,7 @@ import 'package:asmrapp/common/constants/strings.dart';
 import 'package:asmrapp/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:asmrapp/presentation/widgets/auth/login_dialog.dart';
 import 'package:asmrapp/screens/favorites_screen.dart';
+import 'package:asmrapp/screens/recommend_screen.dart';
 
 class DrawerMenu extends StatelessWidget {
   const DrawerMenu({super.key});
@@ -54,6 +55,27 @@ class DrawerMenu extends StatelessWidget {
                   } else {
                     _showLoginDialog(context);
                   }
+                },
+              );
+            },
+          ),
+          Consumer<AuthViewModel>(
+            builder: (context, authVM, _) {
+              return ListTile(
+                leading: const Icon(Icons.recommend),
+                title: const Text('为你推荐'),
+                onTap: () {
+                  Navigator.pop(context);
+                  if (!authVM.isLoggedIn) {
+                    _showLoginDialog(context);
+                    return;
+                  }
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const RecommendScreen(),
+                    ),
+                  );
                 },
               );
             },
