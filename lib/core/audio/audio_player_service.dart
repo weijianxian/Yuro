@@ -4,6 +4,7 @@ import 'package:asmrapp/utils/logger.dart';
 import 'package:logger/logger.dart';
 import './i_audio_player_service.dart';
 import './models/audio_track_info.dart';
+import './models/playback_context.dart';
 import './notification/audio_notification_service.dart';
 import '../../data/repositories/audio/audio_cache_repository.dart';
 
@@ -12,6 +13,7 @@ class AudioPlayerService implements IAudioPlayerService {
   late final AudioNotificationService _notificationService;
   late final AudioCacheRepository _cacheRepository;
   AudioTrackInfo? _currentTrack;
+  PlaybackContext? _currentContext;
 
   AudioPlayerService._internal() {
     _init();
@@ -55,7 +57,7 @@ class AudioPlayerService implements IAudioPlayerService {
           AppLogger.debug('停止当前播放');
 
           await _player.setAudioSource(audioSource);
-          AppLogger.debug('设置音频源成功');
+          AppLogger.debug('设置音频源���功');
         } catch (e, stack) {
           AppLogger.error('设置音频源失败', e, stack);
           throw Exception('设置音频源失败: $e');
@@ -159,6 +161,29 @@ class AudioPlayerService implements IAudioPlayerService {
       await _player.play();
     } catch (e) {
       AppLogger.debug('Next failed: $e');
+    }
+  }
+
+  @override
+  PlaybackContext? get currentContext => _currentContext;
+
+  @override
+  Future<void> playWithContext(PlaybackContext context) async {
+    try {
+      _currentContext = context;
+      
+      final trackInfo = AudioTrackInfo(
+        title: context.currentFile.title ?? '',
+        artist: context.work.circle?.name ?? '',
+        coverUrl: context.work.mainCoverUrl ?? '',
+        url: context.currentFile.mediaDownloadUrl!,
+      );
+
+      // 使用现有的播放方法
+      await play(context.currentFile.mediaDownloadUrl!, trackInfo: trackInfo);
+    } catch (e) {
+      _currentContext = null;
+      rethrow;
     }
   }
 }

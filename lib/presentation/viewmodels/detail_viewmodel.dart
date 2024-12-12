@@ -8,6 +8,7 @@ import 'package:asmrapp/core/audio/i_audio_player_service.dart';
 import 'package:asmrapp/presentation/viewmodels/player_viewmodel.dart';
 import 'package:asmrapp/utils/logger.dart';
 import 'package:asmrapp/core/audio/models/audio_track_info.dart';
+import 'package:asmrapp/core/audio/models/playback_context.dart';
 
 class DetailViewModel extends ChangeNotifier {
   late final ApiService _apiService;
@@ -53,30 +54,28 @@ class DetailViewModel extends ChangeNotifier {
   }
 
   Future<void> playFile(Child file, BuildContext context) async {
-    if (_disposed) return;
-
     if (file.mediaDownloadUrl == null) {
       throw Exception('无法播放：文件URL不存在');
     }
 
+    if (_files == null) {
+      throw Exception('文件列表未加载');
+    }
+
     try {
-      final trackInfo = AudioTrackInfo(
-        title: file.title ?? '',
-        artist: work.circle?.name ?? '',
-        coverUrl: work.mainCoverUrl ?? '',
-        url: file.mediaDownloadUrl!,
+      final playbackContext = PlaybackContext(
+        work: work,
+        files: _files!,
+        currentFile: file,
       );
 
-      await _audioService.play(
-        file.mediaDownloadUrl!,
-        trackInfo: trackInfo,
-      );
+      await _audioService.playWithContext(playbackContext);
 
       if (!_disposed) {
         _miniPlayerViewModel.setTrack(Track(
-          title: trackInfo.title,
-          artist: trackInfo.artist,
-          coverUrl: trackInfo.coverUrl,
+          title: file.title ?? '',
+          artist: work.circle?.name ?? '',
+          coverUrl: work.mainCoverUrl ?? '',
         ));
       }
     } catch (e) {
