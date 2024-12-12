@@ -1,6 +1,7 @@
 import 'package:just_audio/just_audio.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:asmrapp/utils/logger.dart';
+import 'package:logger/logger.dart';
 import './i_audio_player_service.dart';
 import './models/audio_track_info.dart';
 import './notification/audio_notification_service.dart';
@@ -129,4 +130,35 @@ class AudioPlayerService implements IAudioPlayerService {
 
   @override
   AudioTrackInfo? get currentTrack => _currentTrack;
+
+  @override
+  Future<void> seek(Duration position) async {
+    try {
+      await _player.seek(position);
+    } catch (e) {
+      AppLogger.debug('Seek failed: $e');
+    }
+  }
+
+  @override
+  Future<void> previous() async {
+    // 由于目前没有播放列表管理，暂时只实现重新播放当前曲目
+    try {
+      await _player.seek(Duration.zero);
+      await _player.play();
+    } catch (e) {
+      AppLogger.debug('Previous failed: $e');
+    }
+  }
+
+  @override
+  Future<void> next() async {
+    // 由于目前没有播放列表管理，暂时只实现重新播放当前曲目
+    try {
+      await _player.seek(Duration.zero);
+      await _player.play();
+    } catch (e) {
+      AppLogger.debug('Next failed: $e');
+    }
+  }
 }

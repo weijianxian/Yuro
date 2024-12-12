@@ -105,12 +105,24 @@ class PlayerViewModel extends ChangeNotifier {
   Duration? get position => _position;
   Duration? get duration => _duration;
 
-  Future<void> togglePlayPause() async {
+  Future<void> playPause() async {
     if (_isPlaying) {
       await _audioService.pause();
     } else {
       await _audioService.resume();
     }
+  }
+
+  Future<void> seek(Duration position) async {
+    await _audioService.seek(position);
+  }
+
+  Future<void> previous() async {
+    await _audioService.previous();
+  }
+
+  Future<void> next() async {
+    await _audioService.next();
   }
 
   Future<void> stop() async {

@@ -15,7 +15,7 @@ class MiniPlayerControls extends StatelessWidget {
           icon: Icon(
             viewModel.isPlaying ? Icons.pause : Icons.play_arrow,
           ),
-          onPressed: viewModel.togglePlayPause,
+          onPressed: viewModel.playPause,
         );
       },
     );

@@ -14,4 +14,8 @@ abstract class IAudioPlayerService {
   Stream<Duration?> get duration;
 
   AudioTrackInfo? get currentTrack;
+
+  Future<void> seek(Duration position);
+  Future<void> previous();
+  Future<void> next();
 }
