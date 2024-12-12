@@ -67,12 +67,14 @@ class PlayerScreen extends StatelessWidget {
                 const SizedBox(height: 32),
                 // 标题和艺术家
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Column(
                     children: [
                       Text(
                         viewModel.currentTrack?.title ?? '未在播放',
-                        style: Theme.of(context).textTheme.headlineSmall,
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontSize: 16,
+                        ),
                         textAlign: TextAlign.center,
                       ),
                       if (viewModel.currentTrack?.artist != null)
