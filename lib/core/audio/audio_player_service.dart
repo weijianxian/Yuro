@@ -1,7 +1,6 @@
 import 'package:just_audio/just_audio.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:asmrapp/utils/logger.dart';
-import 'package:logger/logger.dart';
 import './i_audio_player_service.dart';
 import './models/audio_track_info.dart';
 import './models/playback_context.dart';
