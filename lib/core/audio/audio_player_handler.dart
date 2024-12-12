@@ -16,8 +16,8 @@ class AudioPlayerHandler extends BaseAudioHandler {
   }
 
   void _broadcastState(PlaybackEvent event) {
-    AppLogger.debug(
-        '广播播放状态: position=${_player.position}, buffered=${_player.bufferedPosition}');
+    // AppLogger.debug(
+    //     '广播播放状态: position=${_player.position}, buffered=${_player.bufferedPosition}');
 
     final state = PlaybackState(
       controls: [
@@ -45,8 +45,8 @@ class AudioPlayerHandler extends BaseAudioHandler {
       queueIndex: 0,
     );
 
-    AppLogger.debug(
-        '更新播放状态: playing=${_player.playing}, state=${_player.processingState}');
+    // AppLogger.debug(
+        // '更新播放状态: playing=${_player.playing}, state=${_player.processingState}');
     playbackState.add(state);
   }
 

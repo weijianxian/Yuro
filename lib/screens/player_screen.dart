@@ -28,7 +28,7 @@ class PlayerScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 32),
-                // 临时的封面占位
+                // 封面
                 Container(
                   width: 300,
                   height: 300,
@@ -44,6 +44,7 @@ class PlayerScreen extends StatelessWidget {
                       : const Icon(Icons.music_note, size: 100),
                 ),
                 const SizedBox(height: 32),
+                // 标题和艺术家
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 32),
                   child: Column(
@@ -63,6 +64,23 @@ class PlayerScreen extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
+                // 字幕显示
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  constraints: const BoxConstraints(minHeight: 60),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: Text(
+                      viewModel.currentSubtitle?.text ?? '',
+                      key: ValueKey(viewModel.currentSubtitle?.text),
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontSize: 18,
+                        height: 1.5,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
                 const PlayerProgress(),
                 const SizedBox(height: 24),
                 const PlayerControls(),

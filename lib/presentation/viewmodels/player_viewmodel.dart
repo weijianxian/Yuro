@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:asmrapp/core/audio/i_audio_player_service.dart';
+import 'package:asmrapp/core/audio/models/subtitle.dart';
 import 'dart:async';
 
 class Track {
@@ -23,6 +24,7 @@ class PlayerViewModel extends ChangeNotifier {
   Track? _currentTrack;
   Duration? _position;
   Duration? _duration;
+  Subtitle? _currentSubtitle;
 
   final List<StreamSubscription> _subscriptions = [];
 
@@ -76,6 +78,7 @@ class PlayerViewModel extends ChangeNotifier {
         _audioService.position.listen(
           (pos) {
             _position = pos;
+            _updateSubtitle();
             notifyListeners();
           },
           onError: (error) {
@@ -100,10 +103,27 @@ class PlayerViewModel extends ChangeNotifier {
     }
   }
 
+  void _updateSubtitle() {
+    final subtitleList = _audioService.subtitleList;
+    debugPrint('字幕列表状态: ${subtitleList != null ? '已加载' : '未加载'}');
+    
+    if (subtitleList != null && _position != null) {
+      final newSubtitle = subtitleList.getCurrentSubtitle(_position!);
+      debugPrint('当前播放位置: ${_position!.inSeconds}秒, 找到字幕: ${newSubtitle?.text ?? '无'}');
+      
+      if (_currentSubtitle?.text != newSubtitle?.text) {
+        _currentSubtitle = newSubtitle;
+        debugPrint('字幕更新: ${newSubtitle?.text ?? '无字幕'}');
+        notifyListeners();
+      }
+    }
+  }
+
   bool get isPlaying => _isPlaying;
   Track? get currentTrack => _currentTrack;
   Duration? get position => _position;
   Duration? get duration => _duration;
+  Subtitle? get currentSubtitle => _currentSubtitle;
 
   Future<void> playPause() async {
     if (_isPlaying) {

@@ -3,6 +3,7 @@ class AudioTrackInfo {
   final String artist;
   final String coverUrl;
   final String url;
+  final String? subtitleUrl;
   final Duration? duration;
 
   AudioTrackInfo({
@@ -10,6 +11,7 @@ class AudioTrackInfo {
     required this.artist,
     required this.coverUrl,
     required this.url,
+    this.subtitleUrl,
     this.duration,
   });
 }
