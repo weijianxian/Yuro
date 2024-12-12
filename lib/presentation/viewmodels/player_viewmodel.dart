@@ -105,11 +105,11 @@ class PlayerViewModel extends ChangeNotifier {
 
   void _updateSubtitle() {
     final subtitleList = _audioService.subtitleList;
-    // debugPrint('字幕列表状态: ${subtitleList != null ? '已加载' : '未加载'}');
+    debugPrint('字幕列表状态: ${subtitleList != null ? '已加载' : '未加载'}');
     
     if (subtitleList != null && _position != null) {
       final newSubtitle = subtitleList.getCurrentSubtitle(_position!);
-      // debugPrint('当前播放位置: ${_position!.inSeconds}秒, 找到字幕: ${newSubtitle?.text ?? '无'}');
+      debugPrint('当前播放位置: ${_position!.inSeconds}秒, 找到字幕: ${newSubtitle?.text ?? '无'}');
       
       if (_currentSubtitle?.text != newSubtitle?.text) {
         _currentSubtitle = newSubtitle;
