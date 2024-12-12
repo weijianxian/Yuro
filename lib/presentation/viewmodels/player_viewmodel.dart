@@ -1,3 +1,4 @@
+import 'package:asmrapp/core/subtitle/i_subtitle_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:just_audio/just_audio.dart';
@@ -19,6 +20,7 @@ class Track {
 
 class PlayerViewModel extends ChangeNotifier {
   final IAudioPlayerService _audioService = GetIt.I<IAudioPlayerService>();
+  final ISubtitleService _subtitleService = GetIt.I<ISubtitleService>();
 
   bool _isPlaying = false;
   Track? _currentTrack;
@@ -65,6 +67,9 @@ class PlayerViewModel extends ChangeNotifier {
                 artist: currentTrack.artist,
                 coverUrl: currentTrack.coverUrl,
               );
+              if (currentTrack.subtitleUrl != null) {
+                _subtitleService.loadSubtitle(currentTrack.subtitleUrl!);
+              }
             }
             notifyListeners();
           },
@@ -78,7 +83,9 @@ class PlayerViewModel extends ChangeNotifier {
         _audioService.position.listen(
           (pos) {
             _position = pos;
-            _updateSubtitle();
+            if (pos != null) {
+              _subtitleService.updatePosition(pos);
+            }
             notifyListeners();
           },
           onError: (error) {
@@ -98,24 +105,31 @@ class PlayerViewModel extends ChangeNotifier {
           },
         ),
       );
+
+      _subscriptions.add(
+        _subtitleService.subtitleStream.listen(
+          (subtitleList) {
+            debugPrint('字幕列表更新: ${subtitleList != null ? '已加载' : '未加载'}');
+          },
+          onError: (error) {
+            debugPrint('字幕流错误: $error');
+          },
+        ),
+      );
+
+      _subscriptions.add(
+        _subtitleService.currentSubtitleStream.listen(
+          (subtitle) {
+            _currentSubtitle = subtitle;
+            notifyListeners();
+          },
+          onError: (error) {
+            debugPrint('当前字幕流错误: $error');
+          },
+        ),
+      );
     } catch (e) {
       debugPrint('初始化流失败: $e');
-    }
-  }
-
-  void _updateSubtitle() {
-    final subtitleList = _audioService.subtitleList;
-    debugPrint('字幕列表状态: ${subtitleList != null ? '已加载' : '未加载'}');
-    
-    if (subtitleList != null && _position != null) {
-      final newSubtitle = subtitleList.getCurrentSubtitle(_position!);
-      debugPrint('当前播放位置: ${_position!.inSeconds}秒, 找到字幕: ${newSubtitle?.text ?? '无'}');
-      
-      if (_currentSubtitle?.text != newSubtitle?.text) {
-        _currentSubtitle = newSubtitle;
-        debugPrint('字幕更新: ${newSubtitle?.text ?? '无字幕'}');
-        notifyListeners();
-      }
     }
   }
 

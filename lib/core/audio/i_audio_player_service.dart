@@ -1,7 +1,6 @@
 import 'package:just_audio/just_audio.dart';
 import './models/audio_track_info.dart';
 import './models/playback_context.dart';
-import './models/subtitle.dart';
 
 abstract class IAudioPlayerService {
   Future<void> play(String url, {AudioTrackInfo? trackInfo});
@@ -23,7 +22,4 @@ abstract class IAudioPlayerService {
 
   Future<void> playWithContext(PlaybackContext context);
   PlaybackContext? get currentContext;
-
-  SubtitleList? get subtitleList;
-  Subtitle? get currentSubtitle;
 }

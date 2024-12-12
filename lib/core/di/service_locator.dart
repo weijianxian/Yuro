@@ -7,6 +7,8 @@ import '../../data/services/auth_service.dart';
 import '../../presentation/viewmodels/auth_viewmodel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/repositories/auth_repository.dart';
+import '../subtitle/i_subtitle_service.dart';
+import '../subtitle/subtitle_service.dart';
 
 final getIt = GetIt.instance;
 
@@ -44,5 +46,10 @@ Future<void> setupServiceLocator() async {
       authService: getIt<AuthService>(),
       authRepository: getIt<AuthRepository>(),
     ),
+  );
+
+  // 添加字幕服务注册
+  getIt.registerLazySingleton<ISubtitleService>(
+    () => SubtitleService(),
   );
 }

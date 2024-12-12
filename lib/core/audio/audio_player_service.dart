@@ -4,10 +4,8 @@ import 'package:asmrapp/utils/logger.dart';
 import './i_audio_player_service.dart';
 import './models/audio_track_info.dart';
 import './models/playback_context.dart';
-import './models/subtitle.dart';
 import './notification/audio_notification_service.dart';
 import '../../data/repositories/audio/audio_cache_repository.dart';
-import 'package:http/http.dart' as http;
 
 class AudioPlayerService implements IAudioPlayerService {
   late final AudioPlayer _player;
@@ -15,8 +13,6 @@ class AudioPlayerService implements IAudioPlayerService {
   late final AudioCacheRepository _cacheRepository;
   AudioTrackInfo? _currentTrack;
   PlaybackContext? _currentContext;
-  SubtitleList? _subtitleList;
-  Subtitle? _currentSubtitle;
 
   AudioPlayerService._internal() {
     _init();
@@ -178,9 +174,7 @@ class AudioPlayerService implements IAudioPlayerService {
       AppLogger.debug('文件列表数量: ${context.files.children?.length ?? 0}');
       
       _currentContext = context;
-      _subtitleList = null;
-      _currentSubtitle = null;
-      
+
       // 检查是否有字幕文件
       AppLogger.debug('开始查找字幕文件...');
       final subtitleFile = context.getSubtitleFile();
@@ -198,14 +192,6 @@ class AudioPlayerService implements IAudioPlayerService {
       AppLogger.debug('准备开始播放音频');
       // 使用现有的播放方法
       play(context.currentFile.mediaDownloadUrl!, trackInfo: trackInfo);
-
-      // 如果有字幕，加载字幕
-      if (subtitleUrl != null) {
-        AppLogger.debug('开始加载字幕文件');
-        await _loadSubtitle(subtitleUrl);
-      } else {
-        AppLogger.debug('没有找到字幕文件，跳过字幕加载');
-      }
     } catch (e, stack) {
       AppLogger.debug('播放上下文处理错误: $e');
       AppLogger.debug('错误堆栈: $stack');
@@ -213,38 +199,4 @@ class AudioPlayerService implements IAudioPlayerService {
       rethrow;
     }
   }
-
-  Future<void> _loadSubtitle(String url) async {
-    try {
-      AppLogger.debug('正在下载字幕文件: $url');
-      final response = await http.get(Uri.parse(url));
-      AppLogger.debug('字幕文件下载状态: ${response.statusCode}');
-      
-      if (response.statusCode == 200) {
-        final content = response.body;
-        AppLogger.debug('字幕文件内容预览: ${content.substring(0, content.length > 100 ? 100 : content.length)}...');
-        
-        _subtitleList = SubtitleList.parse(content);
-        AppLogger.debug('字幕解析完成，字幕数量: ${_subtitleList?.subtitles.length ?? 0}');
-        
-        // 开始监听播放进度以更新字幕
-        _player.positionStream.listen((position) {
-          if (_subtitleList != null) {
-            final newSubtitle = _subtitleList!.getCurrentSubtitle(position);
-            if (newSubtitle != _currentSubtitle) {
-              _currentSubtitle = newSubtitle;
-              AppLogger.debug('字幕服务更新: ${newSubtitle?.text ?? '无字幕'}');
-            }
-          }
-        });
-      }
-    } catch (e) {
-      AppLogger.debug('字幕加载失败: $e');
-      _subtitleList = null;
-    }
-  }
-
-  // 添加字幕相关的 getter
-  SubtitleList? get subtitleList => _subtitleList;
-  Subtitle? get currentSubtitle => _currentSubtitle;
 }

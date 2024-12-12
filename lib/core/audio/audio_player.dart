@@ -1,3 +1,4 @@
+import 'package:asmrapp/utils/logger.dart';
 import 'package:just_audio/just_audio.dart';
 import 'audio_service.dart';
 
@@ -10,7 +11,7 @@ class AudioPlayerService implements AudioService {
       await _player.setUrl(url);
       await _player.play();
     } catch (e) {
-      print('Error playing audio: $e');
+      AppLogger.error('Error playing audio: $e');
       rethrow;
     }
   }
