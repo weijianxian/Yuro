@@ -32,6 +32,8 @@ class PlayerViewModel extends ChangeNotifier {
 
   String? _currentTrackUrl;
 
+  static const _tag = 'PlayerViewModel';
+
   PlayerViewModel() {
     _initStreams();
     _initCurrentTrack();
@@ -57,90 +59,96 @@ class PlayerViewModel extends ChangeNotifier {
   }
 
   void _initStreams() {
-    try {
-      _subscriptions.add(
-        _audioService.playerState.listen(
-          (state) {
-            _isPlaying = state.playing;
-            final currentTrack = _audioService.currentTrack;
-            if (currentTrack != null) {
-              if (_currentTrackUrl != currentTrack.url) {
-                _currentTrackUrl = currentTrack.url;
-                _currentTrack = Track(
-                  title: currentTrack.title,
-                  artist: currentTrack.artist,
-                  coverUrl: currentTrack.coverUrl,
-                );
-                
-                final currentContext = _audioService.currentContext;
-                if (currentContext != null) {
-                  final subtitleFile = currentContext.getSubtitleFile();
-                  if (subtitleFile?.mediaDownloadUrl != null) {
-                    _subtitleService.loadSubtitle(subtitleFile!.mediaDownloadUrl!);
-                  }
-                }
-              }
-            }
-            notifyListeners();
-          },
-          onError: (error) {
-            debugPrint('播放状态流错误: $error');
-          },
-        ),
-      );
+    _initPlayerStateStream();
+    _initPositionStream();
+    _initDurationStream();
+    _initSubtitleStreams();
+  }
 
-      _subscriptions.add(
-        _audioService.position.listen(
-          (pos) {
-            _position = pos;
-            if (pos != null) {
-              _subtitleService.updatePosition(pos);
-            }
-            notifyListeners();
-          },
-          onError: (error) {
-            debugPrint('播放进度流错误: $error');
-          },
-        ),
-      );
+  void _initPlayerStateStream() {
+    _subscriptions.add(
+      _audioService.playerState.listen(
+        _handlePlayerStateChange,
+        onError: (error) => debugPrint('$_tag - 播放状态流错误: $error'),
+      ),
+    );
+  }
 
-      _subscriptions.add(
-        _audioService.duration.listen(
-          (dur) {
-            _duration = dur;
-            notifyListeners();
-          },
-          onError: (error) {
-            debugPrint('音频时长流错误: $error');
-          },
-        ),
-      );
+  void _handlePlayerStateChange(PlayerState state) {
+    _isPlaying = state.playing;
+    _updateCurrentTrack();
+    notifyListeners();
+  }
 
-      _subscriptions.add(
-        _subtitleService.subtitleStream.listen(
-          (subtitleList) {
-            debugPrint('字幕列表更新: ${subtitleList != null ? '已加载' : '未加载'}');
-          },
-          onError: (error) {
-            debugPrint('字幕流错误: $error');
-          },
-        ),
+  void _updateCurrentTrack() {
+    final currentTrack = _audioService.currentTrack;
+    if (currentTrack != null && _currentTrackUrl != currentTrack.url) {
+      _currentTrackUrl = currentTrack.url;
+      _currentTrack = Track(
+        title: currentTrack.title,
+        artist: currentTrack.artist,
+        coverUrl: currentTrack.coverUrl,
       );
-
-      _subscriptions.add(
-        _subtitleService.currentSubtitleStream.listen(
-          (subtitle) {
-            _currentSubtitle = subtitle;
-            notifyListeners();
-          },
-          onError: (error) {
-            debugPrint('当前字幕流错误: $error');
-          },
-        ),
-      );
-    } catch (e) {
-      debugPrint('初始化流失败: $e');
+      _loadSubtitleIfAvailable();
     }
+  }
+
+  void _loadSubtitleIfAvailable() {
+    final currentContext = _audioService.currentContext;
+    if (currentContext != null) {
+      final subtitleFile = currentContext.getSubtitleFile();
+      if (subtitleFile?.mediaDownloadUrl != null) {
+        _subtitleService.loadSubtitle(subtitleFile!.mediaDownloadUrl!);
+      }
+    }
+  }
+
+  void _initPositionStream() {
+    _subscriptions.add(
+      _audioService.position.listen(
+        (pos) {
+          _position = pos;
+          if (pos != null) {
+            _subtitleService.updatePosition(pos);
+          }
+          notifyListeners();
+        },
+        onError: (error) => debugPrint('$_tag - 播放进度流错误: $error'),
+      ),
+    );
+  }
+
+  void _initDurationStream() {
+    _subscriptions.add(
+      _audioService.duration.listen(
+        (dur) {
+          _duration = dur;
+          notifyListeners();
+        },
+        onError: (error) => debugPrint('$_tag - 音频时长流错误: $error'),
+      ),
+    );
+  }
+
+  void _initSubtitleStreams() {
+    _subscriptions.add(
+      _subtitleService.subtitleStream.listen(
+        (subtitleList) {
+          debugPrint('$_tag - 字幕列表更新: ${subtitleList != null ? '已加载' : '未加载'}');
+        },
+        onError: (error) => debugPrint('$_tag - 字幕流错误: $error'),
+      ),
+    );
+
+    _subscriptions.add(
+      _subtitleService.currentSubtitleStream.listen(
+        (subtitle) {
+          _currentSubtitle = subtitle;
+          notifyListeners();
+        },
+        onError: (error) => debugPrint('$_tag - 当前字幕流错误: $error'),
+      ),
+    );
   }
 
   bool get isPlaying => _isPlaying;
