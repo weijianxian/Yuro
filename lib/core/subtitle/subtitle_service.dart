@@ -64,4 +64,7 @@ class SubtitleService implements ISubtitleService {
     _subtitleController.close();
     _currentSubtitleController.close();
   }
+
+  @override
+  SubtitleList? get subtitleList => _subtitleList;
 } 

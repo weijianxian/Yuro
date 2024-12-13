@@ -18,4 +18,7 @@ abstract class ISubtitleService {
   
   // 资源释放
   void dispose();
+  
+  // 添加这一行
+  SubtitleList? get subtitleList;  // 获取当前字幕列表
 } 

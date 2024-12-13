@@ -5,6 +5,7 @@ import 'package:asmrapp/widgets/player/player_controls.dart';
 import 'package:asmrapp/widgets/player/player_progress.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:asmrapp/widgets/lyrics/lyric_display.dart';
 
 class PlayerScreen extends StatelessWidget {
   const PlayerScreen({super.key});
@@ -88,22 +89,7 @@ class PlayerScreen extends StatelessWidget {
                 ),
                 const Spacer(),
                 // 字幕显示
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                  constraints: const BoxConstraints(minHeight: 60),
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: Text(
-                      viewModel.currentSubtitle?.text ?? '',
-                      key: ValueKey('subtitle_${viewModel.currentSubtitle?.text}_${DateTime.now().microsecondsSinceEpoch}'),
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontSize: 18,
-                        height: 1.5,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
+                LyricDisplay(),
                 const PlayerProgress(),
                 const SizedBox(height: 24),
                 const PlayerControls(),

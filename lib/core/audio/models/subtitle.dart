@@ -1,13 +1,31 @@
+import 'dart:math' as math;
+
 class Subtitle {
   final Duration start;
   final Duration end;
   final String text;
+  final int index;
 
   const Subtitle({
     required this.start,
     required this.end,
     required this.text,
+    required this.index,
   });
+
+  Subtitle? getNext(SubtitleList list) {
+    if (index < list.subtitles.length - 1) {
+      return list.subtitles[index + 1];
+    }
+    return null;
+  }
+
+  Subtitle? getPrevious(SubtitleList list) {
+    if (index > 0) {
+      return list.subtitles[index - 1];
+    }
+    return null;
+  }
 
   @override
   String toString() => '$start --> $end: $text';
@@ -17,10 +35,19 @@ class SubtitleList {
   final List<Subtitle> subtitles;
   int _currentIndex = -1;
 
-  SubtitleList(this.subtitles);
+  SubtitleList(List<Subtitle> subtitles) 
+    : subtitles = subtitles.asMap().entries.map(
+        (entry) => Subtitle(
+          start: entry.value.start,
+          end: entry.value.end,
+          text: entry.value.text,
+          index: entry.key,
+        )
+      ).toList();
+
+  int get currentIndex => _currentIndex;
 
   Subtitle? getCurrentSubtitle(Duration position) {
-    // 如果当前索引有效，先检查当前字幕是否仍然有效
     if (_currentIndex >= 0 && _currentIndex < subtitles.length) {
       final current = subtitles[_currentIndex];
       if (position >= current.start && position <= current.end) {
@@ -28,7 +55,6 @@ class SubtitleList {
       }
     }
 
-    // 查找新的当前字幕
     _currentIndex = subtitles.indexWhere(
       (subtitle) => position >= subtitle.start && position <= subtitle.end
     );
@@ -36,12 +62,27 @@ class SubtitleList {
     return _currentIndex >= 0 ? subtitles[_currentIndex] : null;
   }
 
+  List<Subtitle> getSubtitlesInRange(int start, int count) {
+    if (start < 0 || start >= subtitles.length) return [];
+    final end = math.min(start + count, subtitles.length);
+    return subtitles.sublist(start, end);
+  }
+
+  (Subtitle?, Subtitle?, Subtitle?) getCurrentContext() {
+    if (_currentIndex == -1) return (null, null, null);
+    
+    final previous = _currentIndex > 0 ? subtitles[_currentIndex - 1] : null;
+    final current = subtitles[_currentIndex];
+    final next = _currentIndex < subtitles.length - 1 ? subtitles[_currentIndex + 1] : null;
+    
+    return (previous, current, next);
+  }
+
   static SubtitleList parse(String vttContent) {
     final lines = vttContent.split('\n');
     final subtitles = <Subtitle>[];
     
     int i = 0;
-    // 跳过 WEBVTT 头部
     while (i < lines.length && !lines[i].contains('-->')) {
       i++;
     }
@@ -49,14 +90,12 @@ class SubtitleList {
     while (i < lines.length) {
       final line = lines[i].trim();
       
-      // 解析时间戳行
       if (line.contains('-->')) {
         final times = line.split('-->');
         if (times.length == 2) {
           final start = _parseTimestamp(times[0].trim());
           final end = _parseTimestamp(times[1].trim());
           
-          // 收集字幕文本
           i++;
           String text = '';
           while (i < lines.length && lines[i].trim().isNotEmpty) {
@@ -70,6 +109,7 @@ class SubtitleList {
               start: start,
               end: end,
               text: text,
+              index: subtitles.length,
             ));
           }
         }
