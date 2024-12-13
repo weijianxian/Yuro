@@ -3,49 +3,30 @@ import 'package:asmrapp/utils/logger.dart';
 import 'package:dio/dio.dart';
 import 'package:asmrapp/core/audio/models/subtitle.dart';
 import 'package:asmrapp/core/subtitle/i_subtitle_service.dart';
+import 'package:get_it/get_it.dart';
+import 'package:asmrapp/core/subtitle/subtitle_loader.dart';
+import 'package:asmrapp/core/subtitle/managers/subtitle_state_manager.dart';
 
 
 class SubtitleService implements ISubtitleService {
-  final _dio = Dio();
-  SubtitleList? _subtitleList;
-  Subtitle? _currentSubtitle;
-  final _subtitleController = StreamController<SubtitleList?>.broadcast();
-  final _currentSubtitleController = StreamController<Subtitle?>.broadcast();
-  final _currentSubtitleWithStateController = StreamController<SubtitleWithState?>.broadcast();
-  SubtitleWithState? _currentSubtitleWithState;
+  final _subtitleLoader = GetIt.I<SubtitleLoader>();
+  final _stateManager = SubtitleStateManager();
   
   @override
-  Stream<SubtitleList?> get subtitleStream => _subtitleController.stream;
+  Stream<SubtitleList?> get subtitleStream => _stateManager.subtitleStream;
   
   @override
-  Stream<Subtitle?> get currentSubtitleStream => _currentSubtitleController.stream;
+  Stream<Subtitle?> get currentSubtitleStream => _stateManager.currentSubtitleStream;
   
   @override
-  Subtitle? get currentSubtitle {
-    if (_subtitleList == null) return null;
-    return _currentSubtitle;
-  }
+  Subtitle? get currentSubtitle => _stateManager.currentSubtitle;
   
   @override
   Future<void> loadSubtitle(String url) async {
     try {
       clearSubtitle();
-      
-      AppLogger.debug('正在下载字幕文件: $url');
-      final response = await _dio.get(url);
-      AppLogger.debug('字幕文件下载状态: ${response.statusCode}');
-      
-      if (response.statusCode == 200) {
-        final content = response.data as String;
-        AppLogger.debug('字幕文件内容预览: ${content.substring(0, content.length > 100 ? 100 : content.length)}...');
-        
-        _subtitleList = SubtitleList.parse(content);
-        AppLogger.debug('字幕解析完成，字幕数量: ${_subtitleList?.subtitles.length ?? 0}');
-        
-        _subtitleController.add(_subtitleList);
-      } else {
-        throw Exception('字幕下载失败: ${response.statusCode}');
-      }
+      final subtitleList = await _subtitleLoader.loadSubtitleContent(url);
+      _stateManager.setSubtitleList(subtitleList);
     } catch (e) {
       AppLogger.debug('字幕加载失败: $e');
       clearSubtitle();
@@ -55,43 +36,27 @@ class SubtitleService implements ISubtitleService {
   
   @override
   void updatePosition(Duration position) {
-    if (_subtitleList != null) {
-      final newSubtitleWithState = _subtitleList!.getCurrentSubtitle(position);
-      if (newSubtitleWithState?.subtitle != _currentSubtitleWithState?.subtitle) {
-        _currentSubtitleWithState = newSubtitleWithState;
-        _currentSubtitle = newSubtitleWithState?.subtitle;
-        AppLogger.debug('字幕更新: ${_currentSubtitle?.text ?? '无字幕'} (${newSubtitleWithState?.state})');
-        _currentSubtitleWithStateController.add(newSubtitleWithState);
-        _currentSubtitleController.add(_currentSubtitle);
-      }
-    }
+    _stateManager.updatePosition(position);
   }
 
   @override
   void dispose() {
-    _subtitleController.close();
-    _currentSubtitleController.close();
-    _currentSubtitleWithStateController.close();
+    _stateManager.dispose();
   }
 
   @override
-  SubtitleList? get subtitleList => _subtitleList;
+  SubtitleList? get subtitleList => _stateManager.subtitleList;
 
   @override
   void clearSubtitle() {
-    _subtitleList = null;
-    _currentSubtitle = null;
-    _currentSubtitleWithState = null;
-    _subtitleController.add(null);
-    _currentSubtitleController.add(null);
-    _currentSubtitleWithStateController.add(null);
-    AppLogger.debug('字幕已清除');
+    _stateManager.clear();
   }
 
   @override
   Stream<SubtitleWithState?> get currentSubtitleWithStateStream => 
-      _currentSubtitleWithStateController.stream;
+      _stateManager.currentSubtitleWithStateStream;
   
   @override
-  SubtitleWithState? get currentSubtitleWithState => _currentSubtitleWithState;
+  SubtitleWithState? get currentSubtitleWithState => 
+      _stateManager.currentSubtitleWithState;
 } 
