@@ -5,6 +5,7 @@ import 'package:asmrapp/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:asmrapp/presentation/widgets/auth/login_dialog.dart';
 import 'package:asmrapp/screens/favorites_screen.dart';
 import 'package:asmrapp/screens/recommend_screen.dart';
+import 'package:asmrapp/screens/settings/cache_manager_screen.dart';
 
 class DrawerMenu extends StatelessWidget {
   const DrawerMenu({super.key});
@@ -107,6 +108,19 @@ class DrawerMenu extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               // TODO: 导航到设置页面
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.storage),
+            title: const Text('缓存管理'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CacheManagerScreen(),
+                ),
+              );
             },
           ),
         ],
