@@ -67,8 +67,12 @@ class PlayerViewModel extends ChangeNotifier {
                 artist: currentTrack.artist,
                 coverUrl: currentTrack.coverUrl,
               );
-              if (currentTrack.subtitleUrl != null) {
-                _subtitleService.loadSubtitle(currentTrack.subtitleUrl!);
+              final currentContext = _audioService.currentContext;
+              if (currentContext != null) {
+                final subtitleFile = currentContext.getSubtitleFile();
+                if (subtitleFile?.mediaDownloadUrl != null) {
+                  _subtitleService.loadSubtitle(subtitleFile!.mediaDownloadUrl!);
+                }
               }
             }
             notifyListeners();

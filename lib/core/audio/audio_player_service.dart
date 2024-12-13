@@ -170,7 +170,6 @@ class AudioPlayerService implements IAudioPlayerService {
             artist: _currentContext!.work.circle?.name ?? '',
             coverUrl: _currentContext!.work.mainCoverUrl ?? '',
             url: previousFile.mediaDownloadUrl!,
-            subtitleUrl: _currentContext!.getSubtitleFile()?.mediaDownloadUrl,
           );
           _currentTrack = trackInfo;
           _notificationService.updateMetadata(trackInfo);
@@ -207,7 +206,6 @@ class AudioPlayerService implements IAudioPlayerService {
             artist: _currentContext!.work.circle?.name ?? '',
             coverUrl: _currentContext!.work.mainCoverUrl ?? '',
             url: nextFile.mediaDownloadUrl!,
-            subtitleUrl: _currentContext!.getSubtitleFile()?.mediaDownloadUrl,
           );
           _currentTrack = trackInfo;
           _notificationService.updateMetadata(trackInfo);
@@ -263,7 +261,6 @@ class AudioPlayerService implements IAudioPlayerService {
         artist: context.work.circle?.name ?? '',
         coverUrl: context.work.mainCoverUrl ?? '',
         url: context.currentFile.mediaDownloadUrl!,
-        subtitleUrl: context.getSubtitleFile()?.mediaDownloadUrl,
       );
 
       _currentTrack = trackInfo;
