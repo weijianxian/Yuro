@@ -1,3 +1,4 @@
+import 'package:asmrapp/core/audio/cache/audio_cache_manager.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:asmrapp/utils/logger.dart';
@@ -7,6 +8,7 @@ import './models/playback_context.dart';
 import './notification/audio_notification_service.dart';
 import './models/play_mode.dart';
 import 'dart:async';
+
 
 class AudioPlayerService implements IAudioPlayerService {
   late final AudioPlayer _player;
@@ -54,7 +56,7 @@ class AudioPlayerService implements IAudioPlayerService {
 
         // AppLogger.debug('准备播放URL: $url');
 
-        final audioSource = ProgressiveAudioSource(Uri.parse(url));
+        final audioSource = await AudioCacheManager.createAudioSource(url);
         // AppLogger.debug('创建音频源成功: $url');
 
         try {
@@ -233,7 +235,7 @@ class AudioPlayerService implements IAudioPlayerService {
       // 构建播放列表
       final audioSources = await Future.wait(
         context.playlist.map((file) async {
-          return ProgressiveAudioSource(Uri.parse(file.mediaDownloadUrl!));
+          return AudioCacheManager.createAudioSource(file.mediaDownloadUrl!);
         })
       );
 
