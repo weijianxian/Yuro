@@ -8,8 +8,7 @@ import 'package:asmrapp/utils/logger.dart';
 /// 音频缓存管理器
 /// 负责管理音频文件的缓存,对外隐藏具体的缓存实现
 class AudioCacheManager {
-  static const int _maxCacheSize = 100 * 1024 * 1024; // 100MB
-  static const int _maxFileCacheSize = 10 * 1024 * 1024; // 10MB 
+  static const int _maxCacheSize = 1024 * 1024 * 1024; // 总缓存限制 1024MB
   static const Duration _cacheExpiration = Duration(days: 30);
 
   /// 创建音频源
@@ -17,19 +16,21 @@ class AudioCacheManager {
   static Future<AudioSource> createAudioSource(String url) async {
     try {
       final cacheFile = await _getCacheFile(url);
+      final fileName = _generateFileName(url);
+      AppLogger.debug('准备创建音频源 - URL: $url, 缓存文件名: $fileName');
       
       // 检查缓存文件是否存在且有效
-      if (await _isCacheValid(cacheFile)) {
-        AppLogger.debug('使用缓存文件: ${cacheFile.path}');
+      final isValid = await _isCacheValid(cacheFile, fileName);
+      
+      if (isValid) {
+        AppLogger.debug('[$fileName] 使用已有缓存文件');
         return _createCachingSource(url, cacheFile);
       }
 
-      // 如果缓存无效,创建新的缓存源
-      AppLogger.debug('创建新的缓存源: $url');
+      AppLogger.debug('[$fileName] 创建新的缓存源');
       return _createCachingSource(url, cacheFile);
       
     } catch (e) {
-      // 任何错误都降级使用非缓存源
       AppLogger.error('创建缓存音频源失败,使用非缓存源', e);
       return ProgressiveAudioSource(Uri.parse(url));
     }
@@ -100,27 +101,31 @@ class AudioCacheManager {
   }
 
   /// 检查缓存是否有效
-  static Future<bool> _isCacheValid(File cacheFile) async {
-    if (!await cacheFile.exists()) return false;
+  static Future<bool> _isCacheValid(File cacheFile, String fileName) async {
+    final exists = await cacheFile.exists();
+    if (!exists) {
+      AppLogger.debug('[$fileName] 缓存验证: 文件不存在');
+      return false;
+    }
 
     try {
       final stat = await cacheFile.stat();
+      final size = stat.size;
+      final age = DateTime.now().difference(stat.modified);
       
-      // 检查文件大小
-      if (stat.size > _maxFileCacheSize) {
+      AppLogger.debug('[$fileName] 缓存验证: 大小=${size}bytes, 年龄=$age');
+      
+      // 移除单个文件大小检查，只保留过期检查
+      if (age > _cacheExpiration) {
+        AppLogger.debug('[$fileName] 缓存无效: 文件过期 ($age > $_cacheExpiration)');
         await cacheFile.delete();
         return false;
       }
 
-      // 检查是否过期
-      if (DateTime.now().difference(stat.modified) > _cacheExpiration) {
-        await cacheFile.delete();
-        return false;
-      }
-
+      AppLogger.debug('[$fileName] 缓存验证: 有效');
       return true;
     } catch (e) {
-      AppLogger.error('检查缓存有效性失败', e);
+      AppLogger.error('[$fileName] 检查缓存有效性失败', e);
       return false;
     }
   }
