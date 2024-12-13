@@ -206,41 +206,6 @@ class PlaybackContext {
     }
   }
 
-  // 递归查找字幕文件
-  Child? _findSubtitleInDirectory(List<Child> children, String audioFileName) {
-    debugPrint('当前目录文件列表:');
-    for (var file in children) {
-      debugPrint('- ${file.title} (类型: ${file.type})');
-    }
-
-    // 字幕文件名应该是音频文件名加上.vtt
-    final subtitleFileName = '$audioFileName.vtt';
-    debugPrint('查找字幕文件: $subtitleFileName');
-
-    // 先在当前目录查找
-    try {
-      final subtitleFile = children.firstWhere(
-        (file) => file.title == subtitleFileName,
-      );
-      debugPrint('找到字幕文件: ${subtitleFile.title}, URL: ${subtitleFile.mediaDownloadUrl}');
-      return subtitleFile;
-    } catch (e) {
-      // 如果当前目录没找到，递归查找子目录
-      for (var child in children) {
-        if (child.children != null) {
-          debugPrint('进入子目录继续查找...');
-          final result = _findSubtitleInDirectory(child.children!, audioFileName);
-          if (result != null) {
-            return result;
-          }
-        }
-      }
-    }
-
-    debugPrint('在当前目录及子目录中未找到字幕文件');
-    return null;
-  }
-
   // 便捷方法：获取可播放文件列表
   List<Child> getPlayableFiles() {
     if (files.children == null) return [];
