@@ -30,6 +30,8 @@ class PlayerViewModel extends ChangeNotifier {
 
   final List<StreamSubscription> _subscriptions = [];
 
+  String? _currentTrackUrl;
+
   PlayerViewModel() {
     _initStreams();
     _initCurrentTrack();
@@ -62,16 +64,20 @@ class PlayerViewModel extends ChangeNotifier {
             _isPlaying = state.playing;
             final currentTrack = _audioService.currentTrack;
             if (currentTrack != null) {
-              _currentTrack = Track(
-                title: currentTrack.title,
-                artist: currentTrack.artist,
-                coverUrl: currentTrack.coverUrl,
-              );
-              final currentContext = _audioService.currentContext;
-              if (currentContext != null) {
-                final subtitleFile = currentContext.getSubtitleFile();
-                if (subtitleFile?.mediaDownloadUrl != null) {
-                  _subtitleService.loadSubtitle(subtitleFile!.mediaDownloadUrl!);
+              if (_currentTrackUrl != currentTrack.url) {
+                _currentTrackUrl = currentTrack.url;
+                _currentTrack = Track(
+                  title: currentTrack.title,
+                  artist: currentTrack.artist,
+                  coverUrl: currentTrack.coverUrl,
+                );
+                
+                final currentContext = _audioService.currentContext;
+                if (currentContext != null) {
+                  final subtitleFile = currentContext.getSubtitleFile();
+                  if (subtitleFile?.mediaDownloadUrl != null) {
+                    _subtitleService.loadSubtitle(subtitleFile!.mediaDownloadUrl!);
+                  }
                 }
               }
             }
