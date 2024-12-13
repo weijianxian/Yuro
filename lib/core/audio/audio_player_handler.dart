@@ -53,13 +53,13 @@ class AudioPlayerHandler extends BaseAudioHandler {
   @override
   Future<void> play() async {
     AppLogger.debug('AudioHandler: 播放命令');
-    await _player.play();
+    _player.play();
   }
 
   @override
   Future<void> pause() async {
     AppLogger.debug('AudioHandler: 暂停命令');
-    await _player.pause();
+    _player.pause();
   }
 
   @override

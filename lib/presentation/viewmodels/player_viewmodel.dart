@@ -145,9 +145,9 @@ class PlayerViewModel extends ChangeNotifier {
 
   Future<void> playPause() async {
     if (_isPlaying) {
-      await _audioService.pause();
+      _audioService.pause();
     } else {
-      await _audioService.resume();
+      _audioService.resume();
     }
   }
 

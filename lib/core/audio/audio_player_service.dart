@@ -105,12 +105,12 @@ class AudioPlayerService implements IAudioPlayerService {
 
   @override
   Future<void> pause() async {
-    await _player.pause();
+    _player.pause();
   }
 
   @override
   Future<void> resume() async {
-    await _player.play();
+    _player.play();
   }
 
   @override
@@ -142,11 +142,7 @@ class AudioPlayerService implements IAudioPlayerService {
 
   @override
   Future<void> seek(Duration position) async {
-    try {
-      await _player.seek(position);
-    } catch (e) {
-      AppLogger.debug('Seek failed: $e');
-    }
+    await _player.seek(position);
   }
 
   @override
@@ -158,7 +154,7 @@ class AudioPlayerService implements IAudioPlayerService {
       }
 
       // 使用 just_audio 的播放列表控制
-      if (await _player.hasPrevious) {
+      if (_player.hasPrevious) {
         // 更新 context
         final previousFile = _currentContext!.getPreviousFile();
         if (previousFile != null) {
@@ -194,7 +190,7 @@ class AudioPlayerService implements IAudioPlayerService {
       }
 
       // 使用 just_audio 的播放列表控制
-      if (await _player.hasNext) {
+      if (_player.hasNext) {
         // 更新 context
         final nextFile = _currentContext!.getNextFile();
         if (nextFile != null) {
@@ -291,7 +287,7 @@ class AudioPlayerService implements IAudioPlayerService {
           
         case PlayMode.loop:
           // 列表循环：如果是最后一首，跳回第一首
-          if (await _player.hasNext) {
+          if (_player.hasNext) {
             await next();
           } else {
             await _player.seek(Duration.zero, index: 0);
@@ -301,7 +297,7 @@ class AudioPlayerService implements IAudioPlayerService {
           
         case PlayMode.sequence:
           // 顺序播放：有下一曲就播放下一曲
-          if (await _player.hasNext) {
+          if (_player.hasNext) {
             await next();
           }
           break;
