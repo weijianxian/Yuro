@@ -1,4 +1,5 @@
 import 'package:asmrapp/core/subtitle/i_subtitle_service.dart';
+import 'package:asmrapp/utils/logger.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:just_audio/just_audio.dart';
@@ -83,6 +84,8 @@ class PlayerViewModel extends ChangeNotifier {
   void _updateCurrentTrack() {
     final currentTrack = _audioService.currentTrack;
     if (currentTrack != null && _currentTrackUrl != currentTrack.url) {
+      _subtitleService.clearSubtitle();
+      
       _currentTrackUrl = currentTrack.url;
       _currentTrack = Track(
         title: currentTrack.title,
@@ -99,7 +102,13 @@ class PlayerViewModel extends ChangeNotifier {
       final subtitleFile = currentContext.getSubtitleFile();
       if (subtitleFile?.mediaDownloadUrl != null) {
         _subtitleService.loadSubtitle(subtitleFile!.mediaDownloadUrl!);
+      } else {
+        _subtitleService.clearSubtitle();
+        AppLogger.debug('未找到字幕文件，清除现有字幕');
       }
+    } else {
+      _subtitleService.clearSubtitle();
+      AppLogger.debug('无播放上下文，清除现有字幕');
     }
   }
 

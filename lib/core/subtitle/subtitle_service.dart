@@ -67,4 +67,13 @@ class SubtitleService implements ISubtitleService {
 
   @override
   SubtitleList? get subtitleList => _subtitleList;
+
+  @override
+  void clearSubtitle() {
+    _subtitleList = null;
+    _currentSubtitle = null;
+    _subtitleController.add(null);
+    _currentSubtitleController.add(null);
+    AppLogger.debug('字幕已清除');
+  }
 } 

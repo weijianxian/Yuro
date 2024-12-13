@@ -21,4 +21,7 @@ abstract class ISubtitleService {
   
   // 添加这一行
   SubtitleList? get subtitleList;  // 获取当前字幕列表
+  
+  // 添加清除字幕的方法
+  void clearSubtitle();
 } 
