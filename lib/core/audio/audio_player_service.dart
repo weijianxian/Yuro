@@ -12,6 +12,7 @@ class AudioPlayerService implements IAudioPlayerService {
   late final AudioPlayer _player;
   late final AudioNotificationService _notificationService;
   late final AudioCacheRepository _cacheRepository;
+  late final ConcatenatingAudioSource _playlist;
   AudioTrackInfo? _currentTrack;
   PlaybackContext? _currentContext;
 
@@ -26,6 +27,7 @@ class AudioPlayerService implements IAudioPlayerService {
     _player = AudioPlayer();
     _notificationService = AudioNotificationService(_player);
     _cacheRepository = AudioCacheRepository();
+    _playlist = ConcatenatingAudioSource(children: []);
 
     try {
       final session = await AudioSession.instance;
@@ -155,15 +157,30 @@ class AudioPlayerService implements IAudioPlayerService {
         return;
       }
 
-      final previousFile = _currentContext!.getPreviousFile();
-      if (previousFile == null) {
-        AppLogger.debug('无法切换上一曲：已经是第一首');
-        return;
-      }
+      // 使用 just_audio 的播放列表控制
+      if (await _player.hasPrevious) {
+        // 更新 context
+        final previousFile = _currentContext!.getPreviousFile();
+        if (previousFile != null) {
+          _currentContext = _currentContext!.copyWithFile(previousFile);
+          
+          // 更新音轨信息
+          final trackInfo = AudioTrackInfo(
+            title: previousFile.title ?? '',
+            artist: _currentContext!.work.circle?.name ?? '',
+            coverUrl: _currentContext!.work.mainCoverUrl ?? '',
+            url: previousFile.mediaDownloadUrl!,
+            subtitleUrl: _currentContext!.getSubtitleFile()?.mediaDownloadUrl,
+          );
+          _currentTrack = trackInfo;
+          _notificationService.updateMetadata(trackInfo);
 
-      // 创建新的播放上下文
-      final newContext = _currentContext!.copyWithFile(previousFile);
-      await playWithContext(newContext);
+          // 切换到上一曲
+          await _player.seekToPrevious();
+        }
+      } else {
+        AppLogger.debug('无法切换上一曲：已经是第一首');
+      }
     } catch (e) {
       AppLogger.error('切换上一曲失败', e);
     }
@@ -177,15 +194,30 @@ class AudioPlayerService implements IAudioPlayerService {
         return;
       }
 
-      final nextFile = _currentContext!.getNextFile();
-      if (nextFile == null) {
-        AppLogger.debug('无法切换下一曲：已经是最后一首');
-        return;
-      }
+      // 使用 just_audio 的播放列表控制
+      if (await _player.hasNext) {
+        // 更新 context
+        final nextFile = _currentContext!.getNextFile();
+        if (nextFile != null) {
+          _currentContext = _currentContext!.copyWithFile(nextFile);
+          
+          // 更新音轨信息
+          final trackInfo = AudioTrackInfo(
+            title: nextFile.title ?? '',
+            artist: _currentContext!.work.circle?.name ?? '',
+            coverUrl: _currentContext!.work.mainCoverUrl ?? '',
+            url: nextFile.mediaDownloadUrl!,
+            subtitleUrl: _currentContext!.getSubtitleFile()?.mediaDownloadUrl,
+          );
+          _currentTrack = trackInfo;
+          _notificationService.updateMetadata(trackInfo);
 
-      // 创建新的播放上下文
-      final newContext = _currentContext!.copyWithFile(nextFile);
-      await playWithContext(newContext);
+          // 切换到下一曲
+          await _player.seekToNext();
+        }
+      } else {
+        AppLogger.debug('无法切换下一曲：已经是最后一首');
+      }
     } catch (e) {
       AppLogger.error('切换下一曲失败', e);
     }
@@ -199,27 +231,47 @@ class AudioPlayerService implements IAudioPlayerService {
     try {
       AppLogger.debug('开始处理播放上下文');
       AppLogger.debug('当前文件标题: ${context.currentFile.title}');
-      AppLogger.debug('文件列表数量: ${context.files.children?.length ?? 0}');
+      AppLogger.debug('播放列表数量: ${context.playlist.length}');
       
       _currentContext = context;
 
-      // 检查是否有字幕文件
-      // AppLogger.debug('开始查找字幕文件...');
-      final subtitleFile = context.getSubtitleFile();
-      final subtitleUrl = subtitleFile?.mediaDownloadUrl;
-      // AppLogger.debug('字幕URL: ${subtitleUrl ?? '无'}');
+      // 构建播放列表
+      final audioSources = await Future.wait(
+        context.playlist.map((file) async {
+          return await _cacheRepository.getAudioSource(file.mediaDownloadUrl!);
+        })
+      );
+
+      // 清空并设置新的播放列表
+      await _playlist.clear();
+      await _playlist.addAll(audioSources);
       
+      // 设置播放列表到播放器
+      try {
+        await _player.setAudioSource(_playlist, 
+          initialIndex: context.currentIndex,
+          initialPosition: Duration.zero
+        );
+      } catch (e, stack) {
+        AppLogger.error('设置播放列表失败', e, stack);
+        throw Exception('设置播放列表失败: $e');
+      }
+
+      // 创建当前曲目的音轨信息
       final trackInfo = AudioTrackInfo(
         title: context.currentFile.title ?? '',
         artist: context.work.circle?.name ?? '',
         coverUrl: context.work.mainCoverUrl ?? '',
         url: context.currentFile.mediaDownloadUrl!,
-        subtitleUrl: subtitleUrl,
+        subtitleUrl: context.getSubtitleFile()?.mediaDownloadUrl,
       );
 
-      // AppLogger.debug('准备开始播放音频');
-      // 使用现有的播放方法
-      play(context.currentFile.mediaDownloadUrl!, trackInfo: trackInfo);
+      _currentTrack = trackInfo;
+      _notificationService.updateMetadata(trackInfo);
+
+      // 开始播放
+      await _player.play();
+      AppLogger.debug('开始播放成功');
     } catch (e, stack) {
       AppLogger.debug('播放上下文处理错误: $e');
       AppLogger.debug('错误堆栈: $stack');
@@ -233,18 +285,29 @@ class AudioPlayerService implements IAudioPlayerService {
     try {
       if (_currentContext == null) return;
 
-      final nextFile = _currentContext!.getNextFile();
-      if (nextFile == null) {
-        AppLogger.debug('播放完成：已经是最后一首');
-        return;
-      }
-
-      // 如果是单曲循环或有下一曲，自动播放
-      if (_currentContext!.playMode == PlayMode.single || 
-          _currentContext!.playMode == PlayMode.loop ||
-          _currentContext!.hasNext) {
-        final newContext = _currentContext!.copyWithFile(nextFile);
-        await playWithContext(newContext);
+      switch (_currentContext!.playMode) {
+        case PlayMode.single:
+          // 单曲循环：重新播放当前曲目
+          await _player.seek(Duration.zero);
+          await _player.play();
+          break;
+          
+        case PlayMode.loop:
+          // 列表循环：如果是最后一首，跳回第一首
+          if (await _player.hasNext) {
+            await next();
+          } else {
+            await _player.seek(Duration.zero, index: 0);
+            await _player.play();
+          }
+          break;
+          
+        case PlayMode.sequence:
+          // 顺序播放：有下一曲就播放下一曲
+          if (await _player.hasNext) {
+            await next();
+          }
+          break;
       }
     } catch (e) {
       AppLogger.error('自动切换下一曲失败', e);
