@@ -41,14 +41,28 @@ class _LyricDisplayState extends State<LyricDisplay> {
   Widget _buildLyricContext(Subtitle? current, SubtitleList? subtitleList) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // 计算可用空间，考虑到进度条和控制按钮的空间
         final availableHeight = constraints.maxHeight;
+        
+        // 如果没有当前歌词，但有字幕列表，显示第一句
+        if (current == null && subtitleList != null && subtitleList.subtitles.isNotEmpty) {
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            constraints: BoxConstraints(
+              minHeight: 80,
+              maxHeight: availableHeight,
+            ),
+            child: LyricContext(
+              current: subtitleList.subtitles.first,
+              isWaiting: true,  // 添加一个标记表示等待状态
+            ),
+          );
+        }
         
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
           constraints: BoxConstraints(
             minHeight: 80,
-            maxHeight: availableHeight,  // 使用可用空间作为最大高度
+            maxHeight: availableHeight,
           ),
           child: LyricContext(
             previous: current?.getPrevious(subtitleList!),

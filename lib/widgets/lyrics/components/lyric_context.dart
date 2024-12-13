@@ -6,12 +6,14 @@ class LyricContext extends StatelessWidget {
   final Subtitle? previous;
   final Subtitle? current;
   final Subtitle? next;
+  final bool isWaiting;
 
   const LyricContext({
     super.key,
     this.previous,
     this.current,
     this.next,
+    this.isWaiting = false,
   });
 
   @override
@@ -20,38 +22,47 @@ class LyricContext extends StatelessWidget {
       builder: (context, constraints) {
         return Stack(
           children: [
-            // 歌词内容
             Column(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (previous != null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: LyricLine(
-                      subtitle: previous!,
-                      opacity: 0.5,
-                    ),
-                  ),
-                if (current != null)
+                if (isWaiting && current != null)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: LyricLine(
                       subtitle: current!,
-                      isActive: true,
+                      opacity: 0.3,
+                      isActive: false,
                     ),
-                  ),
-                if (next != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: LyricLine(
-                      subtitle: next!,
-                      opacity: 0.5,
+                  )
+                else ...[
+                  if (previous != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: LyricLine(
+                        subtitle: previous!,
+                        opacity: 0.5,
+                      ),
                     ),
-                  ),
+                  if (current != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: LyricLine(
+                        subtitle: current!,
+                        isActive: true,
+                      ),
+                    ),
+                  if (next != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: LyricLine(
+                        subtitle: next!,
+                        opacity: 0.5,
+                      ),
+                    ),
+                ],
               ],
             ),
-            // 顶部渐变遮罩
             Positioned(
               top: 0,
               left: 0,
@@ -70,7 +81,6 @@ class LyricContext extends StatelessWidget {
                 ),
               ),
             ),
-            // 底部渐变遮罩
             Positioned(
               bottom: 0,
               left: 0,
