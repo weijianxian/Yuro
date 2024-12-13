@@ -53,6 +53,10 @@ class DetailViewModel extends ChangeNotifier {
   }
 
   Future<void> playFile(Child file, BuildContext context) async {
+    if (file.type?.toLowerCase() != 'audio') {
+      throw Exception('不支持的文件类型: ${file.type}');
+    }
+
     if (file.mediaDownloadUrl == null) {
       throw Exception('无法播放：文件URL不存在');
     }

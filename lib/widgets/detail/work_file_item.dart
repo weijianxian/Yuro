@@ -17,21 +17,22 @@ class WorkFileItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isMp3 = file.title?.toLowerCase().endsWith('.mp3') ?? false;
+    final bool isAudio = file.type?.toLowerCase() == 'audio';
+    
     return Padding(
       padding: EdgeInsets.only(left: indentation),
       child: ListTile(
         title: Text(file.title ?? ''),
         subtitle: Text(FileSizeFormatter.format(file.size)),
         leading: Icon(
-          isMp3 ? Icons.audio_file : Icons.insert_drive_file,
-          color: isMp3 ? Colors.green : Colors.blue,
+          isAudio ? Icons.audio_file : Icons.insert_drive_file,
+          color: isAudio ? Colors.green : Colors.blue,
         ),
         dense: true,
-        onTap: () {
-          AppLogger.debug('点击文件: ${file.title}');
+        onTap: isAudio ? () {
+          AppLogger.debug('点击音频文件: ${file.title}');
           onFileTap?.call(file);
-        },
+        } : null,  // 非音频文件点击无响应
       ),
     );
   }
