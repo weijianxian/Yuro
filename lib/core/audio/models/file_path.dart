@@ -28,7 +28,10 @@ class FilePath {
     if (children == null) return null;
 
     for (final child in children) {
-      if (child.title == targetFile.title) {
+      if (child.title == targetFile.title && 
+          child.mediaDownloadUrl == targetFile.mediaDownloadUrl && 
+          child.type == targetFile.type &&
+          child.size == targetFile.size) {  // size 作为额外验证
         return [...currentPath, child.title!];
       }
 
