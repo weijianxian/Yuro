@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:asmrapp/data/models/works/work.dart';
-import 'package:asmrapp/widgets/detail/work_stats.dart';
-import 'package:asmrapp/widgets/detail/work_tags_list.dart';
+import 'package:asmrapp/data/models/works/tag.dart';
+import 'package:asmrapp/widgets/common/tag_chip.dart';
+import 'package:asmrapp/widgets/detail/work_info_header.dart';
 
 class WorkInfo extends StatelessWidget {
   final Work work;
@@ -11,6 +12,14 @@ class WorkInfo extends StatelessWidget {
     required this.work,
   });
 
+  String _getLocalizedTagName(Tag tag) {
+    final zhName = tag.i18n?.zhCn?.name;
+    if (zhName != null) return zhName;
+    final jaName = tag.i18n?.jaJp?.name;
+    if (jaName != null) return jaName;
+    return tag.name ?? '';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -18,19 +27,16 @@ class WorkInfo extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            work.title ?? '',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            work.circle?.name ?? '',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 16),
-          WorkStats(work: work),
-          const SizedBox(height: 16),
-          WorkTagsList(tags: work.tags ?? []),
+          WorkInfoHeader(work: work),
+          const SizedBox(height: 12),
+          if (work.tags != null && work.tags!.isNotEmpty)
+            Wrap(
+              spacing: 4,
+              runSpacing: 4,
+              children: work.tags!
+                  .map((tag) => TagChip(text: _getLocalizedTagName(tag)))
+                  .toList(),
+            ),
         ],
       ),
     );

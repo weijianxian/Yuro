@@ -33,6 +33,7 @@ class DetailScreen extends StatelessWidget {
               WorkCover(
                 imageUrl: work.mainCoverUrl ?? '',
                 rjNumber: 'RJ${work.id ?? 0}',
+                releaseDate: work.release,
               ),
               WorkInfo(work: work),
               Consumer<DetailViewModel>(
