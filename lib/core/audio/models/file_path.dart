@@ -51,7 +51,7 @@ class FilePath {
   /// 获取同级文件列表
   /// 返回与目标文件在同一目录下的所有文件
   static List<Child> getSiblings(Child targetFile, Files root) {
-    AppLogger.debug('开始获取同级文件: ${targetFile.title}');
+    // AppLogger.debug('开始获取同级文件: ${targetFile.title}');
     
     // 获取目标文件的路径
     final path = getPath(targetFile, root);
@@ -71,10 +71,10 @@ class FilePath {
       return [];
     }
 
-    AppLogger.debug('找到同级文件:');
-    for (final file in parentDir) {
-      AppLogger.debug('- [${file.type}] ${file.title}');
-    }
+    // AppLogger.debug('找到同级文件:');
+    // for (final file in parentDir) {
+    //   AppLogger.debug('- [${file.type}] ${file.title}');
+    // }
 
     return parentDir;
   }

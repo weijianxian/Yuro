@@ -46,13 +46,13 @@ class PlaybackContext {
 
   // 获取同级文件列表
   static List<Child> _getPlaylistFromSameDirectory(Child currentFile, Files files) {
-    AppLogger.debug('开始获取播放列表...');
-    AppLogger.debug('当前文件: ${currentFile.title}');
-    AppLogger.debug('当前文件类型: ${currentFile.type}');
+    // AppLogger.debug('开始获取播放列表...');
+    // AppLogger.debug('当前文件: ${currentFile.title}');
+    // AppLogger.debug('当前文件类型: ${currentFile.type}');
 
     // 获取当前文件的扩展名
     final extension = currentFile.title?.split('.').last.toLowerCase();
-    AppLogger.debug('当前文件扩展名: $extension');
+    // AppLogger.debug('当前文件扩展名: $extension');
     
     if (extension != 'mp3' && extension != 'wav') {
       AppLogger.debug('不支持的文件类型: $extension');
@@ -67,10 +67,10 @@ class PlaybackContext {
       file.title?.toLowerCase().endsWith('.$extension') ?? false
     ).toList();
     
-    AppLogger.debug('找到 ${playlist.length} 个可播放文件:');
-    for (var file in playlist) {
-      AppLogger.debug('- [${file.type}] ${file.title} (URL: ${file.mediaDownloadUrl != null ? '有' : '无'})');
-    }
+    // AppLogger.debug('找到 ${playlist.length} 个可播放文件:');
+    // for (var file in playlist) {
+    //   AppLogger.debug('- [${file.type}] ${file.title} (URL: ${file.mediaDownloadUrl != null ? '有' : '无'})');
+    // }
     
     return playlist;
   }
@@ -182,9 +182,28 @@ class PlaybackContext {
       debugPrint('无法查找字幕文件: ${files.children == null ? '文件列表为空' : '当前文件名为空'}');
       return null;
     }
+
+    debugPrint('开始查找字幕文件...');
     
-    debugPrint('开始递归查找字幕文件...');
-    return _findSubtitleInDirectory(files.children!, currentFile.title!);
+    // 使用 FilePath 获取同级文件
+    final siblings = FilePath.getSiblings(currentFile, files);
+    
+    // 构造字幕文件名 (不需要去掉音频文件的扩展名，直接加上.vtt)
+    final audioBaseName = currentFile.title;
+    final subtitleFileName = '$audioBaseName.vtt';
+    debugPrint('查找字幕文件: $subtitleFileName');
+    
+    // 在同级文件中查找字幕
+    try {
+      final subtitleFile = siblings.firstWhere(
+        (file) => file.title == subtitleFileName
+      );
+      debugPrint('找到字幕文件: ${subtitleFile.title}, URL: ${subtitleFile.mediaDownloadUrl}');
+      return subtitleFile;
+    } catch (e) {
+      debugPrint('在当前目录中未找到字幕文件');
+      return null;
+    }
   }
 
   // 递归查找字幕文件
