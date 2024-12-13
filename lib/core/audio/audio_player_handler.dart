@@ -9,8 +9,8 @@ class AudioPlayerHandler extends BaseAudioHandler {
     AppLogger.debug('AudioPlayerHandler 初始化');
     _player.playbackEventStream.listen(_broadcastState);
     _player.playerStateStream.listen((state) {
-      AppLogger.debug(
-          '播放器状态变化: playing=${state.playing}, state=${state.processingState}');
+      // AppLogger.debug(
+      //     '播放器状态变化: playing=${state.playing}, state=${state.processingState}');
       _broadcastState(_player.playbackEvent);
     });
   }
