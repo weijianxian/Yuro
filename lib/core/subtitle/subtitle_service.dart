@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:asmrapp/utils/logger.dart';
-import 'package:dio/dio.dart';
 import 'package:asmrapp/core/audio/models/subtitle.dart';
 import 'package:asmrapp/core/subtitle/i_subtitle_service.dart';
 import 'package:get_it/get_it.dart';
