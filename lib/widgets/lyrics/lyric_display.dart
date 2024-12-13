@@ -13,47 +13,71 @@ class LyricDisplay extends StatefulWidget {
 
 class _LyricDisplayState extends State<LyricDisplay> {
   final ISubtitleService _subtitleService = GetIt.I<ISubtitleService>();
-  Subtitle? _lastSubtitle;
+  SubtitleWithState? _lastSubtitleWithState;
+
+  @override
+  void initState() {
+    super.initState();
+    _initCurrentSubtitle();
+  }
+
+  void _initCurrentSubtitle() {
+    final subtitleList = _subtitleService.subtitleList;
+    if (subtitleList != null) {
+      // 获取当前字幕
+      _lastSubtitleWithState = _subtitleService.currentSubtitleWithState;
+      if (mounted) {
+        setState(() {});
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<Subtitle?>(
-      stream: _subtitleService.currentSubtitleStream,
+    return StreamBuilder<SubtitleWithState?>(
+      stream: _subtitleService.currentSubtitleWithStateStream,
       builder: (context, snapshot) {
-        final currentSubtitle = snapshot.data;
+        final currentSubtitleWithState = snapshot.data;
         final subtitleList = _subtitleService.subtitleList;
         
-        // 当没有新字幕时，保持显示上一句
-        if (currentSubtitle == null && _lastSubtitle != null) {
-          return _buildLyricContext(_lastSubtitle, subtitleList);
+        // 当没有新字幕时，使用已保存的字幕
+        if (currentSubtitleWithState == null && _lastSubtitleWithState != null) {
+          return _buildLyricContext(_lastSubtitleWithState, subtitleList);
         }
 
         // 更新最后显示的字幕
-        if (currentSubtitle != null) {
-          _lastSubtitle = currentSubtitle;
+        if (currentSubtitleWithState != null) {
+          _lastSubtitleWithState = currentSubtitleWithState;
         }
 
-        return _buildLyricContext(currentSubtitle, subtitleList);
+        return _buildLyricContext(currentSubtitleWithState ?? _lastSubtitleWithState, subtitleList);
       },
     );
   }
 
-  Widget _buildLyricContext(Subtitle? current, SubtitleList? subtitleList) {
+  Widget _buildLyricContext(SubtitleWithState? current, SubtitleList? subtitleList) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final availableHeight = constraints.maxHeight;
-        
-        // 如果没有当前歌词，但有字幕列表，显示第一句
-        if (current == null && subtitleList != null && subtitleList.subtitles.isNotEmpty) {
+        // 如果没有字幕列表，返回空容器
+        if (subtitleList == null) {
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
             constraints: BoxConstraints(
-              minHeight: 80,
-              maxHeight: availableHeight,
+              maxHeight: constraints.maxHeight,
+            ),
+          );
+        }
+
+        // 如果没有当前字幕但有字幕列表，显示第一句
+        if (current == null && subtitleList.subtitles.isNotEmpty) {
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            constraints: BoxConstraints(
+              maxHeight: constraints.maxHeight,
             ),
             child: LyricContext(
               current: subtitleList.subtitles.first,
-              isWaiting: true,  // 添加一个标记表示等待状态
+              isWaiting: true,
             ),
           );
         }
@@ -61,13 +85,13 @@ class _LyricDisplayState extends State<LyricDisplay> {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
           constraints: BoxConstraints(
-            minHeight: 80,
-            maxHeight: availableHeight,
+            maxHeight: constraints.maxHeight,
           ),
           child: LyricContext(
-            previous: current?.getPrevious(subtitleList!),
-            current: current,
-            next: current?.getNext(subtitleList!),
+            previous: current?.subtitle.getPrevious(subtitleList),
+            current: current?.subtitle,
+            next: current?.subtitle.getNext(subtitleList),
+            state: current?.state,
           ),
         );
       },

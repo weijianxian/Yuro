@@ -11,6 +11,8 @@ class SubtitleService implements ISubtitleService {
   Subtitle? _currentSubtitle;
   final _subtitleController = StreamController<SubtitleList?>.broadcast();
   final _currentSubtitleController = StreamController<Subtitle?>.broadcast();
+  final _currentSubtitleWithStateController = StreamController<SubtitleWithState?>.broadcast();
+  SubtitleWithState? _currentSubtitleWithState;
   
   @override
   Stream<SubtitleList?> get subtitleStream => _subtitleController.stream;
@@ -19,11 +21,16 @@ class SubtitleService implements ISubtitleService {
   Stream<Subtitle?> get currentSubtitleStream => _currentSubtitleController.stream;
   
   @override
-  Subtitle? get currentSubtitle => _currentSubtitle;
+  Subtitle? get currentSubtitle {
+    if (_subtitleList == null) return null;
+    return _currentSubtitle;
+  }
   
   @override
   Future<void> loadSubtitle(String url) async {
     try {
+      clearSubtitle();
+      
       AppLogger.debug('正在下载字幕文件: $url');
       final response = await _dio.get(url);
       AppLogger.debug('字幕文件下载状态: ${response.statusCode}');
@@ -41,8 +48,7 @@ class SubtitleService implements ISubtitleService {
       }
     } catch (e) {
       AppLogger.debug('字幕加载失败: $e');
-      _subtitleList = null;
-      _subtitleController.add(null);
+      clearSubtitle();
       rethrow;
     }
   }
@@ -50,11 +56,13 @@ class SubtitleService implements ISubtitleService {
   @override
   void updatePosition(Duration position) {
     if (_subtitleList != null) {
-      final newSubtitle = _subtitleList!.getCurrentSubtitle(position);
-      if (newSubtitle != _currentSubtitle) {
-        _currentSubtitle = newSubtitle;
-        AppLogger.debug('字幕更新: ${newSubtitle?.text ?? '无字幕'}');
-        _currentSubtitleController.add(newSubtitle);
+      final newSubtitleWithState = _subtitleList!.getCurrentSubtitle(position);
+      if (newSubtitleWithState?.subtitle != _currentSubtitleWithState?.subtitle) {
+        _currentSubtitleWithState = newSubtitleWithState;
+        _currentSubtitle = newSubtitleWithState?.subtitle;
+        AppLogger.debug('字幕更新: ${_currentSubtitle?.text ?? '无字幕'} (${newSubtitleWithState?.state})');
+        _currentSubtitleWithStateController.add(newSubtitleWithState);
+        _currentSubtitleController.add(_currentSubtitle);
       }
     }
   }
@@ -63,6 +71,7 @@ class SubtitleService implements ISubtitleService {
   void dispose() {
     _subtitleController.close();
     _currentSubtitleController.close();
+    _currentSubtitleWithStateController.close();
   }
 
   @override
@@ -72,8 +81,17 @@ class SubtitleService implements ISubtitleService {
   void clearSubtitle() {
     _subtitleList = null;
     _currentSubtitle = null;
+    _currentSubtitleWithState = null;
     _subtitleController.add(null);
     _currentSubtitleController.add(null);
+    _currentSubtitleWithStateController.add(null);
     AppLogger.debug('字幕已清除');
   }
+
+  @override
+  Stream<SubtitleWithState?> get currentSubtitleWithStateStream => 
+      _currentSubtitleWithStateController.stream;
+  
+  @override
+  SubtitleWithState? get currentSubtitleWithState => _currentSubtitleWithState;
 } 

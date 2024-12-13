@@ -24,4 +24,7 @@ abstract class ISubtitleService {
   
   // 添加清除字幕的方法
   void clearSubtitle();
+  
+  Stream<SubtitleWithState?> get currentSubtitleWithStateStream;
+  SubtitleWithState? get currentSubtitleWithState;
 } 

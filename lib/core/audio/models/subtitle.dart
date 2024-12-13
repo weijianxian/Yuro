@@ -1,5 +1,11 @@
 import 'dart:math' as math;
 
+enum SubtitleState {
+  current,  // 当前播放的字幕
+  waiting,  // 即将播放的字幕
+  passed    // 已经播放过的字幕
+}
+
 class Subtitle {
   final Duration start;
   final Duration end;
@@ -45,21 +51,37 @@ class SubtitleList {
         )
       ).toList();
 
-  int get currentIndex => _currentIndex;
+  SubtitleWithState? getCurrentSubtitle(Duration position) {
+    if (subtitles.isEmpty) return null;
 
-  Subtitle? getCurrentSubtitle(Duration position) {
-    if (_currentIndex >= 0 && _currentIndex < subtitles.length) {
-      final current = subtitles[_currentIndex];
-      if (position >= current.start && position <= current.end) {
-        return current;
+    // 如果位置在第一个字幕之前，仍然返回第一个字幕作为当前字幕
+    if (position < subtitles.first.start) {
+      return SubtitleWithState(subtitles.first, SubtitleState.current);
+    }
+
+    // 如果位置在最后一个字幕之后
+    if (position > subtitles.last.end) {
+      return SubtitleWithState(subtitles.last, SubtitleState.passed);
+    }
+
+    // 查找当前时间点对应的字幕
+    for (int i = 0; i < subtitles.length; i++) {
+      final subtitle = subtitles[i];
+      // 如果在当前字幕的时间范围内
+      if (position >= subtitle.start && position <= subtitle.end) {
+        _currentIndex = i;
+        return SubtitleWithState(subtitle, SubtitleState.current);
+      }
+      // 如果已经超过了当前字幕，但还没到下一个字幕
+      if (position > subtitle.end && 
+          (i == subtitles.length - 1 || position < subtitles[i + 1].start)) {
+        return SubtitleWithState(subtitle, SubtitleState.passed);
       }
     }
 
-    _currentIndex = subtitles.indexWhere(
-      (subtitle) => position >= subtitle.start && position <= subtitle.end
-    );
-
-    return _currentIndex >= 0 ? subtitles[_currentIndex] : null;
+    // 正常情况下不会到达这里，因为上面的逻辑已经覆盖了所有情况
+    // 但为了安全起见，返回第一个字幕
+    return SubtitleWithState(subtitles.first, SubtitleState.waiting);
   }
 
   List<Subtitle> getSubtitlesInRange(int start, int count) {
@@ -137,4 +159,11 @@ class SubtitleList {
     }
     return null;
   }
+}
+
+class SubtitleWithState {
+  final Subtitle subtitle;
+  final SubtitleState state;
+
+  SubtitleWithState(this.subtitle, this.state);
 } 
