@@ -6,6 +6,7 @@ import './models/audio_track_info.dart';
 import './models/playback_context.dart';
 import './notification/audio_notification_service.dart';
 import '../../data/repositories/audio/audio_cache_repository.dart';
+import './models/play_mode.dart';
 
 class AudioPlayerService implements IAudioPlayerService {
   late final AudioPlayer _player;
@@ -36,7 +37,7 @@ class AudioPlayerService implements IAudioPlayerService {
         
         // 检查是否播放完成
         if (state.processingState == ProcessingState.completed) {
-          // _handlePlaybackCompletion();
+          _handlePlaybackCompletion();
         }
       });
     } catch (e) {
@@ -227,26 +228,26 @@ class AudioPlayerService implements IAudioPlayerService {
     }
   }
 
-  // // 处理播放完成
-  // void _handlePlaybackCompletion() async {
-  //   try {
-  //     if (_currentContext == null) return;
+  // 处理播放完成
+  void _handlePlaybackCompletion() async {
+    try {
+      if (_currentContext == null) return;
 
-  //     final nextFile = _currentContext!.getNextFile();
-  //     if (nextFile == null) {
-  //       AppLogger.debug('播放完成：已经是最后一首');
-  //       return;
-  //     }
+      final nextFile = _currentContext!.getNextFile();
+      if (nextFile == null) {
+        AppLogger.debug('播放完成：已经是最后一首');
+        return;
+      }
 
-  //     // 如果是单曲循环或有下一曲，自动播放
-  //     if (_currentContext!.playMode == PlayMode.single || 
-  //         _currentContext!.playMode == PlayMode.loop ||
-  //         _currentContext!.hasNext) {
-  //       final newContext = _currentContext!.copyWithFile(nextFile);
-  //       await playWithContext(newContext);
-  //     }
-  //   } catch (e) {
-  //     AppLogger.error('自动切换下一曲失败', e);
-  //   }
-  // }
+      // 如果是单曲循环或有下一曲，自动播放
+      if (_currentContext!.playMode == PlayMode.single || 
+          _currentContext!.playMode == PlayMode.loop ||
+          _currentContext!.hasNext) {
+        final newContext = _currentContext!.copyWithFile(nextFile);
+        await playWithContext(newContext);
+      }
+    } catch (e) {
+      AppLogger.error('自动切换下一曲失败', e);
+    }
+  }
 }
