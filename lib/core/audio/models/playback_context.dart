@@ -75,42 +75,6 @@ class PlaybackContext {
     return playlist;
   }
 
-  // 递归查找文件所在的目录
-  static List<Child>? _findParentDirectory(List<Child>? children, Child targetFile) {
-    if (children == null) {
-      AppLogger.debug('当前目录为空');
-      return null;
-    }
-
-    AppLogger.debug('正在搜索目录，查找文件: ${targetFile.title}');
-    AppLogger.debug('当前目录内容:');
-    for (var file in children) {
-      AppLogger.debug('- [${file.type}] ${file.title}');
-    }
-
-    // 如果当前目录包含目标文件，返回当前目录
-    if (children.any((file) => file.title == targetFile.title)) {
-      AppLogger.debug('✓ 在当前目录找到目标文件');
-      return children;
-    }
-
-    // 递归查找子目录
-    for (var child in children) {
-      if (child.type == 'folder' && child.children != null) {
-        AppLogger.debug('进入子文件夹: ${child.title}');
-        final result = _findParentDirectory(child.children, targetFile);
-        if (result != null) {
-          AppLogger.debug('在文件夹 ${child.title} 中找到目标文件');
-          return result;
-        }
-        AppLogger.debug('未在文件夹 ${child.title} 中找到目标文件，继续搜索');
-      }
-    }
-
-    AppLogger.debug('在当前目录及其子目录中未找到目标文件');
-    return null;
-  }
-
   // 便捷方法：检查是否有下一曲
   bool get hasNext => currentIndex < playlist.length - 1;
 
