@@ -8,6 +8,9 @@ import './models/playback_context.dart';
 import './notification/audio_notification_service.dart';
 import './models/play_mode.dart';
 import 'dart:async';
+import 'package:get_it/get_it.dart';
+import 'package:asmrapp/core/audio/storage/i_playback_state_repository.dart';
+import 'package:asmrapp/data/models/playback/playback_state.dart';
 
 
 class AudioPlayerService implements IAudioPlayerService {
@@ -17,9 +20,11 @@ class AudioPlayerService implements IAudioPlayerService {
   AudioTrackInfo? _currentTrack;
   PlaybackContext? _currentContext;
   final _contextController = StreamController<PlaybackContext?>.broadcast();
+  final _stateRepository = GetIt.I<IPlaybackStateRepository>();
 
   AudioPlayerService._internal() {
     _init();
+    _initAutoSave();
   }
 
   static final AudioPlayerService _instance = AudioPlayerService._internal();
@@ -35,13 +40,18 @@ class AudioPlayerService implements IAudioPlayerService {
       await session.configure(const AudioSessionConfiguration.music());
       await _notificationService.init();
 
+      // 尝试恢复播放状态
+      await restorePlaybackState();
+
       _player.playerStateStream.listen((state) {
-        // AppLogger.debug('播放状态变化: $state');
-        
-        // 检查是否播放完成
         if (state.processingState == ProcessingState.completed) {
           _handlePlaybackCompletion();
         }
+        savePlaybackState();
+      });
+
+      Timer.periodic(const Duration(seconds: 30), (_) {
+        savePlaybackState();
       });
     } catch (e) {
       AppLogger.error('音频播放器初始化失败', e);
@@ -313,4 +323,94 @@ class AudioPlayerService implements IAudioPlayerService {
 
   @override
   Stream<PlaybackContext?> get contextStream => _contextController.stream;
+
+  @override
+  Future<void> savePlaybackState() async {
+    if (_currentContext == null) return;
+
+    try {
+      final state = PlaybackState(
+        work: _currentContext!.work,
+        files: _currentContext!.files,
+        currentFile: _currentContext!.currentFile,
+        playlist: _currentContext!.playlist,
+        currentIndex: _currentContext!.currentIndex,
+        playMode: _currentContext!.playMode,
+        position: (await _player.position).inMilliseconds,
+        timestamp: DateTime.now().toIso8601String(),
+      );
+      
+      await _stateRepository.saveState(state);
+    } catch (e) {
+      AppLogger.error('保存播放状态失败', e);
+    }
+  }
+
+  @override
+  Future<void> restorePlaybackState() async {
+    try {
+      final state = await _stateRepository.loadState();
+      if (state == null) return;
+
+      _currentContext = PlaybackContext(
+        work: state.work,
+        files: state.files,
+        currentFile: state.currentFile,
+        playMode: state.playMode,
+      );
+
+      // 先通知状态更新，这样字幕服务可以准备
+      _contextController.add(_currentContext);
+
+      // 构建播放列表
+      final audioSources = await Future.wait(
+        _currentContext!.playlist.map((file) async {
+          return AudioCacheManager.createAudioSource(file.mediaDownloadUrl!);
+        })
+      );
+
+      // 清空并设置新的播放列表
+      await _playlist.clear();
+      await _playlist.addAll(audioSources);
+
+      // 设置播放列表到播放器
+      try {
+        await _player.setAudioSource(_playlist, 
+          initialIndex: state.currentIndex,
+          initialPosition: Duration(milliseconds: state.position)
+        );
+      } catch (e) {
+        AppLogger.error('设置播放列表失败', e);
+        return;
+      }
+
+      // 更新音轨信息
+      final trackInfo = AudioTrackInfo(
+        title: state.currentFile.title ?? '',
+        artist: state.work.circle?.name ?? '',
+        coverUrl: state.work.mainCoverUrl ?? '',
+        url: state.currentFile.mediaDownloadUrl!,
+      );
+      _currentTrack = trackInfo;
+      _notificationService.updateMetadata(trackInfo);
+      
+      // 最后开始播放
+      await _player.play();
+    } catch (e) {
+      AppLogger.error('恢复播放状态失败', e);
+    }
+  }
+
+  // 添加自动保存触发点
+  void _initAutoSave() {
+    // 播放状态变化时保存
+    _player.playerStateStream.listen((_) {
+      savePlaybackState();
+    });
+
+    // 定期保存(每30秒)
+    Timer.periodic(const Duration(seconds: 30), (_) {
+      savePlaybackState();
+    });
+  }
 }

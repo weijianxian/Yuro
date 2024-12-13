@@ -25,4 +25,8 @@ abstract class IAudioPlayerService {
 
   // 添加播放上下文流
   Stream<PlaybackContext?> get contextStream;
+
+  // 添加状态管理方法
+  Future<void> savePlaybackState();
+  Future<void> restorePlaybackState();
 }

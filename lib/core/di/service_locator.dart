@@ -10,6 +10,8 @@ import '../../data/repositories/auth_repository.dart';
 import '../subtitle/i_subtitle_service.dart';
 import '../subtitle/subtitle_service.dart';
 import '../subtitle/subtitle_loader.dart';
+import '../../core/audio/storage/i_playback_state_repository.dart';
+import '../../core/audio/storage/playback_state_repository.dart';
 
 final getIt = GetIt.instance;
 
@@ -55,6 +57,19 @@ Future<void> setupServiceLocator() async {
   );
 
   setupSubtitleServices();
+
+  // 注册 SharedPreferences 实例
+  if (!getIt.isRegistered<SharedPreferences>()) {
+    getIt.registerSingletonAsync<SharedPreferences>(
+      () => SharedPreferences.getInstance()
+    );
+  }
+
+  // 注册 PlaybackStateRepository
+  getIt.registerSingletonWithDependencies<IPlaybackStateRepository>(
+    () => PlaybackStateRepository(getIt<SharedPreferences>()),
+    dependsOn: [SharedPreferences],
+  );
 }
 
 void setupSubtitleServices() {
