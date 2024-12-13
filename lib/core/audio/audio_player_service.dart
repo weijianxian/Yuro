@@ -6,6 +6,7 @@ import './models/audio_track_info.dart';
 import './models/playback_context.dart';
 import './notification/audio_notification_service.dart';
 import './models/play_mode.dart';
+import 'dart:async';
 
 class AudioPlayerService implements IAudioPlayerService {
   late final AudioPlayer _player;
@@ -13,6 +14,7 @@ class AudioPlayerService implements IAudioPlayerService {
   late final ConcatenatingAudioSource _playlist;
   AudioTrackInfo? _currentTrack;
   PlaybackContext? _currentContext;
+  final _contextController = StreamController<PlaybackContext?>.broadcast();
 
   AudioPlayerService._internal() {
     _init();
@@ -172,6 +174,7 @@ class AudioPlayerService implements IAudioPlayerService {
       } else {
         AppLogger.debug('无法切换上一曲：已经是第一首');
       }
+      _contextController.add(_currentContext);
     } catch (e) {
       AppLogger.error('切换上一曲失败', e);
     }
@@ -208,6 +211,7 @@ class AudioPlayerService implements IAudioPlayerService {
       } else {
         AppLogger.debug('无法切换下一曲：已经是最后一首');
       }
+      _contextController.add(_currentContext);
     } catch (e) {
       AppLogger.error('切换下一曲失败', e);
     }
@@ -224,6 +228,7 @@ class AudioPlayerService implements IAudioPlayerService {
       AppLogger.debug('播放列表数量: ${context.playlist.length}');
       
       _currentContext = context;
+      _contextController.add(_currentContext);
 
       // 构建播放列表
       final audioSources = await Future.wait(
@@ -265,6 +270,7 @@ class AudioPlayerService implements IAudioPlayerService {
       AppLogger.debug('播放上下文处理错误: $e');
       AppLogger.debug('错误堆栈: $stack');
       _currentContext = null;
+      _contextController.add(null);
       rethrow;
     }
   }
@@ -302,4 +308,7 @@ class AudioPlayerService implements IAudioPlayerService {
       AppLogger.error('自动切换下一曲失败', e);
     }
   }
+
+  @override
+  Stream<PlaybackContext?> get contextStream => _contextController.stream;
 }

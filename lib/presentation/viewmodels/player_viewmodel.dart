@@ -33,8 +33,6 @@ class PlayerViewModel extends ChangeNotifier {
 
   final List<StreamSubscription> _subscriptions = [];
 
-  String? _currentTrackUrl;
-
   static const _tag = 'PlayerViewModel';
 
   PlayerViewModel() {
@@ -66,6 +64,7 @@ class PlayerViewModel extends ChangeNotifier {
     _initPositionStream();
     _initDurationStream();
     _initSubtitleStreams();
+    _initContextStream();
   }
 
   void _initPlayerStateStream() {
@@ -85,16 +84,13 @@ class PlayerViewModel extends ChangeNotifier {
 
   void _updateCurrentTrack() {
     final currentTrack = _audioService.currentTrack;
-    if (currentTrack != null && _currentTrackUrl != currentTrack.url) {
-      _subtitleService.clearSubtitle();
-      
-      _currentTrackUrl = currentTrack.url;
+    if (currentTrack != null) {
       _currentTrack = Track(
         title: currentTrack.title,
         artist: currentTrack.artist,
         coverUrl: currentTrack.coverUrl,
       );
-      _loadSubtitleIfAvailable();
+      notifyListeners();
     }
   }
 
@@ -161,6 +157,19 @@ class PlayerViewModel extends ChangeNotifier {
           notifyListeners();
         },
         onError: (error) => debugPrint('$_tag - 当前字幕流错误: $error'),
+      ),
+    );
+  }
+
+  void _initContextStream() {
+    _subscriptions.add(
+      _audioService.contextStream.listen(
+        (context) {
+          if (context != null) {
+            _loadSubtitleIfAvailable();
+          }
+        },
+        onError: (error) => debugPrint('$_tag - 播放上下文流错误: $error'),
       ),
     );
   }

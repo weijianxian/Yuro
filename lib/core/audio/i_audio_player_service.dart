@@ -22,4 +22,7 @@ abstract class IAudioPlayerService {
 
   Future<void> playWithContext(PlaybackContext context);
   PlaybackContext? get currentContext;
+
+  // 添加播放上下文流
+  Stream<PlaybackContext?> get contextStream;
 }
