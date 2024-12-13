@@ -105,4 +105,61 @@ class FilePath {
 
     return current;
   }
+
+  /// 查找第一个包含音频文件的目录路径
+  /// 返回从根目录到目标目录的完整路径数组
+  static List<String>? findFirstAudioFolderPath(
+    List<Child>? children, {
+    List<String> formats = const ['.mp3', '.wav'],
+  }) {
+    if (children == null) return null;
+
+    List<String>? audioFolderPath;
+    
+    void findPath(Child folder, List<String> currentPath) {
+      if (audioFolderPath != null) return;
+
+      if (folder.children != null) {
+        // 首先检查当前目录是否直接包含音频文件
+        bool hasDirectAudio = folder.children!.any((child) {
+          if (child.type != 'folder') {
+            final fileName = child.title?.toLowerCase() ?? '';
+            return formats.any((format) => fileName.endsWith(format));
+          }
+          return false;
+        });
+
+        // 如果当前目录包含音频文件，记录完整路径
+        if (hasDirectAudio) {
+          audioFolderPath = currentPath;
+          return;
+        }
+
+        // 如果当前目录没有音频文件，递归检查子目录
+        for (final child in folder.children!) {
+          if (child.type == 'folder') {
+            List<String> newPath = List.from(currentPath)..add(child.title ?? '');
+            findPath(child, newPath);
+          }
+        }
+      }
+    }
+
+    // 遍历根目录下的所有文件夹
+    for (final child in children) {
+      if (child.type == 'folder') {
+        findPath(child, [child.title ?? '']);
+        if (audioFolderPath != null) break;
+      }
+    }
+
+    return audioFolderPath;
+  }
+
+  /// 检查路径是否包含指定的目录名
+  /// 用于判断某个目录是否在音频文件夹的路径上
+  static bool isInPath(List<String>? path, String? folderName) {
+    if (path == null || folderName == null) return false;
+    return path.contains(folderName);
+  }
 } 

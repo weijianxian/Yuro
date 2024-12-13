@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:asmrapp/data/models/files/child.dart';
 import 'package:asmrapp/utils/logger.dart';
 import 'package:asmrapp/widgets/detail/work_file_item.dart';
+import 'package:asmrapp/core/audio/models/file_path.dart';
 
 class WorkFolderItem extends StatelessWidget {
   final Child folder;
@@ -11,6 +12,14 @@ class WorkFolderItem extends StatelessWidget {
   // 支持的音频格式列表，按优先级排序
   static const _audioFormats = ['.mp3', '.wav'];
 
+  // 静态变量用于跟踪第一个包含音频的文件夹的完整路径
+  static List<String>? _audioFolderPath;
+
+  // 静态方法用于重置展开状态
+  static void resetExpandState() {
+    _audioFolderPath = null;
+  }
+
   const WorkFolderItem({
     super.key,
     required this.folder,
@@ -18,41 +27,17 @@ class WorkFolderItem extends StatelessWidget {
     this.onFileTap,
   });
 
-  bool _containsAudioFile(Child folder, [String? specificFormat]) {
-    if (folder.children == null) return false;
-
-    for (final child in folder.children!) {
-      if (child.type == 'folder') {
-        if (_containsAudioFile(child, specificFormat)) return true;
-      } else {
-        final fileName = child.title?.toLowerCase() ?? '';
-        if (specificFormat != null) {
-          if (fileName.endsWith(specificFormat)) return true;
-        } else {
-          // 如果没有指定格式，按优先级检查所有支持的格式
-          for (final format in _audioFormats) {
-            if (fileName.endsWith(format)) return true;
-          }
-        }
-      }
-    }
-    return false;
-  }
-
   bool _shouldExpandFolder(Child folder) {
-    // 首先检查是否包含MP3文件
-    if (_containsAudioFile(folder, '.mp3')) {
-      // AppLogger.debug('文件夹包含MP3文件: ${folder.title}');
-      return true;
+    // 如果还没有找到第一个音频文件夹，就搜索并记录
+    if (_audioFolderPath == null) {
+      _audioFolderPath = FilePath.findFirstAudioFolderPath(
+        [folder],
+        formats: _audioFormats,
+      );
     }
 
-    // 如果没有MP3文件，检查是否包含WAV文件
-    if (_containsAudioFile(folder, '.wav')) {
-      // AppLogger.debug('文件夹包含WAV文件: ${folder.title}');
-      return true;
-    }
-
-    return false;
+    // 判断当前文件夹是否在音频文件夹的路径上
+    return FilePath.isInPath(_audioFolderPath, folder.title);
   }
 
   @override
