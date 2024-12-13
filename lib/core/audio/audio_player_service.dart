@@ -5,13 +5,11 @@ import './i_audio_player_service.dart';
 import './models/audio_track_info.dart';
 import './models/playback_context.dart';
 import './notification/audio_notification_service.dart';
-import '../../data/repositories/audio/audio_cache_repository.dart';
 import './models/play_mode.dart';
 
 class AudioPlayerService implements IAudioPlayerService {
   late final AudioPlayer _player;
   late final AudioNotificationService _notificationService;
-  late final AudioCacheRepository _cacheRepository;
   late final ConcatenatingAudioSource _playlist;
   AudioTrackInfo? _currentTrack;
   PlaybackContext? _currentContext;
@@ -26,7 +24,6 @@ class AudioPlayerService implements IAudioPlayerService {
   Future<void> _init() async {
     _player = AudioPlayer();
     _notificationService = AudioNotificationService(_player);
-    _cacheRepository = AudioCacheRepository();
     _playlist = ConcatenatingAudioSource(children: []);
 
     try {
@@ -55,8 +52,7 @@ class AudioPlayerService implements IAudioPlayerService {
 
         // AppLogger.debug('准备播放URL: $url');
 
-        // 使用缓存音频源
-        final audioSource = await _cacheRepository.getAudioSource(url);
+        final audioSource = ProgressiveAudioSource(Uri.parse(url));
         // AppLogger.debug('创建音频源成功: $url');
 
         try {
@@ -232,7 +228,7 @@ class AudioPlayerService implements IAudioPlayerService {
       // 构建播放列表
       final audioSources = await Future.wait(
         context.playlist.map((file) async {
-          return await _cacheRepository.getAudioSource(file.mediaDownloadUrl!);
+          return ProgressiveAudioSource(Uri.parse(file.mediaDownloadUrl!));
         })
       );
 
