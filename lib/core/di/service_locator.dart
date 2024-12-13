@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../subtitle/i_subtitle_service.dart';
 import '../subtitle/subtitle_service.dart';
+import '../subtitle/subtitle_loader.dart';
 
 final getIt = GetIt.instance;
 
@@ -52,4 +53,10 @@ Future<void> setupServiceLocator() async {
   getIt.registerLazySingleton<ISubtitleService>(
     () => SubtitleService(),
   );
+
+  setupSubtitleServices();
+}
+
+void setupSubtitleServices() {
+  getIt.registerLazySingleton<SubtitleLoader>(() => SubtitleLoader());
 }

@@ -6,6 +6,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:asmrapp/core/audio/i_audio_player_service.dart';
 import 'package:asmrapp/core/audio/models/subtitle.dart';
 import 'dart:async';
+import 'package:asmrapp/core/subtitle/subtitle_loader.dart';
 
 class Track {
   final String title;
@@ -22,6 +23,7 @@ class Track {
 class PlayerViewModel extends ChangeNotifier {
   final IAudioPlayerService _audioService = GetIt.I<IAudioPlayerService>();
   final ISubtitleService _subtitleService = GetIt.I<ISubtitleService>();
+  final _subtitleLoader = SubtitleLoader();
 
   bool _isPlaying = false;
   Track? _currentTrack;
@@ -99,7 +101,10 @@ class PlayerViewModel extends ChangeNotifier {
   void _loadSubtitleIfAvailable() {
     final currentContext = _audioService.currentContext;
     if (currentContext != null) {
-      final subtitleFile = currentContext.getSubtitleFile();
+      final subtitleFile = _subtitleLoader.findSubtitleFile(
+        currentContext.currentFile,
+        currentContext.files
+      );
       if (subtitleFile?.mediaDownloadUrl != null) {
         _subtitleService.loadSubtitle(subtitleFile!.mediaDownloadUrl!);
       } else {
