@@ -7,6 +7,7 @@ import 'package:asmrapp/presentation/layouts/work_layout_strategy.dart';
 import 'package:asmrapp/screens/search_screen.dart';
 import 'package:asmrapp/widgets/pagination_controls.dart';
 import 'package:asmrapp/widgets/work_grid_view.dart';
+import 'package:asmrapp/widgets/mini_player/mini_player.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -78,16 +79,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 onRetry: () => viewModel.loadWorks(refresh: true),
                 layoutStrategy: _layoutStrategy,
                 scrollController: _scrollController,
-                bottomWidget: PaginationControls(
-                  currentPage: viewModel.currentPage,
-                  totalPages: viewModel.totalPages,
-                  isLoading: viewModel.isLoading,
-                  onPageChanged: _onPageChanged,
+                bottomWidget: Padding(
+                  padding: EdgeInsets.only(bottom: MiniPlayer.height),
+                  child: PaginationControls(
+                    currentPage: viewModel.currentPage,
+                    totalPages: viewModel.totalPages,
+                    isLoading: viewModel.isLoading,
+                    onPageChanged: _onPageChanged,
+                  ),
                 ),
               ),
             );
           },
         ),
+        bottomSheet: const MiniPlayer(),
       ),
     );
   }
