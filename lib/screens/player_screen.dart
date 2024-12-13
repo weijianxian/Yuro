@@ -95,7 +95,7 @@ class PlayerScreen extends StatelessWidget {
                     duration: const Duration(milliseconds: 300),
                     child: Text(
                       viewModel.currentSubtitle?.text ?? '',
-                      key: ValueKey(viewModel.currentSubtitle?.text),
+                      key: ValueKey('subtitle_${viewModel.currentSubtitle?.text}_${DateTime.now().microsecondsSinceEpoch}'),
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         fontSize: 18,
                         height: 1.5,
