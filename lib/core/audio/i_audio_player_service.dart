@@ -3,7 +3,6 @@ import './models/audio_track_info.dart';
 import './models/playback_context.dart';
 
 abstract class IAudioPlayerService {
-  Future<void> play(String url, {AudioTrackInfo? trackInfo});
   Future<void> pause();
   Future<void> resume();
   Future<void> stop();

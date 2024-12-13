@@ -58,60 +58,6 @@ class AudioPlayerService implements IAudioPlayerService {
     }
   }
 
-  @override
-  Future<void> play(String url, {AudioTrackInfo? trackInfo}) async {
-    try {
-      if (trackInfo != null) {
-        _currentTrack = trackInfo;
-
-        // AppLogger.debug('准备播放URL: $url');
-
-        final audioSource = await AudioCacheManager.createAudioSource(url);
-        // AppLogger.debug('创建音频源成功: $url');
-
-        try {
-          await _player.stop(); // 先停止当前播放
-          // AppLogger.debug('停止当前播放');
-
-          await _player.setAudioSource(audioSource);
-          // AppLogger.debug('设置音频源成功');
-        } catch (e, stack) {
-          AppLogger.error('设置音频源失败', e, stack);
-          throw Exception('设置音频源失败: $e');
-        }
-
-        // 等待获取到音频时长后再更新通知栏
-        try {
-          final duration = _player.duration;
-          // AppLogger.debug('获取音频时长成功: $duration');
-
-          final updatedTrackInfo = AudioTrackInfo(
-            title: trackInfo.title,
-            artist: trackInfo.artist,
-            coverUrl: trackInfo.coverUrl,
-            url: trackInfo.url,
-            duration: duration,
-          );
-          _notificationService.updateMetadata(updatedTrackInfo);
-        } catch (e, stack) {
-          AppLogger.error('获取音频时长失败', e, stack);
-          // 不抛出异常，继续尝试播放
-        }
-      }
-
-      try {
-        await _player.play();
-        AppLogger.debug('开始播放成功');
-      } catch (e, stack) {
-        AppLogger.error('开始播放失败', e, stack);
-        throw Exception('开始播放失败: $e');
-      }
-    } catch (e, stack) {
-      _currentTrack = null;
-      AppLogger.error('播放失败', e, stack);
-      rethrow;
-    }
-  }
 
   @override
   Future<void> pause() async {
@@ -395,7 +341,8 @@ class AudioPlayerService implements IAudioPlayerService {
       _notificationService.updateMetadata(trackInfo);
       
       // 最后开始播放
-      await _player.play();
+      _player.play();
+      _player.stop();
     } catch (e) {
       AppLogger.error('恢复播放状态失败', e);
     }
