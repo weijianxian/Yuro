@@ -6,6 +6,8 @@ import 'package:get_it/get_it.dart';
 import 'mini_player_cover.dart';
 
 class MiniPlayer extends StatelessWidget {
+  static const height = 64.0;
+  
   const MiniPlayer({super.key});
 
   @override
@@ -19,7 +21,7 @@ class MiniPlayer extends StatelessWidget {
             Navigator.pushNamed(context, '/player');
           },
           child: Container(
-            height: 64,
+            height: height,
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
               boxShadow: [
