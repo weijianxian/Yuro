@@ -7,6 +7,8 @@ import 'package:asmrapp/widgets/detail/work_info.dart';
 import 'package:asmrapp/widgets/detail/work_files_list.dart';
 import 'package:asmrapp/widgets/detail/work_files_skeleton.dart';
 import 'package:asmrapp/presentation/viewmodels/detail_viewmodel.dart';
+import 'package:asmrapp/widgets/detail/work_action_buttons.dart';
+import 'package:asmrapp/screens/similar_works_screen.dart';
 
 class DetailScreen extends StatelessWidget {
   final Work work;
@@ -37,6 +39,28 @@ class DetailScreen extends StatelessWidget {
                 releaseDate: work.release,
               ),
               WorkInfo(work: work),
+              WorkActionButtons(
+                onRecommendationsTap: () {
+                  Navigator.of(context).push(
+                    PageRouteBuilder(
+                      pageBuilder: (context, animation, secondaryAnimation) =>
+                          SimilarWorksScreen(work: work),
+                      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                        const begin = Offset(1.0, 0.0);
+                        const end = Offset.zero;
+                        const curve = Curves.easeInOut;
+                        var tween = Tween(begin: begin, end: end).chain(
+                          CurveTween(curve: curve),
+                        );
+                        return SlideTransition(
+                          position: animation.drive(tween),
+                          child: child,
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
               Consumer<DetailViewModel>(
                 builder: (context, viewModel, _) {
                   if (viewModel.isLoading) {
