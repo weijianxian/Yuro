@@ -12,6 +12,7 @@ import 'package:asmrapp/core/audio/storage/i_playback_state_repository.dart';
 import 'package:asmrapp/data/models/playback/playback_state.dart';
 import './utils/track_info_creator.dart';
 import './utils/playlist_builder.dart';
+import './utils/audio_error_handler.dart';
 
 
 class AudioPlayerService implements IAudioPlayerService {
@@ -32,33 +33,45 @@ class AudioPlayerService implements IAudioPlayerService {
   factory AudioPlayerService() => _instance;
 
   Future<void> _init() async {
-    _player = AudioPlayer();
-    _notificationService = AudioNotificationService(_player);
-    _playlist = ConcatenatingAudioSource(children: []);
-
     try {
+      _player = AudioPlayer();
+      _notificationService = AudioNotificationService(_player);
+      _playlist = ConcatenatingAudioSource(children: []);
+
       final session = await AudioSession.instance;
       await session.configure(const AudioSessionConfiguration.music());
       await _notificationService.init();
 
-      // 尝试恢复播放状态
       await restorePlaybackState();
 
-      _player.playerStateStream.listen((state) {
-        if (state.processingState == ProcessingState.completed) {
-          _handlePlaybackCompletion();
-        }
-        savePlaybackState();
-      });
-
-      Timer.periodic(const Duration(seconds: 30), (_) {
-        savePlaybackState();
-      });
-    } catch (e) {
-      AppLogger.error('音频播放器初始化失败', e);
+      _initPlayerListeners();
+    } catch (e, stack) {
+      AudioErrorHandler.handleError(
+        AudioErrorType.init,
+        '音频播放器初始化',
+        e,
+        stack,
+      );
+      AudioErrorHandler.throwError(
+        AudioErrorType.init,
+        '音频播放器初始化',
+        e,
+      );
     }
   }
 
+  void _initPlayerListeners() {
+    _player.playerStateStream.listen((state) {
+      if (state.processingState == ProcessingState.completed) {
+        _handlePlaybackCompletion();
+      }
+      savePlaybackState();
+    });
+
+    Timer.periodic(const Duration(seconds: 30), (_) {
+      savePlaybackState();
+    });
+  }
 
   @override
   Future<void> pause() async {
@@ -106,7 +119,11 @@ class AudioPlayerService implements IAudioPlayerService {
   Future<void> previous() async {
     try {
       if (_currentContext == null) {
-        AppLogger.debug('无法切换上一曲：播放上下文为空');
+        AudioErrorHandler.handleError(
+          AudioErrorType.context,
+          '切换上一曲',
+          '播放上下文为空'
+        );
         return;
       }
 
@@ -129,11 +146,20 @@ class AudioPlayerService implements IAudioPlayerService {
           await _player.seekToPrevious();
         }
       } else {
-        AppLogger.debug('无法切换上一曲：已经是第一首');
+        AudioErrorHandler.handleError(
+          AudioErrorType.playback,
+          '切换上一曲',
+          '已经是第一首'
+        );
       }
       _contextController.add(_currentContext);
-    } catch (e) {
-      AppLogger.error('切换上一曲失败', e);
+    } catch (e, stack) {
+      AudioErrorHandler.handleError(
+        AudioErrorType.playback,
+        '切换上一曲',
+        e,
+        stack,
+      );
     }
   }
 
@@ -195,8 +221,17 @@ class AudioPlayerService implements IAudioPlayerService {
           initialPosition: Duration.zero,
         );
       } catch (e, stack) {
-        AppLogger.error('设置播放列表失败', e, stack);
-        throw Exception('设置播放列表失败: $e');
+        AudioErrorHandler.handleError(
+          AudioErrorType.playlist,
+          '设置播放列表',
+          e,
+          stack,
+        );
+        AudioErrorHandler.throwError(
+          AudioErrorType.playlist,
+          '设置播放列表',
+          e,
+        );
       }
 
       // 创建当前曲目的音轨信息
@@ -212,8 +247,12 @@ class AudioPlayerService implements IAudioPlayerService {
       await _player.play();
       AppLogger.debug('开始播放成功');
     } catch (e, stack) {
-      AppLogger.debug('播放上下文处理错误: $e');
-      AppLogger.debug('错误堆栈: $stack');
+      AudioErrorHandler.handleError(
+        AudioErrorType.context,
+        '处理播放上下文',
+        e,
+        stack,
+      );
       _currentContext = null;
       _contextController.add(null);
       rethrow;
@@ -274,8 +313,13 @@ class AudioPlayerService implements IAudioPlayerService {
       );
       
       await _stateRepository.saveState(state);
-    } catch (e) {
-      AppLogger.error('保存播放状态失败', e);
+    } catch (e, stack) {
+      AudioErrorHandler.handleError(
+        AudioErrorType.state,
+        '保存播放状态',
+        e,
+        stack,
+      );
     }
   }
 
@@ -292,10 +336,8 @@ class AudioPlayerService implements IAudioPlayerService {
         playMode: state.playMode,
       );
 
-      // 先通知状态更新，这样字幕服务可以准备
       _contextController.add(_currentContext);
 
-      // 设置播放列表
       try {
         await PlaylistBuilder.setPlaylistSource(
           player: _player,
@@ -304,12 +346,16 @@ class AudioPlayerService implements IAudioPlayerService {
           initialIndex: state.currentIndex,
           initialPosition: Duration(milliseconds: state.position),
         );
-      } catch (e) {
-        AppLogger.error('设置播放列表失败', e);
+      } catch (e, stack) {
+        AudioErrorHandler.handleError(
+          AudioErrorType.playlist,
+          '恢复播放列表',
+          e,
+          stack,
+        );
         return;
       }
 
-      // 更新音轨信息
       final trackInfo = TrackInfoCreator.createFromFile(
         state.currentFile,
         state.work,
@@ -317,11 +363,15 @@ class AudioPlayerService implements IAudioPlayerService {
       _currentTrack = trackInfo;
       _notificationService.updateMetadata(trackInfo);
       
-      // 最后开始播放
-      _player.play();
-      _player.stop();
-    } catch (e) {
-      AppLogger.error('恢复播放状态失败', e);
+      await _player.play();
+      await _player.stop();
+    } catch (e, stack) {
+      AudioErrorHandler.handleError(
+        AudioErrorType.state,
+        '恢复播放状态',
+        e,
+        stack,
+      );
     }
   }
 
