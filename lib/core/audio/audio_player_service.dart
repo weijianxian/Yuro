@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:asmrapp/core/audio/events/playback_event.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:audio_session/audio_session.dart';
 import './i_audio_player_service.dart';
@@ -136,6 +137,9 @@ class AudioPlayerService implements IAudioPlayerService {
     final position = Duration(milliseconds: state.position);
     await _playbackController.setPlaybackContext(context, initialPosition: position);
     await _playbackController.stop();
+    
+    // 直接触发进度事件，PlayerViewModel 会在字幕加载完成后更新位置
+    _eventHub.emit(PlaybackProgressEvent(position, _player.bufferedPosition));
   }
 
   @override

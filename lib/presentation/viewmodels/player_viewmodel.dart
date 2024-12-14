@@ -94,7 +94,13 @@ class PlayerViewModel extends ChangeNotifier {
     // 上下文变更事件
     _subscriptions.add(
       _eventHub.contextChange.listen(
-        (event) => _loadSubtitleIfAvailable(event.context),
+        (event) async {
+          await _loadSubtitleIfAvailable(event.context);
+          // 如果有保存的位置，在字幕加载完成后更新位置
+          if (_position != null) {
+            _subtitleService.updatePosition(_position!);
+          }
+        },
         onError: (error) => debugPrint('$_tag - 上下文流错误: $error'),
       ),
     );
@@ -194,14 +200,14 @@ class PlayerViewModel extends ChangeNotifier {
     _eventHub.emit(RequestInitialStateEvent());
   }
 
-  // 修改字幕加载方法，接收上下文参数而不是直接访问
-  void _loadSubtitleIfAvailable(PlaybackContext context) {
+  // 修改字幕加载方法，返回 Future 以便等待加载完成
+  Future<void> _loadSubtitleIfAvailable(PlaybackContext context) async {
     final subtitleFile = _subtitleLoader.findSubtitleFile(
       context.currentFile,
       context.files
     );
     if (subtitleFile?.mediaDownloadUrl != null) {
-      _subtitleService.loadSubtitle(subtitleFile!.mediaDownloadUrl!);
+      await _subtitleService.loadSubtitle(subtitleFile!.mediaDownloadUrl!);
     } else {
       _subtitleService.clearSubtitle();
       AppLogger.debug('未找到字幕文件，清除现有字幕');
