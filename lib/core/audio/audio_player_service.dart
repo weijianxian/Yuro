@@ -44,7 +44,10 @@ class AudioPlayerService implements IAudioPlayerService {
   Future<void> _init() async {
     try {
       _player = AudioPlayer();
-      _notificationService = AudioNotificationService(_player);
+      _notificationService = AudioNotificationService(
+        _player,
+        _eventHub,
+      );
       _playlist = ConcatenatingAudioSource(children: []);
 
       _stateManager = PlaybackStateManager(

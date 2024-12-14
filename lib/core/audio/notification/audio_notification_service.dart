@@ -5,20 +5,22 @@ import 'package:asmrapp/utils/logger.dart';
 import 'package:rxdart/rxdart.dart';
 import '../models/audio_track_info.dart';
 import '../audio_player_handler.dart';
-import 'package:get_it/get_it.dart';
 
 class AudioNotificationService {
   final AudioPlayer _player;
+  final PlaybackEventHub _eventHub;
   AudioHandler? _audioHandler;
-  final _playbackState = BehaviorSubject<PlaybackState>();
   final _mediaItem = BehaviorSubject<MediaItem?>();
 
-  AudioNotificationService(this._player);
+  AudioNotificationService(
+    this._player,
+    this._eventHub,
+  );
 
   Future<void> init() async {
     try {
       _audioHandler = await AudioService.init(
-        builder: () => AudioPlayerHandler(_player, GetIt.I<PlaybackEventHub>()),
+        builder: () => AudioPlayerHandler(_player, _eventHub),
         config: const AudioServiceConfig(
           androidNotificationChannelId: 'com.asmrapp.audio',
           androidNotificationChannelName: 'ASMR One 播放器',
@@ -27,7 +29,7 @@ class AudioNotificationService {
         ),
       );
 
-      _setupPlayerStateListener();
+      _setupEventListeners();
       AppLogger.debug('通知栏服务初始化成功');
     } catch (e) {
       AppLogger.error('通知栏服务初始化失败', e);
@@ -35,52 +37,11 @@ class AudioNotificationService {
     }
   }
 
-  void _setupPlayerStateListener() {
-    _player.playerStateStream.listen((state) {
-      _updatePlaybackState();
+  void _setupEventListeners() {
+    // 监听轨道变更事件来更新媒体信息
+    _eventHub.trackChange.listen((event) {
+      updateMetadata(event.track);
     });
-
-    _player.positionStream.listen((_) {
-      _updatePlaybackState();
-    });
-
-    _player.durationStream.listen((_) {
-      _updatePlaybackState();
-      _updateMediaItem();
-    });
-  }
-
-  void _updatePlaybackState() {
-    final playbackState = PlaybackState(
-      controls: [
-        MediaControl.skipToPrevious,
-        _player.playing ? MediaControl.pause : MediaControl.play,
-        MediaControl.skipToNext,
-      ],
-      systemActions: const {
-        MediaAction.seek,
-        MediaAction.seekForward,
-        MediaAction.seekBackward,
-      },
-      androidCompactActionIndices: const [0, 1, 2],
-      processingState: const {
-        ProcessingState.idle: AudioProcessingState.idle,
-        ProcessingState.loading: AudioProcessingState.loading,
-        ProcessingState.buffering: AudioProcessingState.buffering,
-        ProcessingState.ready: AudioProcessingState.ready,
-        ProcessingState.completed: AudioProcessingState.completed,
-      }[_player.processingState]!,
-      playing: _player.playing,
-      updatePosition: _player.position,
-      bufferedPosition: _player.bufferedPosition,
-      speed: _player.speed,
-      queueIndex: 0,
-    );
-
-    _playbackState.add(playbackState);
-    if (_audioHandler != null) {
-      (_audioHandler as BaseAudioHandler).playbackState.add(playbackState);
-    }
   }
 
   void updateMetadata(AudioTrackInfo trackInfo) {
@@ -98,22 +59,8 @@ class AudioNotificationService {
     }
   }
 
-  void _updateMediaItem() {
-    final currentItem = _mediaItem.valueOrNull;
-    if (currentItem != null) {
-      final updatedItem = currentItem.copyWith(
-        duration: _player.duration,
-      );
-      _mediaItem.add(updatedItem);
-      if (_audioHandler != null) {
-        (_audioHandler as BaseAudioHandler).mediaItem.add(updatedItem);
-      }
-    }
-  }
-
   Future<void> dispose() async {
     await _audioHandler?.stop();
-    await _playbackState.close();
     await _mediaItem.close();
   }
 }
