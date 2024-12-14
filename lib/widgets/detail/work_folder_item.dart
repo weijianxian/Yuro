@@ -40,17 +40,31 @@ class WorkFolderItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final shouldExpand = _shouldExpandFolder(folder);
-    return Theme(
-      data: ThemeData(dividerColor: Colors.transparent),
-      child: Padding(
-        padding: EdgeInsets.only(left: indentation),
+
+    return Padding(
+      padding: EdgeInsets.only(left: indentation),
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          dividerColor: Colors.transparent,
+          // 确保子组件也能继承正确的文字颜色
+          textTheme: Theme.of(context).textTheme.apply(
+            bodyColor: colorScheme.onSurface,
+            displayColor: colorScheme.onSurface,
+          ),
+        ),
         child: ExpansionTile(
           title: Text(
             folder.title ?? '',
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: colorScheme.onSurface,
+            ),
           ),
-          leading: const Icon(Icons.folder, color: Colors.amber),
+          leading: Icon(
+            Icons.folder,
+            color: colorScheme.primary,
+          ),
           initiallyExpanded: shouldExpand,
           children: folder.children
                   ?.map((child) => child.type == 'folder'

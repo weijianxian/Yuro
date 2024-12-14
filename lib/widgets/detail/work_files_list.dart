@@ -33,7 +33,10 @@ class WorkFilesList extends StatelessWidget {
                   ),
             ),
           ),
-          const Divider(height: 1),
+          Divider(
+            height: 1,
+            color: Theme.of(context).colorScheme.surfaceVariant,
+          ),
           ...files.children
                   ?.map((child) => child.type == 'folder'
                       ? WorkFolderItem(

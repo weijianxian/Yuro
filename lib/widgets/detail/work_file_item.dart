@@ -18,12 +18,23 @@ class WorkFileItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isAudio = file.type?.toLowerCase() == 'audio';
+    final colorScheme = Theme.of(context).colorScheme;
     
     return Padding(
       padding: EdgeInsets.only(left: indentation),
       child: ListTile(
-        title: Text(file.title ?? ''),
-        subtitle: Text(FileSizeFormatter.format(file.size)),
+        title: Text(
+          file.title ?? '',
+          style: TextStyle(
+            color: colorScheme.onSurface,
+          ),
+        ),
+        subtitle: Text(
+          FileSizeFormatter.format(file.size),
+          style: TextStyle(
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
         leading: Icon(
           isAudio ? Icons.audio_file : Icons.insert_drive_file,
           color: isAudio ? Colors.green : Colors.blue,
@@ -32,7 +43,7 @@ class WorkFileItem extends StatelessWidget {
         onTap: isAudio ? () {
           AppLogger.debug('点击音频文件: ${file.title}');
           onFileTap?.call(file);
-        } : null,  // 非音频文件点击无响应
+        } : null,
       ),
     );
   }
