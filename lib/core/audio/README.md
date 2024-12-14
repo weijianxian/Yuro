@@ -1,66 +1,48 @@
 # 音频核心功能
 
-此文档仅供参考，实际实现可能随项目发展而变化。
-
 ## 当前架构
 
-### 1. 音频服务 (AudioPlayerService)
-- 单例模式实现
-- 基于 just_audio 包
-- 通过 GetIt 注入管理
+### 1. 事件驱动系统
+- 基于 RxDart 的事件中心
+- 统一的事件定义和处理
+- 支持事件过滤和转换
 
-<pre>
-class AudioPlayerService implements IAudioPlayerService {
-  late final AudioPlayer _player;
-  AudioTrackInfo? _currentTrack;
-  
-  // 单例实现
-  static final AudioPlayerService _instance = AudioPlayerService._internal();
-  factory AudioPlayerService() => _instance;
-}
-</pre>
+### 2. 核心服务 (AudioPlayerService)
+- 实现 IAudioPlayerService 接口
+- 通过依赖注入管理依赖
+- 负责协调各个组件
 
-### 2. 音频状态管理 (PlayerViewModel)
-- 通过 GetIt 实现全局单例
-- 使用 ChangeNotifier 管理状态
-- 负责所有播放相关的状态管理和UI交互
+### 3. 状态管理
+- PlaybackStateManager 负责状态维护
+- 通过 EventHub 发送状态更新
+- 支持状态持久化
 
-<pre>
-class PlayerViewModel extends ChangeNotifier {
-  final IAudioPlayerService _audioService = GetIt.I<IAudioPlayerService>();
-  Track? _currentTrack;
-  bool _isPlaying = false;
-  Duration? _position;
-  Duration? _duration;
-}
-</pre>
+### 4. 通知栏集成
+- 基于 audio_service 包
+- 响应系统媒体控制
+- 支持后台播放
 
-### 3. UI 组件
-- MiniPlayer: 迷你播放器组件
-- MiniPlayerControls: 播放控制组件
-- MiniPlayerProgress: 进度条组件
-
-### 4. 依赖注入
+### 5. 依赖注入
 通过 GetIt 管理所有依赖：
 <pre>
 void setupServiceLocator() {
-  getIt.registerLazySingleton<IAudioPlayerService>(() => AudioPlayerService());
-  getIt.registerLazySingleton<PlayerViewModel>(() => PlayerViewModel());
+  // 注册 EventHub
+  getIt.registerLazySingleton(() => PlaybackEventHub());
+  
+  // 注册音频服务
+  getIt.registerLazySingleton<IAudioPlayerService>(
+    () => AudioPlayerService(
+      eventHub: getIt(),
+      stateRepository: getIt(),
+    ),
+  );
 }
 </pre>
 
-## 待实现功能
-
-1. 播放列表管理
-2. 播放模式控制
-3. 音频缓存
-4. 播放历史记录
-5. 完整播放器界面
-
 ## 注意事项
 
-- 此架构文档仅供参考
-- 可根据需求随时调整
-- 优先考虑实际开发需求
-- 保持灵活性和可扩展性
+- 所有状态更新通过 EventHub 传递
+- 避免组件间直接调用
+- 优先使用依赖注入
+- 保持组件职责单一
  
