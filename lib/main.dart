@@ -5,6 +5,8 @@ import 'package:asmrapp/presentation/viewmodels/auth_viewmodel.dart';
 import 'core/di/service_locator.dart';
 import 'package:provider/provider.dart';
 import 'screens/main_screen.dart';
+import 'package:asmrapp/core/theme/app_theme.dart';
+import 'package:asmrapp/core/theme/theme_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,17 +27,22 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => getIt<AuthViewModel>(),
         ),
-        // ... 其他 providers
-      ],
-      child: MaterialApp(
-        title: Strings.appName,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
+        ChangeNotifierProvider(
+          create: (_) => getIt<ThemeController>(),
         ),
-        home: const MainScreen(),
-        routes: {
-          '/player': (context) => const PlayerScreen(),
+      ],
+      child: Consumer<ThemeController>(
+        builder: (context, themeController, child) {
+          return MaterialApp(
+            title: Strings.appName,
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            themeMode: themeController.themeMode,
+            home: const MainScreen(),
+            routes: {
+              '/player': (context) => const PlayerScreen(),
+            },
+          );
         },
       ),
     );

@@ -13,6 +13,7 @@ import '../subtitle/subtitle_loader.dart';
 import '../../core/audio/storage/i_playback_state_repository.dart';
 import '../../core/audio/storage/playback_state_repository.dart';
 import '../audio/events/playback_event_hub.dart';
+import '../../core/theme/theme_controller.dart';
 
 final getIt = GetIt.instance;
 
@@ -79,6 +80,11 @@ Future<void> setupServiceLocator() async {
   );
 
   setupSubtitleServices();
+
+  // 注册主题控制器
+  getIt.registerLazySingleton<ThemeController>(
+    () => ThemeController(prefs),
+  );
 }
 
 void setupSubtitleServices() {

@@ -7,6 +7,7 @@ import 'package:asmrapp/screens/favorites_screen.dart';
 import 'package:asmrapp/screens/recommend_screen.dart';
 import 'package:asmrapp/screens/settings/cache_manager_screen.dart';
 import 'package:asmrapp/screens/popular_screen.dart';
+import 'package:asmrapp/core/theme/theme_controller.dart';
 
 class DrawerMenu extends StatelessWidget {
   const DrawerMenu({super.key});
@@ -137,8 +138,40 @@ class DrawerMenu extends StatelessWidget {
               );
             },
           ),
+          const Divider(),
+          Consumer<ThemeController>(
+            builder: (context, themeController, _) {
+              return ListTile(
+                leading: Icon(_getThemeIcon(themeController.themeMode)),
+                title: Text(_getThemeText(themeController.themeMode)),
+                onTap: () => themeController.toggleThemeMode(),
+              );
+            },
+          ),
         ],
       ),
     );
+  }
+
+  IconData _getThemeIcon(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.system:
+        return Icons.brightness_auto;
+      case ThemeMode.light:
+        return Icons.brightness_high;
+      case ThemeMode.dark:
+        return Icons.brightness_2;
+    }
+  }
+
+  String _getThemeText(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.system:
+        return '跟随系统主题';
+      case ThemeMode.light:
+        return '浅色模式';
+      case ThemeMode.dark:
+        return '深色模式';
+    }
   }
 }
