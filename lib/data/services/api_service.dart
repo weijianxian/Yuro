@@ -4,7 +4,6 @@ import 'package:asmrapp/data/models/works/work.dart';
 import 'package:asmrapp/data/models/works/pagination.dart';
 import 'package:asmrapp/utils/logger.dart';
 import 'package:asmrapp/data/services/interceptors/auth_interceptor.dart';
-import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 
 class WorksResponse {
   final List<Work> works;
@@ -15,23 +14,11 @@ class WorksResponse {
 
 class ApiService {
   final Dio _dio;
-  late final CacheOptions _defaultOptions;
 
   ApiService()
       : _dio = Dio(BaseOptions(
           baseUrl: 'https://api.asmr.one/api',
         )) {
-    // 设置默认缓存选项
-    _defaultOptions = CacheOptions(
-      store: MemCacheStore(), // 使用内存缓存
-      policy: CachePolicy.request, // 优先请求网络,失败时使用缓存
-      hitCacheOnErrorExcept: [401, 403], // 除了401,403外的错误都使用缓存
-      maxStale: const Duration(days: 1), // 缓存1天
-    );
-
-    // 添加缓存拦截器
-    _dio.interceptors.add(DioCacheInterceptor(options: _defaultOptions));
-    // 添加认证拦截器
     _dio.interceptors.add(AuthInterceptor());
   }
 
@@ -252,12 +239,6 @@ class ApiService {
           'localSubtitledWorks': [],
           'withPlaylistStatus': [],
         },
-        options: _defaultOptions
-            .copyWith(
-              policy: CachePolicy.forceCache, // 强制使用缓存
-              maxStale: const Nullable(Duration(hours: 1)), // 缓存1小时
-            )
-            .toOptions(),
       );
 
       if (response.statusCode == 200) {
@@ -271,8 +252,12 @@ class ApiService {
       }
 
       throw Exception('获取相关推荐失败: ${response.statusCode}');
-    } catch (e) {
-      throw Exception('获取相关推荐失败: $e');
+    } on DioException catch (e) {
+      AppLogger.error('网络请求失败', e, e.stackTrace);
+      throw Exception('网络请求失败: ${e.message}');
+    } catch (e, stackTrace) {
+      AppLogger.error('解析数据失败', e, stackTrace);
+      throw Exception('解析数据失败: $e');
     }
   }
 }
