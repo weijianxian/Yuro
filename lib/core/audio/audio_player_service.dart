@@ -1,4 +1,3 @@
-import 'package:asmrapp/core/audio/cache/audio_cache_manager.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:asmrapp/utils/logger.dart';
@@ -12,6 +11,7 @@ import 'package:get_it/get_it.dart';
 import 'package:asmrapp/core/audio/storage/i_playback_state_repository.dart';
 import 'package:asmrapp/data/models/playback/playback_state.dart';
 import './utils/track_info_creator.dart';
+import './utils/playlist_builder.dart';
 
 
 class AudioPlayerService implements IAudioPlayerService {
@@ -185,22 +185,14 @@ class AudioPlayerService implements IAudioPlayerService {
       _currentContext = context;
       _contextController.add(_currentContext);
 
-      // 构建播放列表
-      final audioSources = await Future.wait(
-        context.playlist.map((file) async {
-          return AudioCacheManager.createAudioSource(file.mediaDownloadUrl!);
-        })
-      );
-
-      // 清空并设置新的播放列表
-      await _playlist.clear();
-      await _playlist.addAll(audioSources);
-      
-      // 设置播放列表到播放器
+      // 设置播放列表
       try {
-        await _player.setAudioSource(_playlist, 
+        await PlaylistBuilder.setPlaylistSource(
+          player: _player,
+          playlist: _playlist,
+          files: context.playlist,
           initialIndex: context.currentIndex,
-          initialPosition: Duration.zero
+          initialPosition: Duration.zero,
         );
       } catch (e, stack) {
         AppLogger.error('设置播放列表失败', e, stack);
@@ -303,22 +295,14 @@ class AudioPlayerService implements IAudioPlayerService {
       // 先通知状态更新，这样字幕服务可以准备
       _contextController.add(_currentContext);
 
-      // 构建播放列表
-      final audioSources = await Future.wait(
-        _currentContext!.playlist.map((file) async {
-          return AudioCacheManager.createAudioSource(file.mediaDownloadUrl!);
-        })
-      );
-
-      // 清空并设置新的播放列表
-      await _playlist.clear();
-      await _playlist.addAll(audioSources);
-
-      // 设置播放列表到播放器
+      // 设置播放列表
       try {
-        await _player.setAudioSource(_playlist, 
+        await PlaylistBuilder.setPlaylistSource(
+          player: _player,
+          playlist: _playlist,
+          files: _currentContext!.playlist,
           initialIndex: state.currentIndex,
-          initialPosition: Duration(milliseconds: state.position)
+          initialPosition: Duration(milliseconds: state.position),
         );
       } catch (e) {
         AppLogger.error('设置播放列表失败', e);
