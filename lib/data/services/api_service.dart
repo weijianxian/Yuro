@@ -1,9 +1,11 @@
+import 'package:asmrapp/core/cache/recommendation_cache_manager.dart';
 import 'package:dio/dio.dart';
 import 'package:asmrapp/data/models/files/files.dart';
 import 'package:asmrapp/data/models/works/work.dart';
 import 'package:asmrapp/data/models/works/pagination.dart';
 import 'package:asmrapp/utils/logger.dart';
 import 'package:asmrapp/data/services/interceptors/auth_interceptor.dart';
+
 
 class WorksResponse {
   final List<Work> works;
@@ -14,6 +16,7 @@ class WorksResponse {
 
 class ApiService {
   final Dio _dio;
+  final _recommendationCache = RecommendationCacheManager();
 
   ApiService()
       : _dio = Dio(BaseOptions(
@@ -229,6 +232,13 @@ class ApiService {
     int subtitle = 0,
   }) async {
     try {
+      // 先尝试从缓存获取
+      final cachedData = _recommendationCache.get(itemId, page, subtitle);
+      if (cachedData != null) {
+        return cachedData;
+      }
+
+      // 缓存未命中，从网络获取
       final response = await _dio.post(
         '/recommender/item-neighbors',
         data: {
@@ -245,10 +255,15 @@ class ApiService {
         final List<dynamic> works = response.data['works'] ?? [];
         final pagination = Pagination.fromJson(response.data['pagination']);
 
-        return WorksResponse(
+        final worksResponse = WorksResponse(
           works: works.map((work) => Work.fromJson(work)).toList(),
           pagination: pagination,
         );
+
+        // 存入缓存
+        _recommendationCache.set(itemId, page, subtitle, worksResponse);
+
+        return worksResponse;
       }
 
       throw Exception('获取相关推荐失败: ${response.statusCode}');
