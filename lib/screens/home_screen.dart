@@ -80,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 layoutStrategy: _layoutStrategy,
                 scrollController: _scrollController,
                 bottomWidget: Padding(
-                  padding: EdgeInsets.only(bottom: MiniPlayer.height),
+                  padding: const EdgeInsets.only(bottom: MiniPlayer.height),
                   child: PaginationControls(
                     currentPage: viewModel.currentPage,
                     totalPages: viewModel.totalPages,

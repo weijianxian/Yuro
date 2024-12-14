@@ -89,7 +89,7 @@ class PlayerScreen extends StatelessWidget {
                 ),
                 const Spacer(),
                 // 字幕显示
-                LyricDisplay(),
+                const LyricDisplay(),
                 const PlayerProgress(),
                 const SizedBox(height: 24),
                 const PlayerControls(),

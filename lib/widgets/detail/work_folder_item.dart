@@ -29,12 +29,10 @@ class WorkFolderItem extends StatelessWidget {
 
   bool _shouldExpandFolder(Child folder) {
     // 如果还没有找到第一个音频文件夹，就搜索并记录
-    if (_audioFolderPath == null) {
-      _audioFolderPath = FilePath.findFirstAudioFolderPath(
+    _audioFolderPath ??= FilePath.findFirstAudioFolderPath(
         [folder],
         formats: _audioFormats,
       );
-    }
 
     // 判断当前文件夹是否在音频文件夹的路径上
     return FilePath.isInPath(_audioFolderPath, folder.title);

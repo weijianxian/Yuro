@@ -27,7 +27,7 @@ class DetailScreen extends StatelessWidget {
           title: Text('RJ${work.id ?? 0}'),
         ),
         body: SingleChildScrollView(
-          padding: EdgeInsets.only(bottom: MiniPlayer.height),
+          padding: const EdgeInsets.only(bottom: MiniPlayer.height),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
