@@ -184,4 +184,41 @@ class ApiService {
       throw Exception('解析数据失败: $e');
     }
   }
+
+  /// 获取热门作品
+  Future<WorksResponse> getPopular({
+    int page = 1,
+    int subtitle = 0,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/recommender/popular',
+        data: {
+          'keyword': ' ',
+          'page': page,
+          'subtitle': subtitle,
+          'localSubtitledWorks': [],
+          'withPlaylistStatus': [],
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> works = response.data['works'] ?? [];
+        final pagination = Pagination.fromJson(response.data['pagination']);
+
+        return WorksResponse(
+          works: works.map((work) => Work.fromJson(work)).toList(),
+          pagination: pagination,
+        );
+      }
+
+      throw Exception('获取热门列表失败: ${response.statusCode}');
+    } on DioException catch (e) {
+      AppLogger.error('网络请求失败', e, e.stackTrace);
+      throw Exception('网络请求失败: ${e.message}');
+    } catch (e, stackTrace) {
+      AppLogger.error('解析数据失败', e, stackTrace);
+      throw Exception('解析数据失败: $e');
+    }
+  }
 }

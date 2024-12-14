@@ -6,6 +6,7 @@ import 'package:asmrapp/presentation/widgets/auth/login_dialog.dart';
 import 'package:asmrapp/screens/favorites_screen.dart';
 import 'package:asmrapp/screens/recommend_screen.dart';
 import 'package:asmrapp/screens/settings/cache_manager_screen.dart';
+import 'package:asmrapp/screens/popular_screen.dart';
 
 class DrawerMenu extends StatelessWidget {
   const DrawerMenu({super.key});
@@ -119,6 +120,19 @@ class DrawerMenu extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => const CacheManagerScreen(),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.trending_up),
+            title: const Text('热门作品'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PopularScreen(),
                 ),
               );
             },
