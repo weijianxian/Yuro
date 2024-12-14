@@ -138,7 +138,10 @@ class DrawerMenu extends StatelessWidget {
               );
             },
           ),
-          const Divider(),
+            Divider(
+              color: Theme.of(context).colorScheme.surfaceVariant,
+              height: 1,
+            ),
           Consumer<ThemeController>(
             builder: (context, themeController, _) {
               return ListTile(
