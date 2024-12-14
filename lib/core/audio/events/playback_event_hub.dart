@@ -2,15 +2,10 @@ import 'package:rxdart/rxdart.dart';
 import './playback_event.dart';
 
 class PlaybackEventHub {
-  // 单例实现
-  static final PlaybackEventHub _instance = PlaybackEventHub._internal();
-  factory PlaybackEventHub() => _instance;
-  PlaybackEventHub._internal();
-
-  // 主事件流
+  // 统一的事件流，处理所有类型的事件
   final _eventSubject = PublishSubject<PlaybackEvent>();
 
-  // 分类事件流
+  // 分类后的特定事件流
   late final Stream<PlaybackStateEvent> playbackState = _eventSubject
       .whereType<PlaybackStateEvent>()
       .distinct();
@@ -27,6 +22,13 @@ class PlaybackEventHub {
       
   late final Stream<PlaybackErrorEvent> errors = _eventSubject
       .whereType<PlaybackErrorEvent>();
+
+  // 添加新的事件流
+  late final Stream<InitialStateEvent> initialState = _eventSubject
+      .whereType<InitialStateEvent>();
+      
+  late final Stream<RequestInitialStateEvent> requestInitialState = _eventSubject
+      .whereType<RequestInitialStateEvent>();
 
   // 发送事件
   void emit(PlaybackEvent event) => _eventSubject.add(event);

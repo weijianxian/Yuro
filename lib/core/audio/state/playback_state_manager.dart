@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:just_audio/just_audio.dart';
 import '../models/audio_track_info.dart';
 import '../models/playback_context.dart';
@@ -10,6 +11,7 @@ import '../events/playback_event_hub.dart';
 import 'package:asmrapp/data/models/files/child.dart';
 import 'package:asmrapp/data/models/works/work.dart';
 
+
 class PlaybackStateManager {
   final AudioPlayer _player;
   final PlaybackEventHub _eventHub;
@@ -17,6 +19,8 @@ class PlaybackStateManager {
   
   AudioTrackInfo? _currentTrack;
   PlaybackContext? _currentContext;
+
+  final List<StreamSubscription> _subscriptions = [];
 
   PlaybackStateManager({
     required AudioPlayer player,
@@ -28,11 +32,12 @@ class PlaybackStateManager {
 
   // 初始化状态监听
   void initStateListeners() {
-    // 播放状态变化监听
+    // 直接监听 AudioPlayer 的原始流
     _player.playerStateStream.listen((state) async {
       final position = _player.position;
       final duration = _player.duration;
       
+      // 转换并发送到 EventHub
       _eventHub.emit(PlaybackStateEvent(state, position, duration));
 
       if (state.processingState == ProcessingState.completed) {
@@ -41,7 +46,6 @@ class PlaybackStateManager {
       saveState();
     });
 
-    // 播放进度监听
     _player.positionStream.listen((position) {
       _eventHub.emit(PlaybackProgressEvent(
         position,
@@ -127,5 +131,24 @@ class PlaybackStateManager {
       );
       return null;
     }
+  }
+
+  void _setupEventListeners() {
+    // 处理初始状态请求
+    _subscriptions.add(
+      _eventHub.requestInitialState.listen((_) {
+        _eventHub.emit(InitialStateEvent(
+          _currentTrack,
+          _currentContext
+        ));
+      }),
+    );
+  }
+
+  void dispose() {
+    for (var subscription in _subscriptions) {
+      subscription.cancel();
+    }
+    _subscriptions.clear();
   }
 } 

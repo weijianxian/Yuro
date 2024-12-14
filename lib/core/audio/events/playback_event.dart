@@ -49,3 +49,12 @@ class PlaybackProgressEvent extends PlaybackEvent {
   final Duration? bufferedPosition;
   PlaybackProgressEvent(this.position, this.bufferedPosition);
 }
+
+/// 添加初始状态相关事件
+class RequestInitialStateEvent extends PlaybackEvent {}
+
+class InitialStateEvent extends PlaybackEvent {
+  final AudioTrackInfo? track;
+  final PlaybackContext? context;
+  InitialStateEvent(this.track, this.context);
+}

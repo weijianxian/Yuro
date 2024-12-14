@@ -1,3 +1,5 @@
+import 'package:asmrapp/core/audio/events/playback_event.dart';
+import 'package:asmrapp/core/audio/models/playback_context.dart';
 import 'package:asmrapp/core/subtitle/i_subtitle_service.dart';
 import 'package:asmrapp/utils/logger.dart';
 import 'package:flutter/foundation.dart';
@@ -43,7 +45,7 @@ class PlayerViewModel extends ChangeNotifier {
        _eventHub = eventHub,
        _subtitleService = subtitleService {
     _initStreams();
-    _initCurrentTrack();
+    _requestInitialState();
   }
 
   void _initStreams() {
@@ -92,43 +94,32 @@ class PlayerViewModel extends ChangeNotifier {
     // 上下文变更事件
     _subscriptions.add(
       _eventHub.contextChange.listen(
-        (event) => _loadSubtitleIfAvailable(),
+        (event) => _loadSubtitleIfAvailable(event.context),
         onError: (error) => debugPrint('$_tag - 上下文流错误: $error'),
       ),
     );
 
+    // 使用新添加的 initialState 流
+    _subscriptions.add(
+      _eventHub.initialState.listen(
+        (event) {
+          if (event.track != null) {
+            _currentTrack = Track(
+              title: event.track!.title,
+              artist: event.track!.artist,
+              coverUrl: event.track!.coverUrl,
+            );
+            notifyListeners();
+          }
+          if (event.context != null) {
+            _loadSubtitleIfAvailable(event.context!);
+          }
+        },
+        onError: (error) => debugPrint('$_tag - 初始状态流错误: $error'),
+      ),
+    );
+
     _initSubtitleStreams();
-  }
-
-  void _initCurrentTrack() {
-    final currentTrack = _audioService.currentTrack;
-    if (currentTrack != null) {
-      _currentTrack = Track(
-        title: currentTrack.title,
-        artist: currentTrack.artist,
-        coverUrl: currentTrack.coverUrl,
-      );
-      notifyListeners();
-    }
-  }
-
-  void _loadSubtitleIfAvailable() {
-    final currentContext = _audioService.currentContext;
-    if (currentContext != null) {
-      final subtitleFile = _subtitleLoader.findSubtitleFile(
-        currentContext.currentFile,
-        currentContext.files
-      );
-      if (subtitleFile?.mediaDownloadUrl != null) {
-        _subtitleService.loadSubtitle(subtitleFile!.mediaDownloadUrl!);
-      } else {
-        _subtitleService.clearSubtitle();
-        AppLogger.debug('未找到字幕文件，清除现有字幕');
-      }
-    } else {
-      _subtitleService.clearSubtitle();
-      AppLogger.debug('无播放上下文，清除现有字幕');
-    }
   }
 
   void _initSubtitleStreams() {
@@ -196,5 +187,24 @@ class PlayerViewModel extends ChangeNotifier {
     }
     _subscriptions.clear();
     super.dispose();
+  }
+
+  // 请求初始状态
+  void _requestInitialState() {
+    _eventHub.emit(RequestInitialStateEvent());
+  }
+
+  // 修改字幕加载方法，接收上下文参数而不是直接访问
+  void _loadSubtitleIfAvailable(PlaybackContext context) {
+    final subtitleFile = _subtitleLoader.findSubtitleFile(
+      context.currentFile,
+      context.files
+    );
+    if (subtitleFile?.mediaDownloadUrl != null) {
+      _subtitleService.loadSubtitle(subtitleFile!.mediaDownloadUrl!);
+    } else {
+      _subtitleService.clearSubtitle();
+      AppLogger.debug('未找到字幕文件，清除现有字幕');
+    }
   }
 }
