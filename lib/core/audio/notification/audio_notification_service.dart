@@ -1,9 +1,11 @@
+import 'package:asmrapp/core/audio/events/playback_event_hub.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:asmrapp/utils/logger.dart';
 import 'package:rxdart/rxdart.dart';
 import '../models/audio_track_info.dart';
 import '../audio_player_handler.dart';
+import 'package:get_it/get_it.dart';
 
 class AudioNotificationService {
   final AudioPlayer _player;
@@ -16,7 +18,7 @@ class AudioNotificationService {
   Future<void> init() async {
     try {
       _audioHandler = await AudioService.init(
-        builder: () => AudioPlayerHandler(_player),
+        builder: () => AudioPlayerHandler(_player, GetIt.I<PlaybackEventHub>()),
         config: const AudioServiceConfig(
           androidNotificationChannelId: 'com.asmrapp.audio',
           androidNotificationChannelName: 'ASMR One 播放器',
