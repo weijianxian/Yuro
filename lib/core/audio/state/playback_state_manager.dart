@@ -1,7 +1,3 @@
-import 'dart:async';
-import 'package:asmrapp/core/audio/models/play_mode.dart';
-import 'package:asmrapp/data/models/files/child.dart';
-import 'package:asmrapp/data/models/works/work.dart';
 import 'package:just_audio/just_audio.dart';
 import '../models/audio_track_info.dart';
 import '../models/playback_context.dart';
@@ -12,6 +8,8 @@ import 'package:asmrapp/data/models/playback/playback_state.dart';
 import '../storage/i_playback_state_repository.dart';
 import '../events/playback_event.dart';
 import '../events/playback_event_hub.dart';
+import 'package:asmrapp/data/models/files/child.dart';
+import 'package:asmrapp/data/models/works/work.dart';
 
 class PlaybackStateManager {
   final AudioPlayer _player;
@@ -59,7 +57,6 @@ class PlaybackStateManager {
   // 状态更新方法
   void updateContext(PlaybackContext? context) {
     _currentContext = context;
-    _contextController.add(context);
     if (context != null) {
       _eventHub.emit(PlaybackContextEvent(context));
     }
@@ -136,20 +133,5 @@ class PlaybackStateManager {
       );
       return null;
     }
-  }
-
-  // 播放完成事件流
-  final _playbackCompletionController = StreamController<PlayMode>.broadcast();
-  Stream<PlayMode> get playbackCompletionStream => _playbackCompletionController.stream;
-
-  // 添加上下文流控制器
-  final _contextController = StreamController<PlaybackContext?>.broadcast();
-  
-  // 添加上下文流 getter
-  Stream<PlaybackContext?> get contextStream => _contextController.stream;
-
-  void dispose() {
-    _playbackCompletionController.close();
-    _contextController.close();
   }
 } 

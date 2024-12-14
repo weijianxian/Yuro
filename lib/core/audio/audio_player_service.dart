@@ -6,13 +6,11 @@ import './i_audio_player_service.dart';
 import './models/audio_track_info.dart';
 import './models/playback_context.dart';
 import './notification/audio_notification_service.dart';
-import './models/play_mode.dart';
 import './storage/i_playback_state_repository.dart';
 import './utils/audio_error_handler.dart';
 import './state/playback_state_manager.dart';
 import './controllers/playback_controller.dart';
 import './events/playback_event_hub.dart';
-import './events/playback_event.dart';
 
 class AudioPlayerService implements IAudioPlayerService {
   late final AudioPlayer _player;
@@ -22,12 +20,6 @@ class AudioPlayerService implements IAudioPlayerService {
   late final PlaybackController _playbackController;
   final _eventHub = PlaybackEventHub();
   final _stateRepository = GetIt.I<IPlaybackStateRepository>();
-
-  // 状态流控制器
-  final _stateController = StreamController<PlayerState>.broadcast();
-  final _positionController = StreamController<Duration>.broadcast();
-  final _bufferedPositionController = StreamController<Duration>.broadcast();
-  final _durationController = StreamController<Duration?>.broadcast();
 
   AudioPlayerService._internal() {
     _init();
@@ -59,10 +51,8 @@ class AudioPlayerService implements IAudioPlayerService {
       await session.configure(const AudioSessionConfiguration.music());
       await _notificationService.init();
 
-       _stateManager.initStateListeners();
-
+      _stateManager.initStateListeners();
       await restorePlaybackState();
-      _initEventListeners();
     } catch (e, stack) {
       AudioErrorHandler.handleError(
         AudioErrorType.init,
@@ -78,68 +68,7 @@ class AudioPlayerService implements IAudioPlayerService {
     }
   }
 
-  void _initEventListeners() {
-    // 播放状态事件
-    _eventHub.playbackState.listen((event) {
-      _stateController.add(event.state);
-      _positionController.add(event.position);
-      if (event.duration != null) {
-        _durationController.add(event.duration);
-      }
-    });
-
-    // 播放进度事件
-    _eventHub.playbackProgress.listen((event) {
-      _positionController.add(event.position);
-      if (event.bufferedPosition != null) {
-        _bufferedPositionController.add(event.bufferedPosition!);
-      }
-    });
-
-    // 播放完成事件
-    _eventHub.playbackState
-        .where((event) => event.state.processingState == ProcessingState.completed)
-        .listen(_handlePlaybackCompleted);
-  }
-
-  void _handlePlaybackCompleted(PlaybackStateEvent event) async {
-    final context = _stateManager.currentContext;
-    if (context == null) return;
-
-    switch (context.playMode) {
-      case PlayMode.single:
-        await _playbackController.seek(Duration.zero);
-        await _playbackController.play();
-        break;
-      case PlayMode.loop:
-        if (_player.hasNext) {
-          await _playbackController.next();
-        } else {
-          await _playbackController.seek(Duration.zero, index: 0);
-          await _playbackController.play();
-        }
-        break;
-      case PlayMode.sequence:
-        if (_player.hasNext) {
-          await _playbackController.next();
-        }
-        break;
-    }
-  }
-
-  // IAudioPlayerService 实现
-  @override
-  Stream<PlayerState> get playerState => _stateController.stream;
-  
-  @override
-  Stream<Duration> get position => _positionController.stream;
-  
-  @override
-  Stream<Duration> get bufferedPosition => _bufferedPositionController.stream;
-  
-  @override
-  Stream<Duration?> get duration => _durationController.stream;
-
+  // 基础播放控制
   @override
   Future<void> pause() => _playbackController.pause();
 
@@ -161,10 +90,19 @@ class AudioPlayerService implements IAudioPlayerService {
   @override
   Future<void> next() => _playbackController.next();
 
+  // 上下文管理
   @override
   Future<void> playWithContext(PlaybackContext context) => 
     _playbackController.setPlaybackContext(context);
 
+  // 状态访问
+  @override
+  AudioTrackInfo? get currentTrack => _stateManager.currentTrack;
+
+  @override
+  PlaybackContext? get currentContext => _stateManager.currentContext;
+
+  // 状态持久化
   @override
   Future<void> savePlaybackState() => _stateManager.saveState();
 
@@ -190,13 +128,4 @@ class AudioPlayerService implements IAudioPlayerService {
     _player.dispose();
     _notificationService.dispose();
   }
-
-  @override
-  AudioTrackInfo? get currentTrack => _stateManager.currentTrack;
-
-  @override
-  PlaybackContext? get currentContext => _stateManager.currentContext;
-
-  @override
-  Stream<PlaybackContext?> get contextStream => _stateManager.contextStream;
 }

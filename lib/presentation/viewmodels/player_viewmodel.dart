@@ -1,8 +1,6 @@
 import 'package:asmrapp/core/subtitle/i_subtitle_service.dart';
 import 'package:asmrapp/utils/logger.dart';
 import 'package:flutter/foundation.dart';
-import 'package:get_it/get_it.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:asmrapp/core/audio/i_audio_player_service.dart';
 import 'package:asmrapp/core/audio/models/subtitle.dart';
 import 'dart:async';
