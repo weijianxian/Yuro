@@ -16,10 +16,13 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
   final _layoutStrategy = const WorkLayoutStrategy();
   final _scrollController = ScrollController();
   late HomeViewModel _viewModel;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -47,6 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return ChangeNotifierProvider.value(
       value: _viewModel,
       child: Scaffold(
@@ -79,20 +83,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 onRetry: () => viewModel.loadWorks(refresh: true),
                 layoutStrategy: _layoutStrategy,
                 scrollController: _scrollController,
-                bottomWidget: Padding(
-                  padding: const EdgeInsets.only(bottom: MiniPlayer.height),
-                  child: PaginationControls(
-                    currentPage: viewModel.currentPage,
-                    totalPages: viewModel.totalPages,
-                    isLoading: viewModel.isLoading,
-                    onPageChanged: _onPageChanged,
-                  ),
+                bottomWidget: PaginationControls(
+                  currentPage: viewModel.currentPage,
+                  totalPages: viewModel.totalPages,
+                  isLoading: viewModel.isLoading,
+                  onPageChanged: _onPageChanged,
                 ),
               ),
             );
           },
         ),
-        bottomSheet: const MiniPlayer(),
       ),
     );
   }

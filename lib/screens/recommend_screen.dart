@@ -14,10 +14,13 @@ class RecommendScreen extends StatefulWidget {
   State<RecommendScreen> createState() => _RecommendScreenState();
 }
 
-class _RecommendScreenState extends State<RecommendScreen> {
+class _RecommendScreenState extends State<RecommendScreen> with AutomaticKeepAliveClientMixin {
   final _layoutStrategy = const WorkLayoutStrategy();
   final _scrollController = ScrollController();
   late RecommendViewModel _viewModel;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -44,6 +47,7 @@ class _RecommendScreenState extends State<RecommendScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return ChangeNotifierProvider.value(
       value: _viewModel,
       child: Scaffold(

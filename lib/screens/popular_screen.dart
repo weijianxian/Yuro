@@ -13,10 +13,13 @@ class PopularScreen extends StatefulWidget {
   State<PopularScreen> createState() => _PopularScreenState();
 }
 
-class _PopularScreenState extends State<PopularScreen> {
+class _PopularScreenState extends State<PopularScreen> with AutomaticKeepAliveClientMixin {
   final _layoutStrategy = const WorkLayoutStrategy();
   final _scrollController = ScrollController();
   late PopularViewModel _viewModel;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -43,6 +46,7 @@ class _PopularScreenState extends State<PopularScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return ChangeNotifierProvider.value(
       value: _viewModel,
       child: Scaffold(
