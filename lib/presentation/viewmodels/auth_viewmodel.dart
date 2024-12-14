@@ -83,4 +83,12 @@ class AuthViewModel extends ChangeNotifier {
   String? get group => _authData?.user?.group;
   bool? get isUserLoggedIn => _authData?.user?.loggedIn;
   String? get recommenderUuid => _authData?.user?.recommenderUuid;
+
+  Future<void> loadSavedAuth() async {
+    _authData = await _authRepository.getAuthData();
+    if (_authData != null) {
+      AppLogger.info('加载保存的认证数据: ${_authData?.user?.name}');
+    }
+    notifyListeners();
+  }
 } 

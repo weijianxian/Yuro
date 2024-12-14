@@ -63,12 +63,15 @@ Future<void> setupServiceLocator() async {
   );
 
   // 修改 AuthViewModel 注册
-  getIt.registerLazySingleton<AuthViewModel>(
-    () => AuthViewModel(
+  getIt.registerSingleton<AuthViewModel>(
+    AuthViewModel(
       authService: getIt<AuthService>(),
       authRepository: getIt<AuthRepository>(),
     ),
   );
+
+  // 等待 AuthViewModel 完成初始化
+  await getIt<AuthViewModel>().loadSavedAuth();
 
   // 添加字幕服务注册
   getIt.registerLazySingleton<ISubtitleService>(
