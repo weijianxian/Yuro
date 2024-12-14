@@ -19,6 +19,9 @@ class DetailViewModel extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
   bool _disposed = false;
+  
+  bool _hasRecommendations = false;
+  bool _checkingRecommendations = false;
 
   DetailViewModel({
     required this.work,
@@ -26,11 +29,33 @@ class DetailViewModel extends ChangeNotifier {
     _audioService = GetIt.I<IAudioPlayerService>();
     _apiService = GetIt.I<ApiService>();
     _miniPlayerViewModel = GetIt.I<PlayerViewModel>();
+    _checkRecommendations();
   }
 
   Files? get files => _files;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  bool get hasRecommendations => _hasRecommendations;
+  bool get checkingRecommendations => _checkingRecommendations;
+
+  Future<void> _checkRecommendations() async {
+    _checkingRecommendations = true;
+    notifyListeners();
+
+    try {
+      final response = await _apiService.getItemNeighbors(
+        itemId: work.id.toString(),
+        page: 1,
+      );
+      _hasRecommendations = (response.pagination.totalCount ?? 0) > 0;
+    } catch (e) {
+      AppLogger.error('检查相关推荐失败', e);
+      _hasRecommendations = false;
+    } finally {
+      _checkingRecommendations = false;
+      notifyListeners();
+    }
+  }
 
   Future<void> loadFiles() async {
     if (_isLoading) return;

@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 
 class WorkActionButtons extends StatelessWidget {
   final VoidCallback onRecommendationsTap;
+  final bool hasRecommendations;
+  final bool checkingRecommendations;
 
   const WorkActionButtons({
     super.key,
     required this.onRecommendationsTap,
+    required this.hasRecommendations,
+    required this.checkingRecommendations,
   });
 
   @override
@@ -38,8 +42,9 @@ class WorkActionButtons extends StatelessWidget {
           ),
           _ActionButton(
             icon: Icons.recommend,
-            label: '相关推荐',
-            onTap: onRecommendationsTap,
+            label: checkingRecommendations ? '检查中' : (hasRecommendations ? '相关推荐' : '暂无推荐'),
+            onTap: hasRecommendations ? onRecommendationsTap : null,
+            loading: checkingRecommendations,
           ),
         ],
       ),
@@ -51,15 +56,20 @@ class _ActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback? onTap;
+  final bool loading;
 
   const _ActionButton({
     required this.icon,
     required this.label,
     this.onTap,
+    this.loading = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final disabled = onTap == null && !loading;
+    
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
@@ -68,11 +78,30 @@ class _ActionButton extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon),
+            if (loading)
+              SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: theme.colorScheme.primary,
+                ),
+              )
+            else
+              Icon(
+                icon,
+                color: disabled 
+                    ? theme.colorScheme.onSurface.withOpacity(0.38)
+                    : null,
+              ),
             const SizedBox(height: 4),
             Text(
               label,
-              style: Theme.of(context).textTheme.bodySmall,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: disabled
+                    ? theme.colorScheme.onSurface.withOpacity(0.38)
+                    : null,
+              ),
             ),
           ],
         ),
