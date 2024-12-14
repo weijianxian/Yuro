@@ -5,6 +5,8 @@ import 'package:asmrapp/core/audio/models/file_path.dart';
 import 'package:asmrapp/core/audio/models/subtitle.dart';
 import 'package:dio/dio.dart';
 import 'package:asmrapp/utils/logger.dart';
+import 'package:asmrapp/core/subtitle/utils/subtitle_matcher.dart';
+import 'package:asmrapp/core/subtitle/parsers/subtitle_parser_factory.dart';
 
 class SubtitleLoader {
   final _dio = Dio();
@@ -12,31 +14,28 @@ class SubtitleLoader {
   // 查找字幕文件
   Child? findSubtitleFile(Child audioFile, Files files) {
     if (files.children == null || audioFile.title == null) {
-      debugPrint('无法查找字幕文件: ${files.children == null ? '文件列表为空' : '当前文件名为空'}');
+      AppLogger.debug('无法查找字幕文件: ${files.children == null ? '文件列表为空' : '当前文件名为空'}');
       return null;
     }
 
-    debugPrint('开始查找字幕文件...');
+    AppLogger.debug('开始查找字幕文件...');
     
     // 使用 FilePath 获取同级文件
     final siblings = FilePath.getSiblings(audioFile, files);
     
-    // 构造字幕文件名 (不需要去掉音频文件的扩展名，直接加上.vtt)
-    final audioBaseName = audioFile.title;
-    final subtitleFileName = '$audioBaseName.vtt';
-    debugPrint('查找字幕文件: $subtitleFileName');
+    // 使用 SubtitleMatcher 查找匹配的字幕文件
+    final subtitleFile = SubtitleMatcher.findMatchingSubtitle(
+      audioFile.title!,
+      siblings
+    );
     
-    // 在同级文件中查找字幕
-    try {
-      final subtitleFile = siblings.firstWhere(
-        (file) => file.title == subtitleFileName
-      );
-      debugPrint('找到字幕文件: ${subtitleFile.title}, URL: ${subtitleFile.mediaDownloadUrl}');
-      return subtitleFile;
-    } catch (e) {
-      debugPrint('在当前目录中未找到字幕文件');
-      return null;
+    if (subtitleFile != null) {
+      AppLogger.debug('找到字幕文件: ${subtitleFile.title}, URL: ${subtitleFile.mediaDownloadUrl}');
+    } else {
+      AppLogger.debug('在当前目录中未找到字幕文件');
     }
+    
+    return subtitleFile;
   }
 
   // 新增: 加载字幕内容
@@ -50,7 +49,13 @@ class SubtitleLoader {
         final content = response.data as String;
         AppLogger.debug('字幕文件内容预览: ${content.substring(0, content.length > 100 ? 100 : content.length)}...');
         
-        final subtitleList = SubtitleList.parse(content);
+        // 使用解析器工厂获取合适的解析器
+        final parser = SubtitleParserFactory.getParser(content);
+        if (parser == null) {
+          throw Exception('不支持的字幕格式');
+        }
+        
+        final subtitleList = parser.parse(content);
         AppLogger.debug('字幕解析完成，字幕数量: ${subtitleList.subtitles.length}');
         
         return subtitleList;
