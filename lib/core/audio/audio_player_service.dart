@@ -52,7 +52,6 @@ class AudioPlayerService implements IAudioPlayerService {
 
       _stateManager = PlaybackStateManager(
         player: _player,
-        notificationService: _notificationService,
         stateRepository: _stateRepository,
         eventHub: _eventHub,
       );

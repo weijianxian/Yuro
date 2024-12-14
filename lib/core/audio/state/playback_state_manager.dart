@@ -1,7 +1,6 @@
 import 'package:just_audio/just_audio.dart';
 import '../models/audio_track_info.dart';
 import '../models/playback_context.dart';
-import '../notification/audio_notification_service.dart';
 import '../utils/audio_error_handler.dart';
 import '../utils/track_info_creator.dart';
 import 'package:asmrapp/data/models/playback/playback_state.dart';
@@ -13,22 +12,19 @@ import 'package:asmrapp/data/models/works/work.dart';
 
 class PlaybackStateManager {
   final AudioPlayer _player;
-  final AudioNotificationService _notificationService;
-  final IPlaybackStateRepository _stateRepository;
   final PlaybackEventHub _eventHub;
-
+  final IPlaybackStateRepository _stateRepository;
+  
   AudioTrackInfo? _currentTrack;
   PlaybackContext? _currentContext;
 
   PlaybackStateManager({
     required AudioPlayer player,
-    required AudioNotificationService notificationService,
-    required IPlaybackStateRepository stateRepository,
     required PlaybackEventHub eventHub,
+    required IPlaybackStateRepository stateRepository,
   }) : _player = player,
-       _notificationService = notificationService,
-       _stateRepository = stateRepository,
-       _eventHub = eventHub;
+       _eventHub = eventHub,
+       _stateRepository = stateRepository;
 
   // 初始化状态监听
   void initStateListeners() {
@@ -64,7 +60,7 @@ class PlaybackStateManager {
 
   void updateTrackInfo(AudioTrackInfo track) {
     _currentTrack = track;
-    _notificationService.updateMetadata(track);
+    _eventHub.emit(TrackChangeEvent(track, _currentContext!.currentFile, _currentContext!.work));
   }
 
   void updateTrackAndContext(Child file, Work work) {
@@ -75,8 +71,6 @@ class PlaybackStateManager {
     
     final trackInfo = TrackInfoCreator.createFromFile(file, work);
     updateTrackInfo(trackInfo);
-    
-    _eventHub.emit(TrackChangeEvent(trackInfo, file, work));
   }
 
   void _onPlaybackCompleted() {
