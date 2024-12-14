@@ -36,8 +36,8 @@ class PlaybackStateManager {
   void initStateListeners() {
     // 播放状态变化监听
     _player.playerStateStream.listen((state) async {
-      final position = await _player.position;
-      final duration = await _player.duration;
+      final position = _player.position;
+      final duration = _player.duration;
       
       _eventHub.emit(PlaybackStateEvent(state, position, duration));
 
@@ -109,7 +109,7 @@ class PlaybackStateManager {
         playlist: _currentContext!.playlist,
         currentIndex: _currentContext!.currentIndex,
         playMode: _currentContext!.playMode,
-        position: (await _player.position).inMilliseconds,
+        position: (_player.position).inMilliseconds,
         timestamp: DateTime.now().toIso8601String(),
       );
       
