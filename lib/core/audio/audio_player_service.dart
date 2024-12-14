@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:just_audio/just_audio.dart';
 import 'package:audio_session/audio_session.dart';
-import 'package:get_it/get_it.dart';
 import './i_audio_player_service.dart';
 import './models/audio_track_info.dart';
 import './models/playback_context.dart';
@@ -18,15 +17,29 @@ class AudioPlayerService implements IAudioPlayerService {
   late final ConcatenatingAudioSource _playlist;
   late final PlaybackStateManager _stateManager;
   late final PlaybackController _playbackController;
-  final _eventHub = PlaybackEventHub();
-  final _stateRepository = GetIt.I<IPlaybackStateRepository>();
+  final PlaybackEventHub _eventHub;
+  final IPlaybackStateRepository _stateRepository;
 
-  AudioPlayerService._internal() {
+  AudioPlayerService._internal({
+    required PlaybackEventHub eventHub,
+    required IPlaybackStateRepository stateRepository,
+  }) : _eventHub = eventHub,
+       _stateRepository = stateRepository {
     _init();
   }
 
-  static final AudioPlayerService _instance = AudioPlayerService._internal();
-  factory AudioPlayerService() => _instance;
+  static AudioPlayerService? _instance;
+  
+  factory AudioPlayerService({
+    required PlaybackEventHub eventHub,
+    required IPlaybackStateRepository stateRepository,
+  }) {
+    _instance ??= AudioPlayerService._internal(
+      eventHub: eventHub,
+      stateRepository: stateRepository,
+    );
+    return _instance!;
+  }
 
   Future<void> _init() async {
     try {

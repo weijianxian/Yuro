@@ -32,7 +32,10 @@ Future<void> setupServiceLocator() async {
 
   // 核心服务
   getIt.registerLazySingleton<IAudioPlayerService>(
-    () => AudioPlayerService(),
+    () => AudioPlayerService(
+      eventHub: getIt(),
+      stateRepository: getIt(),
+    ),
   );
 
   // 注册 PlayerViewModel
