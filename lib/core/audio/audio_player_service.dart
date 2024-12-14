@@ -11,6 +11,7 @@ import 'dart:async';
 import 'package:get_it/get_it.dart';
 import 'package:asmrapp/core/audio/storage/i_playback_state_repository.dart';
 import 'package:asmrapp/data/models/playback/playback_state.dart';
+import './utils/track_info_creator.dart';
 
 
 class AudioPlayerService implements IAudioPlayerService {
@@ -117,11 +118,9 @@ class AudioPlayerService implements IAudioPlayerService {
           _currentContext = _currentContext!.copyWithFile(previousFile);
           
           // 更新音轨信息
-          final trackInfo = AudioTrackInfo(
-            title: previousFile.title ?? '',
-            artist: _currentContext!.work.circle?.name ?? '',
-            coverUrl: _currentContext!.work.mainCoverUrl ?? '',
-            url: previousFile.mediaDownloadUrl!,
+          final trackInfo = TrackInfoCreator.createFromFile(
+            previousFile,
+            _currentContext!.work,
           );
           _currentTrack = trackInfo;
           _notificationService.updateMetadata(trackInfo);
@@ -154,11 +153,9 @@ class AudioPlayerService implements IAudioPlayerService {
           _currentContext = _currentContext!.copyWithFile(nextFile);
           
           // 更新音轨信息
-          final trackInfo = AudioTrackInfo(
-            title: nextFile.title ?? '',
-            artist: _currentContext!.work.circle?.name ?? '',
-            coverUrl: _currentContext!.work.mainCoverUrl ?? '',
-            url: nextFile.mediaDownloadUrl!,
+          final trackInfo = TrackInfoCreator.createFromFile(
+            nextFile,
+            _currentContext!.work,
           );
           _currentTrack = trackInfo;
           _notificationService.updateMetadata(trackInfo);
@@ -211,11 +208,9 @@ class AudioPlayerService implements IAudioPlayerService {
       }
 
       // 创建当前曲目的音轨信息
-      final trackInfo = AudioTrackInfo(
-        title: context.currentFile.title ?? '',
-        artist: context.work.circle?.name ?? '',
-        coverUrl: context.work.mainCoverUrl ?? '',
-        url: context.currentFile.mediaDownloadUrl!,
+      final trackInfo = TrackInfoCreator.createFromFile(
+        context.currentFile,
+        context.work,
       );
 
       _currentTrack = trackInfo;
@@ -331,11 +326,9 @@ class AudioPlayerService implements IAudioPlayerService {
       }
 
       // 更新音轨信息
-      final trackInfo = AudioTrackInfo(
-        title: state.currentFile.title ?? '',
-        artist: state.work.circle?.name ?? '',
-        coverUrl: state.work.mainCoverUrl ?? '',
-        url: state.currentFile.mediaDownloadUrl!,
+      final trackInfo = TrackInfoCreator.createFromFile(
+        state.currentFile,
+        state.work,
       );
       _currentTrack = trackInfo;
       _notificationService.updateMetadata(trackInfo);
