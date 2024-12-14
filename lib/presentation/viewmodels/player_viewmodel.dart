@@ -7,6 +7,7 @@ import 'package:asmrapp/core/audio/i_audio_player_service.dart';
 import 'package:asmrapp/core/audio/models/subtitle.dart';
 import 'dart:async';
 import 'package:asmrapp/core/subtitle/subtitle_loader.dart';
+import 'package:asmrapp/core/audio/events/playback_event_hub.dart';
 
 class Track {
   final String title;
@@ -21,8 +22,9 @@ class Track {
 }
 
 class PlayerViewModel extends ChangeNotifier {
-  final IAudioPlayerService _audioService = GetIt.I<IAudioPlayerService>();
-  final ISubtitleService _subtitleService = GetIt.I<ISubtitleService>();
+  final IAudioPlayerService _audioService;
+  final PlaybackEventHub _eventHub;
+  final ISubtitleService _subtitleService;
   final _subtitleLoader = SubtitleLoader();
 
   bool _isPlaying = false;
@@ -35,54 +37,72 @@ class PlayerViewModel extends ChangeNotifier {
 
   static const _tag = 'PlayerViewModel';
 
-  PlayerViewModel() {
+  PlayerViewModel({
+    required IAudioPlayerService audioService,
+    required PlaybackEventHub eventHub,
+    required ISubtitleService subtitleService,
+  }) : _audioService = audioService,
+       _eventHub = eventHub,
+       _subtitleService = subtitleService {
     _initStreams();
     _initCurrentTrack();
   }
 
-  void _initCurrentTrack() {
-    final currentTrack = _audioService.currentTrack;
-    if (currentTrack != null) {
-      _currentTrack = Track(
-        title: currentTrack.title,
-        artist: currentTrack.artist,
-        coverUrl: currentTrack.coverUrl,
-      );
-      notifyListeners();
-    }
-
-    _audioService.playerState.first.then((state) {
-      if (state.playing || state.processingState == ProcessingState.ready) {
-        _isPlaying = state.playing;
-        notifyListeners();
-      }
-    });
-  }
-
   void _initStreams() {
-    _initPlayerStateStream();
-    _initPositionStream();
-    _initDurationStream();
-    _initSubtitleStreams();
-    _initContextStream();
-  }
-
-  void _initPlayerStateStream() {
+    // 播放状态事件
     _subscriptions.add(
-      _audioService.playerState.listen(
-        _handlePlayerStateChange,
+      _eventHub.playbackState.listen(
+        (event) {
+          _isPlaying = event.state.playing;
+          _position = event.position;
+          _duration = event.duration;
+          notifyListeners();
+        },
         onError: (error) => debugPrint('$_tag - 播放状态流错误: $error'),
       ),
     );
+
+    // 音轨变更事件
+    _subscriptions.add(
+      _eventHub.trackChange.listen(
+        (event) {
+          _currentTrack = Track(
+            title: event.track.title,
+            artist: event.track.artist,
+            coverUrl: event.track.coverUrl,
+          );
+          notifyListeners();
+        },
+        onError: (error) => debugPrint('$_tag - 音轨变更流错误: $error'),
+      ),
+    );
+
+    // 播放进度事件
+    _subscriptions.add(
+      _eventHub.playbackProgress.listen(
+        (event) {
+          _position = event.position;
+          if (_position != null) {
+            _subtitleService.updatePosition(_position!);
+          }
+          notifyListeners();
+        },
+        onError: (error) => debugPrint('$_tag - 播放进度流错误: $error'),
+      ),
+    );
+
+    // 上下文变更事件
+    _subscriptions.add(
+      _eventHub.contextChange.listen(
+        (event) => _loadSubtitleIfAvailable(),
+        onError: (error) => debugPrint('$_tag - 上下文流错误: $error'),
+      ),
+    );
+
+    _initSubtitleStreams();
   }
 
-  void _handlePlayerStateChange(PlayerState state) {
-    _isPlaying = state.playing;
-    _updateCurrentTrack();
-    notifyListeners();
-  }
-
-  void _updateCurrentTrack() {
+  void _initCurrentTrack() {
     final currentTrack = _audioService.currentTrack;
     if (currentTrack != null) {
       _currentTrack = Track(
@@ -113,33 +133,6 @@ class PlayerViewModel extends ChangeNotifier {
     }
   }
 
-  void _initPositionStream() {
-    _subscriptions.add(
-      _audioService.position.listen(
-        (pos) {
-          _position = pos;
-          if (pos != null) {
-            _subtitleService.updatePosition(pos);
-          }
-          notifyListeners();
-        },
-        onError: (error) => debugPrint('$_tag - 播放进度流错误: $error'),
-      ),
-    );
-  }
-
-  void _initDurationStream() {
-    _subscriptions.add(
-      _audioService.duration.listen(
-        (dur) {
-          _duration = dur;
-          notifyListeners();
-        },
-        onError: (error) => debugPrint('$_tag - 音频时长流错误: $error'),
-      ),
-    );
-  }
-
   void _initSubtitleStreams() {
     _subscriptions.add(
       _subtitleService.subtitleStream.listen(
@@ -157,19 +150,6 @@ class PlayerViewModel extends ChangeNotifier {
           notifyListeners();
         },
         onError: (error) => debugPrint('$_tag - 当前字幕流错误: $error'),
-      ),
-    );
-  }
-
-  void _initContextStream() {
-    _subscriptions.add(
-      _audioService.contextStream.listen(
-        (context) {
-          if (context != null) {
-            _loadSubtitleIfAvailable();
-          }
-        },
-        onError: (error) => debugPrint('$_tag - 播放上下文流错误: $error'),
       ),
     );
   }

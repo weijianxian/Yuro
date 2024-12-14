@@ -11,6 +11,8 @@ import './storage/i_playback_state_repository.dart';
 import './utils/audio_error_handler.dart';
 import './state/playback_state_manager.dart';
 import './controllers/playback_controller.dart';
+import './events/playback_event_hub.dart';
+import './events/playback_event.dart';
 
 class AudioPlayerService implements IAudioPlayerService {
   late final AudioPlayer _player;
@@ -18,9 +20,14 @@ class AudioPlayerService implements IAudioPlayerService {
   late final ConcatenatingAudioSource _playlist;
   late final PlaybackStateManager _stateManager;
   late final PlaybackController _playbackController;
-  
-  final _contextController = StreamController<PlaybackContext?>.broadcast();
+  final _eventHub = PlaybackEventHub();
   final _stateRepository = GetIt.I<IPlaybackStateRepository>();
+
+  // 状态流控制器
+  final _stateController = StreamController<PlayerState>.broadcast();
+  final _positionController = StreamController<Duration>.broadcast();
+  final _bufferedPositionController = StreamController<Duration>.broadcast();
+  final _durationController = StreamController<Duration?>.broadcast();
 
   AudioPlayerService._internal() {
     _init();
@@ -39,7 +46,7 @@ class AudioPlayerService implements IAudioPlayerService {
         player: _player,
         notificationService: _notificationService,
         stateRepository: _stateRepository,
-        contextController: _contextController,
+        eventHub: _eventHub,
       );
 
       _playbackController = PlaybackController(
@@ -52,9 +59,10 @@ class AudioPlayerService implements IAudioPlayerService {
       await session.configure(const AudioSessionConfiguration.music());
       await _notificationService.init();
 
+       _stateManager.initStateListeners();
+
       await restorePlaybackState();
-      _stateManager.initStateListeners();
-      _initPlaybackCompletionListener();
+      _initEventListeners();
     } catch (e, stack) {
       AudioErrorHandler.handleError(
         AudioErrorType.init,
@@ -70,44 +78,68 @@ class AudioPlayerService implements IAudioPlayerService {
     }
   }
 
-  // 播放模式处理
-  void _initPlaybackCompletionListener() {
-    _stateManager.playbackCompletionStream.listen((playMode) {
-      switch (playMode) {
-        case PlayMode.single:
-          _handleSingleModeCompletion();
-          break;
-        case PlayMode.loop:
-          _handleLoopModeCompletion();
-          break;
-        case PlayMode.sequence:
-          _handleSequenceModeCompletion();
-          break;
+  void _initEventListeners() {
+    // 播放状态事件
+    _eventHub.playbackState.listen((event) {
+      _stateController.add(event.state);
+      _positionController.add(event.position);
+      if (event.duration != null) {
+        _durationController.add(event.duration);
       }
     });
+
+    // 播放进度事件
+    _eventHub.playbackProgress.listen((event) {
+      _positionController.add(event.position);
+      if (event.bufferedPosition != null) {
+        _bufferedPositionController.add(event.bufferedPosition!);
+      }
+    });
+
+    // 播放完成事件
+    _eventHub.playbackState
+        .where((event) => event.state.processingState == ProcessingState.completed)
+        .listen(_handlePlaybackCompleted);
   }
 
-  Future<void> _handleSingleModeCompletion() async {
-    await _playbackController.seek(Duration.zero);
-    await _playbackController.play();
-  }
+  void _handlePlaybackCompleted(PlaybackStateEvent event) async {
+    final context = _stateManager.currentContext;
+    if (context == null) return;
 
-  Future<void> _handleLoopModeCompletion() async {
-    if (_player.hasNext) {
-      await _playbackController.next();
-    } else {
-      await _playbackController.seek(Duration.zero, index: 0);
-      await _playbackController.play();
-    }
-  }
-
-  Future<void> _handleSequenceModeCompletion() async {
-    if (_player.hasNext) {
-      await _playbackController.next();
+    switch (context.playMode) {
+      case PlayMode.single:
+        await _playbackController.seek(Duration.zero);
+        await _playbackController.play();
+        break;
+      case PlayMode.loop:
+        if (_player.hasNext) {
+          await _playbackController.next();
+        } else {
+          await _playbackController.seek(Duration.zero, index: 0);
+          await _playbackController.play();
+        }
+        break;
+      case PlayMode.sequence:
+        if (_player.hasNext) {
+          await _playbackController.next();
+        }
+        break;
     }
   }
 
   // IAudioPlayerService 实现
+  @override
+  Stream<PlayerState> get playerState => _stateController.stream;
+  
+  @override
+  Stream<Duration> get position => _positionController.stream;
+  
+  @override
+  Stream<Duration> get bufferedPosition => _bufferedPositionController.stream;
+  
+  @override
+  Stream<Duration?> get duration => _durationController.stream;
+
   @override
   Future<void> pause() => _playbackController.pause();
 
@@ -148,29 +180,16 @@ class AudioPlayerService implements IAudioPlayerService {
       playMode: state.playMode,
     );
 
-    await _playbackController.setPlaybackContext(context);
-    await _playbackController.seek(Duration(milliseconds: state.position));
+    final position = Duration(milliseconds: state.position);
+    await _playbackController.setPlaybackContext(context, initialPosition: position);
     await _playbackController.stop();
   }
 
   @override
   Future<void> dispose() async {
-    await _notificationService.dispose();
-    await _player.dispose();
+    _player.dispose();
+    _notificationService.dispose();
   }
-
-  // 状态访问
-  @override
-  Stream<PlayerState> get playerState => _player.playerStateStream;
-  
-  @override
-  Stream<Duration?> get position => _player.positionStream;
-  
-  @override
-  Stream<Duration?> get bufferedPosition => _player.bufferedPositionStream;
-  
-  @override
-  Stream<Duration?> get duration => _player.durationStream;
 
   @override
   AudioTrackInfo? get currentTrack => _stateManager.currentTrack;

@@ -75,7 +75,7 @@ class PlaybackController {
   }
 
   // 播放上下文设置
-  Future<void> setPlaybackContext(PlaybackContext context) async {
+  Future<void> setPlaybackContext(PlaybackContext context, {Duration? initialPosition}) async {
     try {
       _stateManager.updateContext(context);
       
@@ -84,11 +84,10 @@ class PlaybackController {
         playlist: _playlist,
         files: context.playlist,
         initialIndex: context.currentIndex,
-        initialPosition: Duration.zero,
+        initialPosition: initialPosition ?? Duration.zero,
       );
 
       _updateTrackAndContext(context.currentFile, context.work);
-      await play();
     } catch (e, stack) {
       AudioErrorHandler.handleError(
         AudioErrorType.context,

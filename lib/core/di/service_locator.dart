@@ -12,25 +12,41 @@ import '../subtitle/subtitle_service.dart';
 import '../subtitle/subtitle_loader.dart';
 import '../../core/audio/storage/i_playback_state_repository.dart';
 import '../../core/audio/storage/playback_state_repository.dart';
+import '../audio/events/playback_event_hub.dart';
 
 final getIt = GetIt.instance;
 
 Future<void> setupServiceLocator() async {
   final prefs = await SharedPreferences.getInstance();
 
+  // 注册 EventHub
+  getIt.registerLazySingleton(() => PlaybackEventHub());
+
+  // 注册 SharedPreferences 实例
+  getIt.registerSingleton<SharedPreferences>(prefs);
+
+  // 注册 PlaybackStateRepository
+  getIt.registerLazySingleton<IPlaybackStateRepository>(
+    () => PlaybackStateRepository(getIt()),
+  );
+
   // 核心服务
   getIt.registerLazySingleton<IAudioPlayerService>(
     () => AudioPlayerService(),
   );
 
+  // 注册 PlayerViewModel
+  getIt.registerLazySingleton<PlayerViewModel>(
+    () => PlayerViewModel(
+      audioService: getIt(),
+      eventHub: getIt(),
+      subtitleService: getIt(),
+    ),
+  );
+
   // API 服务
   getIt.registerLazySingleton<ApiService>(
     () => ApiService(),
-  );
-
-  // 添加 PlayerViewModel 的注册
-  getIt.registerLazySingleton<PlayerViewModel>(
-    () => PlayerViewModel(),
   );
 
   // 添加 AuthService 注册
@@ -57,19 +73,6 @@ Future<void> setupServiceLocator() async {
   );
 
   setupSubtitleServices();
-
-  // 注册 SharedPreferences 实例
-  if (!getIt.isRegistered<SharedPreferences>()) {
-    getIt.registerSingletonAsync<SharedPreferences>(
-      () => SharedPreferences.getInstance()
-    );
-  }
-
-  // 注册 PlaybackStateRepository
-  getIt.registerSingletonWithDependencies<IPlaybackStateRepository>(
-    () => PlaybackStateRepository(getIt<SharedPreferences>()),
-    dependsOn: [SharedPreferences],
-  );
 }
 
 void setupSubtitleServices() {
