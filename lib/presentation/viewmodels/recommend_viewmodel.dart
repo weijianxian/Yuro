@@ -4,9 +4,10 @@ import 'package:asmrapp/data/models/works/pagination.dart';
 import 'package:asmrapp/data/services/api_service.dart';
 import 'package:asmrapp/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:asmrapp/utils/logger.dart';
+import 'package:get_it/get_it.dart';
 
 class RecommendViewModel extends ChangeNotifier {
-  final ApiService _apiService = ApiService();
+  final ApiService _apiService;
   final AuthViewModel _authViewModel;
   List<Work> _works = [];
   bool _isLoading = false;
@@ -14,7 +15,7 @@ class RecommendViewModel extends ChangeNotifier {
   Pagination? _pagination;
   int _currentPage = 1;
 
-  RecommendViewModel(this._authViewModel);
+  RecommendViewModel(this._authViewModel) : _apiService = GetIt.I<ApiService>();
 
   List<Work> get works => _works;
   bool get isLoading => _isLoading;
