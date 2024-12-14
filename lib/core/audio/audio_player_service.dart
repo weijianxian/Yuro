@@ -13,20 +13,19 @@ import 'package:asmrapp/data/models/playback/playback_state.dart';
 import './utils/track_info_creator.dart';
 import './utils/playlist_builder.dart';
 import './utils/audio_error_handler.dart';
+import './state/playback_state_manager.dart';
 
 
 class AudioPlayerService implements IAudioPlayerService {
   late final AudioPlayer _player;
   late final AudioNotificationService _notificationService;
   late final ConcatenatingAudioSource _playlist;
-  AudioTrackInfo? _currentTrack;
-  PlaybackContext? _currentContext;
+  late final PlaybackStateManager _stateManager;
   final _contextController = StreamController<PlaybackContext?>.broadcast();
   final _stateRepository = GetIt.I<IPlaybackStateRepository>();
 
   AudioPlayerService._internal() {
     _init();
-    _initAutoSave();
   }
 
   static final AudioPlayerService _instance = AudioPlayerService._internal();
@@ -38,13 +37,22 @@ class AudioPlayerService implements IAudioPlayerService {
       _notificationService = AudioNotificationService(_player);
       _playlist = ConcatenatingAudioSource(children: []);
 
+      _stateManager = PlaybackStateManager(
+        player: _player,
+        notificationService: _notificationService,
+        stateRepository: _stateRepository,
+        contextController: _contextController,
+      );
+
       final session = await AudioSession.instance;
       await session.configure(const AudioSessionConfiguration.music());
       await _notificationService.init();
 
       await restorePlaybackState();
-
-      _initPlayerListeners();
+      
+      // 初始化状态监听
+      _stateManager.initStateListeners();
+      _initPlaybackCompletionListener();
     } catch (e, stack) {
       AudioErrorHandler.handleError(
         AudioErrorType.init,
@@ -60,17 +68,40 @@ class AudioPlayerService implements IAudioPlayerService {
     }
   }
 
-  void _initPlayerListeners() {
-    _player.playerStateStream.listen((state) {
-      if (state.processingState == ProcessingState.completed) {
-        _handlePlaybackCompletion();
+  void _initPlaybackCompletionListener() {
+    _stateManager.playbackCompletionStream.listen((playMode) {
+      switch (playMode) {
+        case PlayMode.single:
+          _handleSingleModeCompletion();
+          break;
+        case PlayMode.loop:
+          _handleLoopModeCompletion();
+          break;
+        case PlayMode.sequence:
+          _handleSequenceModeCompletion();
+          break;
       }
-      savePlaybackState();
     });
+  }
 
-    Timer.periodic(const Duration(seconds: 30), (_) {
-      savePlaybackState();
-    });
+  Future<void> _handleSingleModeCompletion() async {
+    await _player.seek(Duration.zero);
+    await _player.play();
+  }
+
+  Future<void> _handleLoopModeCompletion() async {
+    if (_player.hasNext) {
+      await next();
+    } else {
+      await _player.seek(Duration.zero, index: 0);
+      await _player.play();
+    }
+  }
+
+  Future<void> _handleSequenceModeCompletion() async {
+    if (_player.hasNext) {
+      await next();
+    }
   }
 
   @override
@@ -86,7 +117,7 @@ class AudioPlayerService implements IAudioPlayerService {
   @override
   Future<void> stop() async {
     await _player.stop();
-    _currentTrack = null;
+    _stateManager.clearState();
   }
 
   @override
@@ -108,7 +139,7 @@ class AudioPlayerService implements IAudioPlayerService {
   Stream<Duration?> get duration => _player.durationStream;
 
   @override
-  AudioTrackInfo? get currentTrack => _currentTrack;
+  AudioTrackInfo? get currentTrack => _stateManager.currentTrack;
 
   @override
   Future<void> seek(Duration position) async {
@@ -118,7 +149,7 @@ class AudioPlayerService implements IAudioPlayerService {
   @override
   Future<void> previous() async {
     try {
-      if (_currentContext == null) {
+      if (_stateManager.currentContext == null) {
         AudioErrorHandler.handleError(
           AudioErrorType.context,
           '切换上一曲',
@@ -127,22 +158,13 @@ class AudioPlayerService implements IAudioPlayerService {
         return;
       }
 
-      // 使用 just_audio 的播放列表控制
       if (_player.hasPrevious) {
-        // 更新 context
-        final previousFile = _currentContext!.getPreviousFile();
+        final previousFile = _stateManager.currentContext!.getPreviousFile();
         if (previousFile != null) {
-          _currentContext = _currentContext!.copyWithFile(previousFile);
-          
-          // 更新音轨信息
-          final trackInfo = TrackInfoCreator.createFromFile(
+          _stateManager.updateTrackAndContext(
             previousFile,
-            _currentContext!.work,
+            _stateManager.currentContext!.work,
           );
-          _currentTrack = trackInfo;
-          _notificationService.updateMetadata(trackInfo);
-
-          // 切换到上一曲
           await _player.seekToPrevious();
         }
       } else {
@@ -152,7 +174,6 @@ class AudioPlayerService implements IAudioPlayerService {
           '已经是第一首'
         );
       }
-      _contextController.add(_currentContext);
     } catch (e, stack) {
       AudioErrorHandler.handleError(
         AudioErrorType.playback,
@@ -166,7 +187,7 @@ class AudioPlayerService implements IAudioPlayerService {
   @override
   Future<void> next() async {
     try {
-      if (_currentContext == null) {
+      if (_stateManager.currentContext == null) {
         AppLogger.debug('无法切换下一曲：播放上下文为空');
         return;
       }
@@ -174,17 +195,16 @@ class AudioPlayerService implements IAudioPlayerService {
       // 使用 just_audio 的播放列表控制
       if (_player.hasNext) {
         // 更新 context
-        final nextFile = _currentContext!.getNextFile();
+        final nextFile = _stateManager.currentContext!.getNextFile();
         if (nextFile != null) {
-          _currentContext = _currentContext!.copyWithFile(nextFile);
+          _stateManager.updateContext(_stateManager.currentContext!.copyWithFile(nextFile));
           
           // 更新音轨信息
           final trackInfo = TrackInfoCreator.createFromFile(
             nextFile,
-            _currentContext!.work,
+            _stateManager.currentContext!.work,
           );
-          _currentTrack = trackInfo;
-          _notificationService.updateMetadata(trackInfo);
+          _stateManager.updateTrackInfo(trackInfo);
 
           // 切换到下一曲
           await _player.seekToNext();
@@ -192,14 +212,13 @@ class AudioPlayerService implements IAudioPlayerService {
       } else {
         AppLogger.debug('无法切换下一曲：已经是最后一首');
       }
-      _contextController.add(_currentContext);
     } catch (e) {
       AppLogger.error('切换下一曲失败', e);
     }
   }
 
   @override
-  PlaybackContext? get currentContext => _currentContext;
+  PlaybackContext? get currentContext => _stateManager.currentContext;
 
   @override
   Future<void> playWithContext(PlaybackContext context) async {
@@ -208,8 +227,7 @@ class AudioPlayerService implements IAudioPlayerService {
       AppLogger.debug('当前文件标题: ${context.currentFile.title}');
       AppLogger.debug('播放列表数量: ${context.playlist.length}');
       
-      _currentContext = context;
-      _contextController.add(_currentContext);
+      _stateManager.updateContext(context);
 
       // 设置播放列表
       try {
@@ -234,15 +252,6 @@ class AudioPlayerService implements IAudioPlayerService {
         );
       }
 
-      // 创建当前曲目的音轨信息
-      final trackInfo = TrackInfoCreator.createFromFile(
-        context.currentFile,
-        context.work,
-      );
-
-      _currentTrack = trackInfo;
-      _notificationService.updateMetadata(trackInfo);
-
       // 开始播放
       await _player.play();
       AppLogger.debug('开始播放成功');
@@ -253,61 +262,26 @@ class AudioPlayerService implements IAudioPlayerService {
         e,
         stack,
       );
-      _currentContext = null;
-      _contextController.add(null);
+      _stateManager.clearState();
       rethrow;
     }
   }
 
-  // 处理播放完成
-  void _handlePlaybackCompletion() async {
-    try {
-      if (_currentContext == null) return;
-
-      switch (_currentContext!.playMode) {
-        case PlayMode.single:
-          // 单曲循环：重新播放当前曲目
-          await _player.seek(Duration.zero);
-          await _player.play();
-          break;
-          
-        case PlayMode.loop:
-          // 列表循环：如果是最后一首，跳回第一首
-          if (_player.hasNext) {
-            await next();
-          } else {
-            await _player.seek(Duration.zero, index: 0);
-            await _player.play();
-          }
-          break;
-          
-        case PlayMode.sequence:
-          // 顺序播放：有下一曲就播放下一曲
-          if (_player.hasNext) {
-            await next();
-          }
-          break;
-      }
-    } catch (e) {
-      AppLogger.error('自动切换下一曲失败', e);
-    }
-  }
-
   @override
-  Stream<PlaybackContext?> get contextStream => _contextController.stream;
+  Stream<PlaybackContext?> get contextStream => _stateManager.contextStream;
 
   @override
   Future<void> savePlaybackState() async {
-    if (_currentContext == null) return;
+    if (_stateManager.currentContext == null) return;
 
     try {
       final state = PlaybackState(
-        work: _currentContext!.work,
-        files: _currentContext!.files,
-        currentFile: _currentContext!.currentFile,
-        playlist: _currentContext!.playlist,
-        currentIndex: _currentContext!.currentIndex,
-        playMode: _currentContext!.playMode,
+        work: _stateManager.currentContext!.work,
+        files: _stateManager.currentContext!.files,
+        currentFile: _stateManager.currentContext!.currentFile,
+        playlist: _stateManager.currentContext!.playlist,
+        currentIndex: _stateManager.currentContext!.currentIndex,
+        playMode: _stateManager.currentContext!.playMode,
         position: (await _player.position).inMilliseconds,
         timestamp: DateTime.now().toIso8601String(),
       );
@@ -329,20 +303,18 @@ class AudioPlayerService implements IAudioPlayerService {
       final state = await _stateRepository.loadState();
       if (state == null) return;
 
-      _currentContext = PlaybackContext(
+      _stateManager.updateContext(PlaybackContext(
         work: state.work,
         files: state.files,
         currentFile: state.currentFile,
         playMode: state.playMode,
-      );
-
-      _contextController.add(_currentContext);
+      ));
 
       try {
         await PlaylistBuilder.setPlaylistSource(
           player: _player,
           playlist: _playlist,
-          files: _currentContext!.playlist,
+          files: _stateManager.currentContext!.playlist,
           initialIndex: state.currentIndex,
           initialPosition: Duration(milliseconds: state.position),
         );
@@ -360,8 +332,7 @@ class AudioPlayerService implements IAudioPlayerService {
         state.currentFile,
         state.work,
       );
-      _currentTrack = trackInfo;
-      _notificationService.updateMetadata(trackInfo);
+      _stateManager.updateTrackInfo(trackInfo);
       
       await _player.play();
       await _player.stop();
@@ -373,18 +344,5 @@ class AudioPlayerService implements IAudioPlayerService {
         stack,
       );
     }
-  }
-
-  // 添加自动保存触发点
-  void _initAutoSave() {
-    // 播放状态变化时保存
-    _player.playerStateStream.listen((_) {
-      savePlaybackState();
-    });
-
-    // 定期保存(每30秒)
-    Timer.periodic(const Duration(seconds: 30), (_) {
-      savePlaybackState();
-    });
   }
 }
