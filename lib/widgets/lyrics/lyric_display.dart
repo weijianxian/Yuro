@@ -67,27 +67,35 @@ class _LyricDisplayState extends State<LyricDisplay> {
 
         // 如果没有当前字幕但有字幕列表，显示第一句
         if (current == null && subtitleList.subtitles.isNotEmpty) {
-          return SingleChildScrollView(
-            physics: const NeverScrollableScrollPhysics(),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-              child: LyricContext(
-                current: subtitleList.subtitles.first,
-                isWaiting: true,
+          return OverflowBox(
+            minHeight: 0,
+            maxHeight: double.infinity,
+            child: SingleChildScrollView(
+              physics: const NeverScrollableScrollPhysics(),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                child: LyricContext(
+                  current: subtitleList.subtitles.first,
+                  isWaiting: true,
+                ),
               ),
             ),
           );
         }
         
-        return SingleChildScrollView(
-          physics: const NeverScrollableScrollPhysics(),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-            child: LyricContext(
-              previous: current?.subtitle.getPrevious(subtitleList),
-              current: current?.subtitle,
-              next: current?.subtitle.getNext(subtitleList),
-              state: current?.state,
+        return OverflowBox(
+          minHeight: 0,
+          maxHeight: double.infinity,
+          child: SingleChildScrollView(
+            physics: const NeverScrollableScrollPhysics(),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              child: LyricContext(
+                previous: current?.subtitle.getPrevious(subtitleList),
+                current: current?.subtitle,
+                next: current?.subtitle.getNext(subtitleList),
+                state: current?.state,
+              ),
             ),
           ),
         );
