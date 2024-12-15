@@ -56,4 +56,4 @@ Please read our [Development Guidelines](docs/guidelines_en.md) before making a 
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. 
+This project is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike License (CC BY-NC-SA) - see the [LICENSE](LICENSE) file for details. This license allows others to remix, tweak, and build upon your work non-commercially, as long as they credit you and license their new creations under the identical terms. 

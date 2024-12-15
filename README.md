@@ -71,4 +71,4 @@ flutter run
 
 ## 许可证
 
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详细信息。
+本项目采用 Creative Commons 非商业性使用-相同方式共享许可证 (CC BY-NC-SA) - 查看 [LICENSE](LICENSE) 文件了解详细信息。该许可证允许他人修改和分享您的作品，但禁止商业用途，要求保留署名，并要求对修改后的作品以相同的许可证发布。
