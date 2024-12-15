@@ -3,9 +3,8 @@ import 'package:get_it/get_it.dart';
 import 'package:asmrapp/presentation/viewmodels/player_viewmodel.dart';
 import 'package:asmrapp/widgets/player/player_controls.dart';
 import 'package:asmrapp/widgets/player/player_progress.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:asmrapp/widgets/lyrics/lyric_display.dart';
+import 'package:asmrapp/widgets/player/player_cover.dart';
 
 class PlayerScreen extends StatelessWidget {
   const PlayerScreen({super.key});
@@ -34,50 +33,8 @@ class PlayerScreen extends StatelessWidget {
                 // 封面
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 32),
-                  child: AspectRatio(
-                    aspectRatio: 4/3,
-                    child: Container(
-                      constraints: const BoxConstraints(
-                        maxWidth: 480, // 限制最大宽度
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(12), // 稍微增大圆角
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: viewModel.currentTrack?.coverUrl != null
-                            ? CachedNetworkImage(
-                                imageUrl: viewModel.currentTrack!.coverUrl,
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) => Shimmer.fromColors(
-                                  baseColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                                  highlightColor: Theme.of(context).colorScheme.surface,
-                                  child: Container(
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                errorWidget: (context, url, error) => Container(
-                                  color: Theme.of(context).colorScheme.errorContainer,
-                                  child: Center(
-                                    child: Icon(
-                                      Icons.error_outline,
-                                      size: 48,
-                                      color: Theme.of(context).colorScheme.error,
-                                    ),
-                                  ),
-                                ),
-                              )
-                            : const Icon(Icons.music_note, size: 100),
-                      ),
-                    ),
+                  child: PlayerCover(
+                    coverUrl: viewModel.currentTrack?.coverUrl,
                   ),
                 ),
                 const SizedBox(height: 32),
