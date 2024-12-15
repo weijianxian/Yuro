@@ -87,13 +87,20 @@ class PlayerScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Spacer(),
-                // 字幕显示
-                const LyricDisplay(),
-                const PlayerProgress(),
-                const SizedBox(height: 24),
-                const PlayerControls(),
-                const SizedBox(height: 48),
+                // 字幕显示 - 使用 Expanded 自动占据剩余空间
+                const Expanded(
+                  child: LyricDisplay(),
+                ),
+                // 底部控制区域
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    PlayerProgress(),
+                    SizedBox(height: 24),
+                    PlayerControls(),
+                    SizedBox(height: 48),
+                  ],
+                ),
               ],
             ),
           );
