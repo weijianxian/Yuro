@@ -58,11 +58,20 @@ class _LyricDisplayState extends State<LyricDisplay> {
   Widget _buildLyricContext(SubtitleWithState? current, SubtitleList? subtitleList) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // 如果没有字幕列表，返回空容器
-        if (subtitleList == null) {
+        // 添加安全检查
+        if (subtitleList == null || subtitleList.subtitles.isEmpty) {
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
           );
+        }
+
+        // 确保 current 在有效范围内
+        if (current != null) {
+          final currentTime = current!.subtitle.start;
+          final totalDuration = subtitleList.subtitles.last.end;
+          if (currentTime > totalDuration) {
+            current = null;
+          }
         }
 
         // 如果没有当前字幕但有字幕列表，显示第一句

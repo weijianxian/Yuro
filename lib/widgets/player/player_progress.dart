@@ -13,6 +13,12 @@ class PlayerProgress extends StatelessWidget {
     return '$twoDigitMinutes:$twoDigitSeconds';
   }
 
+  double _ensureValueInRange(double value, double min, double max) {
+    if (value < min) return min;
+    if (value > max) return max;
+    return value;
+  }
+
   @override
   Widget build(BuildContext context) {
     final viewModel = GetIt.I<PlayerViewModel>();
@@ -32,10 +38,15 @@ class PlayerProgress extends StatelessWidget {
                   ),
                 ),
                 child: Slider(
-                  value: viewModel.position?.inMilliseconds.toDouble() ?? 0.0,
-                  max: viewModel.duration?.inMilliseconds.toDouble() ?? 1.0,
+                  value: _ensureValueInRange(
+                    viewModel.position?.inMilliseconds.toDouble() ?? 0,
+                    0,
+                    viewModel.duration?.inMilliseconds.toDouble() ?? 1
+                  ),
+                  min: 0,
+                  max: viewModel.duration?.inMilliseconds.toDouble() ?? 1,
                   onChanged: (value) {
-                    viewModel.seek(Duration(milliseconds: value.toInt()));
+                    viewModel.seek(Duration(milliseconds: value.round()));
                   },
                 ),
               ),
