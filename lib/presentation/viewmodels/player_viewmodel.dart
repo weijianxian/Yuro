@@ -1,4 +1,5 @@
 import 'package:asmrapp/core/audio/events/playback_event.dart';
+import 'package:asmrapp/core/audio/models/audio_track_info.dart';
 import 'package:asmrapp/core/audio/models/playback_context.dart';
 import 'package:asmrapp/core/subtitle/i_subtitle_service.dart';
 import 'package:asmrapp/utils/logger.dart';
@@ -9,18 +10,6 @@ import 'dart:async';
 import 'package:asmrapp/core/subtitle/subtitle_loader.dart';
 import 'package:asmrapp/core/audio/events/playback_event_hub.dart';
 
-class Track {
-  final String title;
-  final String artist;
-  final String coverUrl;
-
-  Track({
-    required this.title,
-    required this.artist,
-    required this.coverUrl,
-  });
-}
-
 class PlayerViewModel extends ChangeNotifier {
   final IAudioPlayerService _audioService;
   final PlaybackEventHub _eventHub;
@@ -28,7 +17,6 @@ class PlayerViewModel extends ChangeNotifier {
   final _subtitleLoader = SubtitleLoader();
 
   bool _isPlaying = false;
-  Track? _currentTrack;
   Duration? _position;
   Duration? _duration;
   Subtitle? _currentSubtitle;
@@ -66,11 +54,6 @@ class PlayerViewModel extends ChangeNotifier {
     _subscriptions.add(
       _eventHub.trackChange.listen(
         (event) {
-          _currentTrack = Track(
-            title: event.track.title,
-            artist: event.track.artist,
-            coverUrl: event.track.coverUrl,
-          );
           notifyListeners();
         },
         onError: (error) => debugPrint('$_tag - 音轨变更流错误: $error'),
@@ -110,11 +93,6 @@ class PlayerViewModel extends ChangeNotifier {
       _eventHub.initialState.listen(
         (event) {
           if (event.track != null) {
-            _currentTrack = Track(
-              title: event.track!.title,
-              artist: event.track!.artist,
-              coverUrl: event.track!.coverUrl,
-            );
             notifyListeners();
           }
           if (event.context != null) {
@@ -150,7 +128,6 @@ class PlayerViewModel extends ChangeNotifier {
   }
 
   bool get isPlaying => _isPlaying;
-  Track? get currentTrack => _currentTrack;
   Duration? get position => _position;
   Duration? get duration => _duration;
   Subtitle? get currentSubtitle => _currentSubtitle;
@@ -208,4 +185,6 @@ class PlayerViewModel extends ChangeNotifier {
       AppLogger.debug('未找到字幕文件，清除现有字幕');
     }
   }
+
+  AudioTrackInfo? get currentTrackInfo => _audioService.currentTrack;
 }

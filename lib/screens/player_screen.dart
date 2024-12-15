@@ -34,7 +34,7 @@ class PlayerScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 32),
                   child: PlayerCover(
-                    coverUrl: viewModel.currentTrack?.coverUrl,
+                    coverUrl: viewModel.currentTrackInfo?.coverUrl,
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -44,16 +44,16 @@ class PlayerScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        viewModel.currentTrack?.title ?? '未在播放',
+                        viewModel.currentTrackInfo?.title ?? '未在播放',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 8),
-                      if (viewModel.currentTrack?.artist != null)
+                      if (viewModel.currentTrackInfo?.artist != null)
                         Text(
-                          viewModel.currentTrack!.artist,
+                          viewModel.currentTrackInfo!.artist,
                           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                           ),

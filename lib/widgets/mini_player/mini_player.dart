@@ -41,14 +41,14 @@ class MiniPlayer extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 4, 8, 4),
                         child: MiniPlayerCover(
-                          coverUrl: viewModel.currentTrack?.coverUrl,
+                          coverUrl: viewModel.currentTrackInfo?.coverUrl,
                         ),
                       ),
                       Expanded(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
-                            viewModel.currentTrack?.title ?? '未在播放',
+                            viewModel.currentTrackInfo?.title ?? '未在播放',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(context).textTheme.titleSmall,
