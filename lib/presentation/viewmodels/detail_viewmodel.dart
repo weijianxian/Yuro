@@ -1,3 +1,5 @@
+import 'package:asmrapp/data/models/playlists_with_exist_statu/pagination.dart';
+import 'package:asmrapp/data/models/playlists_with_exist_statu/playlist.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter/material.dart';
 import 'package:asmrapp/data/models/files/files.dart';
@@ -8,6 +10,7 @@ import 'package:asmrapp/core/audio/i_audio_player_service.dart';
 import 'package:asmrapp/presentation/viewmodels/player_viewmodel.dart';
 import 'package:asmrapp/utils/logger.dart';
 import 'package:asmrapp/core/audio/models/playback_context.dart';
+import 'package:asmrapp/widgets/detail/playlist_selection_dialog.dart';
 
 class DetailViewModel extends ChangeNotifier {
   late final ApiService _apiService;
@@ -23,6 +26,15 @@ class DetailViewModel extends ChangeNotifier {
   bool _hasRecommendations = false;
   bool _checkingRecommendations = false;
 
+  // 收藏夹相关状态
+  bool _loadingPlaylists = false;
+  String? _playlistsError;
+  List<Playlist>? _playlists;
+  Pagination? _playlistsPagination;
+
+  bool _loadingFavorite = false;
+  bool get loadingFavorite => _loadingFavorite;
+
   DetailViewModel({
     required this.work,
   }) {
@@ -37,6 +49,15 @@ class DetailViewModel extends ChangeNotifier {
   String? get error => _error;
   bool get hasRecommendations => _hasRecommendations;
   bool get checkingRecommendations => _checkingRecommendations;
+
+  // 收藏夹相关 getters
+  bool get loadingPlaylists => _loadingPlaylists;
+  String? get playlistsError => _playlistsError;
+  List<Playlist>? get playlists => _playlists;
+  int? get playlistsTotalPages => 
+      _playlistsPagination?.totalCount != null && _playlistsPagination?.pageSize != null
+          ? (_playlistsPagination!.totalCount! / _playlistsPagination!.pageSize!).ceil()
+          : null;
 
   Future<void> _checkRecommendations() async {
     _checkingRecommendations = true;
@@ -110,6 +131,63 @@ class DetailViewModel extends ChangeNotifier {
       if (!_disposed) {
         AppLogger.error('播放失败', e);
       }
+      rethrow;
+    }
+  }
+
+  /// 加载收藏夹列表
+  Future<void> loadPlaylists({int page = 1}) async {
+    if (_loadingPlaylists) return;
+
+    _loadingPlaylists = true;
+    _playlistsError = null;
+    notifyListeners();
+
+    try {
+      final response = await _apiService.getWorkExistStatusInPlaylists(
+        workId: work.id.toString(),
+        page: page,
+      );
+      
+      _playlists = response.playlists;
+      _playlistsPagination = response.pagination;
+      AppLogger.info('收藏夹列表加载成功: ${_playlists?.length ?? 0}个收藏夹');
+    } catch (e) {
+      AppLogger.error('加载收藏夹列表失败', e);
+      _playlistsError = e.toString();
+    } finally {
+      _loadingPlaylists = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> showPlaylistsDialog(BuildContext context) async {
+    _loadingFavorite = true;
+    notifyListeners();
+    
+    try {
+      await loadPlaylists();
+      _loadingFavorite = false;
+      notifyListeners();
+      
+      if (!context.mounted) return;
+      
+      await showDialog(
+        context: context,
+        builder: (context) => PlaylistSelectionDialog(
+          playlists: playlists,
+          isLoading: loadingPlaylists,
+          error: playlistsError,
+          onRetry: () => loadPlaylists(),
+          onPlaylistTap: (playlist) {
+            // TODO: 实现收藏/取消收藏功能
+            Navigator.of(context).pop();
+          },
+        ),
+      );
+    } catch (e) {
+      _loadingFavorite = false;
+      notifyListeners();
       rethrow;
     }
   }

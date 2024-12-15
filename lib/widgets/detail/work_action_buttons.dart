@@ -4,12 +4,16 @@ class WorkActionButtons extends StatelessWidget {
   final VoidCallback onRecommendationsTap;
   final bool hasRecommendations;
   final bool checkingRecommendations;
+  final VoidCallback onFavoriteTap;
+  final bool loadingFavorite;
 
   const WorkActionButtons({
     super.key,
     required this.onRecommendationsTap,
     required this.hasRecommendations,
     required this.checkingRecommendations,
+    required this.onFavoriteTap,
+    this.loadingFavorite = false,
   });
 
   @override
@@ -22,9 +26,8 @@ class WorkActionButtons extends StatelessWidget {
           _ActionButton(
             icon: Icons.favorite_border,
             label: '收藏',
-            onTap: () {
-              // TODO: 实现收藏功能
-            },
+            onTap: onFavoriteTap,
+            loading: loadingFavorite,
           ),
           _ActionButton(
             icon: Icons.bookmark_border,

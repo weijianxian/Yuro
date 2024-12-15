@@ -1,4 +1,5 @@
 import 'package:asmrapp/core/cache/recommendation_cache_manager.dart';
+import 'package:asmrapp/data/models/playlists_with_exist_statu/playlists_with_exist_statu.dart';
 import 'package:dio/dio.dart';
 import 'package:asmrapp/data/models/files/files.dart';
 import 'package:asmrapp/data/models/works/work.dart';
@@ -267,6 +268,35 @@ class ApiService {
       }
 
       throw Exception('获取相关推荐失败: ${response.statusCode}');
+    } on DioException catch (e) {
+      AppLogger.error('网络请求失败', e, e.stackTrace);
+      throw Exception('网络请求失败: ${e.message}');
+    } catch (e, stackTrace) {
+      AppLogger.error('解析数据失败', e, stackTrace);
+      throw Exception('解析数据失败: $e');
+    }
+  }
+
+  /// 获取作品在收藏夹中的状态
+  Future<PlaylistsWithExistStatu> getWorkExistStatusInPlaylists({
+    required String workId,
+    int page = 1,
+  }) async {
+    try {
+      final response = await _dio.get(
+        '/playlist/get-work-exist-status-in-my-playlists',
+        queryParameters: {
+          'workID': workId,
+          'page': page,
+          'version': 2,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return PlaylistsWithExistStatu.fromJson(response.data);
+      }
+
+      throw Exception('获取收藏夹列表失败: ${response.statusCode}');
     } on DioException catch (e) {
       AppLogger.error('网络请求失败', e, e.stackTrace);
       throw Exception('网络请求失败: ${e.message}');

@@ -63,6 +63,8 @@ class DetailScreen extends StatelessWidget {
                       ),
                     );
                   },
+                  onFavoriteTap: () => viewModel.showPlaylistsDialog(context),
+                  loadingFavorite: viewModel.loadingFavorite,
                 ),
               ),
               Consumer<DetailViewModel>(
