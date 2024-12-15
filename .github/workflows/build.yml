@@ -11,6 +11,49 @@ jobs:
     
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # 获取完整的 git 历史
+      
+      - name: Get Previous tag
+        id: previoustag
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+        
+      - name: Generate changelog
+        id: changelog
+        uses: mikepenz/release-changelog-builder-action@v4
+        with:
+          configuration: |
+            {
+              "categories": [
+                {
+                  "title": "## 🚀 Enhancements",
+                  "labels": ["feature", "enhancement"],
+                  "commits_case_sensitive": false,
+                  "commits": ["enhance", "improve", "update", "add", "implement"]
+                },
+                {
+                  "title": "## 🐛 Bug Fixes",
+                  "labels": ["fix", "bug"],
+                  "commits_case_sensitive": false,
+                  "commits": ["fix", "resolve", "correct"]
+                },
+                {
+                  "title": "## 🔄 Changes",
+                  "labels": ["change", "refactor"],
+                  "commits_case_sensitive": false,
+                  "commits": ["change", "modify", "refactor", "restructure"]
+                }
+              ],
+              "template": "${{CATEGORIZED_COUNT}} changes since ${{FROM_TAG}}\n\n${{CHANGELOG}}\n\n<details>\n<summary>Other Changes</summary>\n\n${{UNCATEGORIZED}}\n</details>",
+              "pr_template": "- ${{TITLE}}\n   - ${{BODY}}",
+              "empty_template": "- No significant changes",
+              "max_tags_to_fetch": 200,
+              "max_pull_requests": 200,
+              "max_back_track_time_days": 90,
+              "exclude_merge_branches": ["merge pull request", "merge branch", "merge remote-tracking"]
+            }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -46,8 +89,31 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
+          prerelease: true
+          draft: false
+          body: |
+            🚧 This is a pre-release version
+            
+            ### Build Information
+            - Version: ${{ github.ref_name }}
+            - Previous Version: ${{ steps.previoustag.outputs.tag }}
+            - Built with Flutter ${{ env.FLUTTER_VERSION }}
+            
+            ### Changelog
+            ${{ steps.changelog.outputs.changelog }}
+            
+            ### Commit History
+            ```
+            ${{ github.event.head_commit.message }}
+            ```
+            
+            ⚠️ This version may contain bugs and is not recommended for production use.
+            
+            ### Download
+            - APK: Direct installation file for Android
+            - AAB: Android App Bundle for Play Store submission
           files: |
             build/app/outputs/flutter-apk/app-release.apk
             build/app/outputs/bundle/release/app-release.aab
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
