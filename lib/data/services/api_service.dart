@@ -305,4 +305,48 @@ class ApiService {
       throw Exception('解析数据失败: $e');
     }
   }
+
+  /// 添加作品到收藏夹
+  Future<void> addWorkToPlaylist({
+    required String playlistId,
+    required String workId,
+  }) async {
+    try {
+      await _dio.post(
+        '/playlist/add-works-to-playlist',
+        data: {
+          'id': playlistId,
+          'works': [int.parse(workId)],
+        },
+      );
+    } on DioException catch (e) {
+      AppLogger.error('网络请求失败', e, e.stackTrace);
+      throw Exception('网络请求失败: ${e.message}');
+    } catch (e, stackTrace) {
+      AppLogger.error('添加到收藏夹失败', e, stackTrace);
+      throw Exception('添加到收藏夹失败: $e');
+    }
+  }
+
+  /// 从收藏夹移除作品
+  Future<void> removeWorkFromPlaylist({
+    required String playlistId,
+    required String workId,
+  }) async {
+    try {
+      await _dio.post(
+        '/playlist/remove-works-from-playlist',
+        data: {
+          'id': playlistId,
+          'works': [int.parse(workId)],
+        },
+      );
+    } on DioException catch (e) {
+      AppLogger.error('网络请求失败', e, e.stackTrace);
+      throw Exception('网络请求失败: ${e.message}');
+    } catch (e, stackTrace) {
+      AppLogger.error('从收藏夹移除失败', e, stackTrace);
+      throw Exception('从收藏夹移除失败: $e');
+    }
+  }
 }

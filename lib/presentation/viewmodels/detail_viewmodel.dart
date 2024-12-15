@@ -179,15 +179,52 @@ class DetailViewModel extends ChangeNotifier {
           isLoading: loadingPlaylists,
           error: playlistsError,
           onRetry: () => loadPlaylists(),
-          onPlaylistTap: (playlist) {
-            // TODO: 实现收藏/取消收藏功能
-            Navigator.of(context).pop();
+          onPlaylistTap: (playlist) async {
+            try {
+              await togglePlaylistWork(playlist);
+            } catch (e) {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('操作失败: $e')),
+                );
+              }
+            }
           },
         ),
       );
     } catch (e) {
       _loadingFavorite = false;
       notifyListeners();
+      rethrow;
+    }
+  }
+
+  Future<void> togglePlaylistWork(Playlist playlist) async {
+    try {
+      if (playlist.exist ?? false) {
+        await _apiService.removeWorkFromPlaylist(
+          playlistId: playlist.id!,
+          workId: work.id.toString(),
+        );
+      } else {
+        await _apiService.addWorkToPlaylist(
+          playlistId: playlist.id!,
+          workId: work.id.toString(),
+        );
+      }
+      
+      // 更新本地收藏夹状态
+      final index = _playlists?.indexWhere((p) => p.id == playlist.id);
+      if (index != null && index != -1) {
+        _playlists = List<Playlist>.from(_playlists!)
+          ..[index] = playlist.copyWith(exist: !(playlist.exist ?? false));
+        notifyListeners();
+      }
+      
+      final action = (playlist.exist ?? false) ? '移除' : '添加';
+      AppLogger.info('$action收藏成功: ${playlist.name}');
+    } catch (e) {
+      AppLogger.error('切换收藏状态失败', e);
       rethrow;
     }
   }
