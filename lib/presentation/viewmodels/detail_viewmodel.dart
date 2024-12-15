@@ -11,6 +11,8 @@ import 'package:asmrapp/presentation/viewmodels/player_viewmodel.dart';
 import 'package:asmrapp/utils/logger.dart';
 import 'package:asmrapp/core/audio/models/playback_context.dart';
 import 'package:asmrapp/widgets/detail/playlist_selection_dialog.dart';
+import 'package:asmrapp/data/models/mark_status.dart';
+import 'package:asmrapp/widgets/detail/mark_selection_dialog.dart';
 
 class DetailViewModel extends ChangeNotifier {
   late final ApiService _apiService;
@@ -34,6 +36,12 @@ class DetailViewModel extends ChangeNotifier {
 
   bool _loadingFavorite = false;
   bool get loadingFavorite => _loadingFavorite;
+
+  MarkStatus? _currentMarkStatus;
+  MarkStatus? get currentMarkStatus => _currentMarkStatus;
+
+  bool _loadingMark = false;
+  bool get loadingMark => _loadingMark;
 
   DetailViewModel({
     required this.work,
@@ -104,7 +112,7 @@ class DetailViewModel extends ChangeNotifier {
     }
 
     if (file.mediaDownloadUrl == null) {
-      throw Exception('无法播放：文件URL不存在');
+      throw Exception('无法播放：文件URL不存��');
     }
 
     if (_files == null) {
@@ -227,6 +235,57 @@ class DetailViewModel extends ChangeNotifier {
       AppLogger.error('切换收藏状态失败', e);
       rethrow;
     }
+  }
+
+  Future<void> updateMarkStatus(MarkStatus status) async {
+    _loadingMark = true;
+    notifyListeners();
+
+    try {
+      await _apiService.updateWorkMarkStatus(
+        work.id.toString(),
+        _apiService.convertMarkStatusToApi(status),
+      );
+      
+      _currentMarkStatus = status;
+      AppLogger.info('更新标记状态成功: ${status.label}');
+    } catch (e) {
+      AppLogger.error('更新标记状态失败', e);
+      rethrow;
+    } finally {
+      _loadingMark = false;
+      notifyListeners();
+    }
+  }
+
+  void showMarkDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => MarkSelectionDialog(
+        currentStatus: _currentMarkStatus,
+        loading: _loadingMark,
+        onMarkSelected: (status) async {
+          try {
+            await updateMarkStatus(status);
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('已标记为${status.label}'),
+                  duration: const Duration(seconds: 2),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
+          } catch (e) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('标记失败: $e')),
+              );
+            }
+          }
+        },
+      ),
+    );
   }
 
   @override

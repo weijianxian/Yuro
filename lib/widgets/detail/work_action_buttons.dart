@@ -1,3 +1,4 @@
+import 'package:asmrapp/data/models/mark_status.dart';
 import 'package:flutter/material.dart';
 
 class WorkActionButtons extends StatelessWidget {
@@ -6,6 +7,9 @@ class WorkActionButtons extends StatelessWidget {
   final bool checkingRecommendations;
   final VoidCallback onFavoriteTap;
   final bool loadingFavorite;
+  final VoidCallback onMarkTap;
+  final MarkStatus? currentMarkStatus;
+  final bool loadingMark;
 
   const WorkActionButtons({
     super.key,
@@ -14,6 +18,9 @@ class WorkActionButtons extends StatelessWidget {
     required this.checkingRecommendations,
     required this.onFavoriteTap,
     this.loadingFavorite = false,
+    required this.onMarkTap,
+    this.currentMarkStatus,
+    this.loadingMark = false,
   });
 
   @override
@@ -31,10 +38,9 @@ class WorkActionButtons extends StatelessWidget {
           ),
           _ActionButton(
             icon: Icons.bookmark_border,
-            label: '标记',
-            onTap: () {
-              // TODO: 实现标记功能
-            },
+            label: currentMarkStatus?.label ?? '标记',
+            onTap: onMarkTap,
+            loading: loadingMark,
           ),
           _ActionButton(
             icon: Icons.star_border,

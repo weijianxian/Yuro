@@ -65,6 +65,9 @@ class DetailScreen extends StatelessWidget {
                   },
                   onFavoriteTap: () => viewModel.showPlaylistsDialog(context),
                   loadingFavorite: viewModel.loadingFavorite,
+                  onMarkTap: () => viewModel.showMarkDialog(context),
+                  currentMarkStatus: viewModel.currentMarkStatus,
+                  loadingMark: viewModel.loadingMark,
                 ),
               ),
               Consumer<DetailViewModel>(

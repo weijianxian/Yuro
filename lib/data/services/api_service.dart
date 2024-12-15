@@ -1,4 +1,5 @@
 import 'package:asmrapp/core/cache/recommendation_cache_manager.dart';
+import 'package:asmrapp/data/models/mark_status.dart';
 import 'package:asmrapp/data/models/playlists_with_exist_statu/playlists_with_exist_statu.dart';
 import 'package:dio/dio.dart';
 import 'package:asmrapp/data/models/files/files.dart';
@@ -347,6 +348,42 @@ class ApiService {
     } catch (e, stackTrace) {
       AppLogger.error('从收藏夹移除失败', e, stackTrace);
       throw Exception('从收藏夹移除失败: $e');
+    }
+  }
+
+  /// 更新作品的标记状态
+  Future<void> updateWorkMarkStatus(String workId, String status) async {
+    try {
+      final response = await _dio.put(
+        '/review',
+        data: {
+          'work_id': int.parse(workId),
+          'progress': status,
+        },
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('标记失败: ${response.statusCode}');
+      }
+    } catch (e) {
+      AppLogger.error('更新标记状态失败', e);
+      rethrow;
+    }
+  }
+
+  /// 将 MarkStatus 枚举转换为 API 参数
+  String convertMarkStatusToApi(MarkStatus status) {
+    switch (status) {
+      case MarkStatus.wantToListen:
+        return 'marked';
+      case MarkStatus.listening:
+        return 'listening';
+      case MarkStatus.listened:
+        return 'listened';
+      case MarkStatus.relistening:
+        return 'replay';
+      case MarkStatus.onHold:
+        return 'postponed';
     }
   }
 }
