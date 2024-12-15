@@ -7,7 +7,6 @@ import 'package:asmrapp/data/models/files/child.dart';
 import 'package:asmrapp/data/models/works/work.dart';
 import 'package:asmrapp/data/services/api_service.dart';
 import 'package:asmrapp/core/audio/i_audio_player_service.dart';
-import 'package:asmrapp/presentation/viewmodels/player_viewmodel.dart';
 import 'package:asmrapp/utils/logger.dart';
 import 'package:asmrapp/core/audio/models/playback_context.dart';
 import 'package:asmrapp/widgets/detail/playlist_selection_dialog.dart';
@@ -17,7 +16,6 @@ import 'package:asmrapp/widgets/detail/mark_selection_dialog.dart';
 class DetailViewModel extends ChangeNotifier {
   late final ApiService _apiService;
   late final IAudioPlayerService _audioService;
-  late final PlayerViewModel _miniPlayerViewModel;
   final Work work;
 
   Files? _files;
@@ -48,7 +46,6 @@ class DetailViewModel extends ChangeNotifier {
   }) {
     _audioService = GetIt.I<IAudioPlayerService>();
     _apiService = GetIt.I<ApiService>();
-    _miniPlayerViewModel = GetIt.I<PlayerViewModel>();
     _checkRecommendations();
   }
 
@@ -128,14 +125,6 @@ class DetailViewModel extends ChangeNotifier {
 
       await _audioService.playWithContext(playbackContext);
       await _audioService.resume();
-
-      if (!_disposed) {
-        _miniPlayerViewModel.setTrack(Track(
-          title: file.title ?? '',
-          artist: work.circle?.name ?? '',
-          coverUrl: work.mainCoverUrl ?? '',
-        ));
-      }
     } catch (e) {
       if (!_disposed) {
         AppLogger.error('播放失败', e);

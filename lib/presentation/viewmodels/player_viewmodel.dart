@@ -181,11 +181,6 @@ class PlayerViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setTrack(Track track) {
-    _currentTrack = track;
-    notifyListeners();
-  }
-
   @override
   void dispose() {
     for (var subscription in _subscriptions) {
