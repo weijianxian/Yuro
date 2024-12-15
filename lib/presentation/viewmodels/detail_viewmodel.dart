@@ -112,7 +112,7 @@ class DetailViewModel extends ChangeNotifier {
     }
 
     if (file.mediaDownloadUrl == null) {
-      throw Exception('无法播放：文件URL不存��');
+      throw Exception('无法播放：文件URL不存在');
     }
 
     if (_files == null) {
@@ -127,6 +127,7 @@ class DetailViewModel extends ChangeNotifier {
       );
 
       await _audioService.playWithContext(playbackContext);
+      await _audioService.resume();
 
       if (!_disposed) {
         _miniPlayerViewModel.setTrack(Track(

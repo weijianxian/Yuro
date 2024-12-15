@@ -108,8 +108,11 @@ class AudioPlayerService implements IAudioPlayerService {
 
   // 上下文管理
   @override
-  Future<void> playWithContext(PlaybackContext context) => 
-    _playbackController.setPlaybackContext(context);
+  Future<void> playWithContext(PlaybackContext context) async {
+    await _playbackController.setPlaybackContext(context);
+    // 添加自动播放
+    await resume();
+  }
 
   // 状态访问
   @override
