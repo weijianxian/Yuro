@@ -124,7 +124,6 @@ class DetailViewModel extends ChangeNotifier {
       );
 
       await _audioService.playWithContext(playbackContext);
-      await _audioService.resume();
     } catch (e) {
       if (!_disposed) {
         AppLogger.error('播放失败', e);
