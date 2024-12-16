@@ -55,10 +55,14 @@ class ApiService {
   }
 
   /// 获取作品列表
-  Future<WorksResponse> getWorks({int page = 1}) async {
+  Future<WorksResponse> getWorks({
+    int page = 1,
+    bool hasSubtitle = false,
+  }) async {
     try {
       final response = await _dio.get('/works', queryParameters: {
         'page': page,
+        'subtitle': hasSubtitle ? 1 : 0, 
       });
 
       if (response.statusCode == 200) {
@@ -87,7 +91,7 @@ class ApiService {
     int page = 1,
     String order = 'create_date',
     String sort = 'desc',
-    int subtitle = 0,
+    bool hasSubtitle = false,
   }) async {
     try {
       final response = await _dio.get(
@@ -96,7 +100,7 @@ class ApiService {
           'page': page,
           'order': order,
           'sort': sort,
-          'subtitle': subtitle,
+          'subtitle': hasSubtitle ? 1 : 0,
           'includeTranslationWorks': true,
         },
       );
@@ -155,7 +159,7 @@ class ApiService {
   Future<WorksResponse> getRecommendations({
     required String uuid,
     int page = 1,
-    int subtitle = 0,
+    bool hasSubtitle = false,
   }) async {
     try {
       final response = await _dio.post(
@@ -164,7 +168,7 @@ class ApiService {
           'keyword': ' ',
           'userId': uuid,
           'page': page,
-          'subtitle': subtitle,
+          'subtitle': hasSubtitle ? 1 : 0,
           'localSubtitledWorks': [],
           'withPlaylistStatus': [],
         },
@@ -193,7 +197,7 @@ class ApiService {
   /// 获取热门作品
   Future<WorksResponse> getPopular({
     int page = 1,
-    int subtitle = 0,
+    bool hasSubtitle = false,
   }) async {
     try {
       final response = await _dio.post(
@@ -201,7 +205,7 @@ class ApiService {
         data: {
           'keyword': ' ',
           'page': page,
-          'subtitle': subtitle,
+          'subtitle': hasSubtitle ? 1 : 0,
           'localSubtitledWorks': [],
           'withPlaylistStatus': [],
         },
@@ -231,11 +235,11 @@ class ApiService {
   Future<WorksResponse> getItemNeighbors({
     required String itemId,
     int page = 1,
-    int subtitle = 0,
+    bool hasSubtitle = false,
   }) async {
     try {
       // 先尝试从缓存获取
-      final cachedData = _recommendationCache.get(itemId, page, subtitle);
+      final cachedData = _recommendationCache.get(itemId, page, hasSubtitle ? 1 : 0);
       if (cachedData != null) {
         return cachedData;
       }
@@ -247,7 +251,7 @@ class ApiService {
           'keyword': '',
           'itemId': itemId,
           'page': page,
-          'subtitle': subtitle,
+          'subtitle': hasSubtitle ? 1 : 0,
           'localSubtitledWorks': [],
           'withPlaylistStatus': [],
         },
@@ -263,7 +267,7 @@ class ApiService {
         );
 
         // 存入缓存
-        _recommendationCache.set(itemId, page, subtitle, worksResponse);
+        _recommendationCache.set(itemId, page, hasSubtitle ? 1 : 0, worksResponse);
 
         return worksResponse;
       }

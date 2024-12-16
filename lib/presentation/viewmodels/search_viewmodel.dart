@@ -70,7 +70,7 @@ class SearchViewModel extends ChangeNotifier {
         page: page,
         order: _order,
         sort: _sort,
-        subtitle: _hasSubtitle ? 1 : 0, // 添加字幕过滤
+        hasSubtitle: _hasSubtitle, // 添加字幕过滤
       );
 
       _works = response.works;
