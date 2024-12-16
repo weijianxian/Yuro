@@ -24,7 +24,6 @@ class _PopularScreenState extends State<PopularScreen> with AutomaticKeepAliveCl
   void initState() {
     super.initState();
     _viewModel = PopularViewModel();
-    _viewModel.loadPopular();
   }
 
   @override
@@ -52,8 +51,8 @@ class _PopularScreenState extends State<PopularScreen> with AutomaticKeepAliveCl
               currentPage: viewModel.currentPage,
               totalPages: viewModel.totalPages,
               onPageChanged: (page) => viewModel.loadPage(page),
-              onRefresh: () => viewModel.loadPopular(refresh: true),
-              onRetry: () => viewModel.loadPopular(refresh: true),
+              onRefresh: () => viewModel.refresh(),
+              onRetry: () => viewModel.refresh(),
               layoutStrategy: _layoutStrategy,
               scrollController: _scrollController,
             );
