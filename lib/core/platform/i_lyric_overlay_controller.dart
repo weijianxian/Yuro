@@ -19,4 +19,7 @@ abstract class ILyricOverlayController {
   
   /// 释放资源
   Future<void> dispose();
+  
+  /// 获取悬浮窗当前显示状态
+  Future<bool> isShowing();
 } 

@@ -19,8 +19,16 @@ class LyricOverlayManager {
   Future<void> initialize() async {
     await _controller.initialize();
     _subscription = _subtitleService.currentSubtitleStream.listen((subtitle) {
-      _controller.updateLyric(subtitle?.text);
+      if (_isShowing) {
+        _controller.updateLyric(subtitle?.text);
+      }
     });
+    
+    _isShowing = await _controller.isShowing();
+    
+    if (_isShowing) {
+      await show();
+    }
   }
   
   Future<void> dispose() async {
@@ -101,4 +109,8 @@ class LyricOverlayManager {
   }
   
   // 其他控制方法...
+
+  Future<void> syncState() async {
+    _isShowing = await _controller.isShowing();
+  }
 } 

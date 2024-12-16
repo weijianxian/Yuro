@@ -49,6 +49,9 @@ class LyricOverlayPlugin(private val context: Context) : MethodCallHandler {
                 service = null
                 result.success(null)
             }
+            "isShowing" -> {
+                result.success(service?.isShowing() ?: false)
+            }
             else -> result.notImplemented()
         }
     }

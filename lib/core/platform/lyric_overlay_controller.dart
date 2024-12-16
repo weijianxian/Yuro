@@ -49,4 +49,10 @@ class LyricOverlayController implements ILyricOverlayController {
     AppLogger.debug('[$_tag] 释放资源');
     await _channel.invokeMethod('dispose');
   }
+  
+  @override
+  Future<bool> isShowing() async {
+    final result = await _channel.invokeMethod<bool>('isShowing') ?? false;
+    return result;
+  }
 } 

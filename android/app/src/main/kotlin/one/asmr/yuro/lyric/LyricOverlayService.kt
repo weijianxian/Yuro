@@ -28,6 +28,7 @@ class LyricOverlayService : Service() {
         private const val PREFS_NAME = "LyricOverlayPrefs"
         private const val KEY_X = "window_x"
         private const val KEY_Y = "window_y"
+        private const val KEY_SHOWING = "is_showing"
     }
     
     inner class LocalBinder : Binder() {
@@ -47,6 +48,10 @@ class LyricOverlayService : Service() {
             createLyricView()
         }
         (lyricView as? TextView)?.text = text
+        getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean(KEY_SHOWING, true)
+            .apply()
     }
     
     private fun createLyricView() {
@@ -119,6 +124,10 @@ class LyricOverlayService : Service() {
             if (lyricView != null) {
                 windowManager?.removeView(lyricView)
                 lyricView = null
+                getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                    .edit()
+                    .putBoolean(KEY_SHOWING, false)
+                    .apply()
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -128,5 +137,13 @@ class LyricOverlayService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         hideLyric()
+    }
+    
+    fun isShowing(): Boolean {
+        if (lyricView == null) {
+            return getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .getBoolean(KEY_SHOWING, false)
+        }
+        return true
     }
 } 
