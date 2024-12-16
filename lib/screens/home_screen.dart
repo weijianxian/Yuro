@@ -5,9 +5,7 @@ import 'package:asmrapp/common/constants/strings.dart';
 import 'package:asmrapp/presentation/viewmodels/home_viewmodel.dart';
 import 'package:asmrapp/presentation/layouts/work_layout_strategy.dart';
 import 'package:asmrapp/screens/search_screen.dart';
-import 'package:asmrapp/widgets/pagination_controls.dart';
-import 'package:asmrapp/widgets/work_grid_view.dart';
-import 'package:asmrapp/widgets/mini_player/mini_player.dart';
+import 'package:asmrapp/widgets/work_grid/enhanced_work_grid_view.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -37,17 +35,6 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
     super.dispose();
   }
 
-  void _onPageChanged(int page) async {
-    await _viewModel.loadPage(page);
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        0,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -59,7 +46,6 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
           actions: [
             IconButton(
               icon: const Icon(Icons.search),
-              tooltip: Strings.search,
               onPressed: () {
                 Navigator.push(
                   context,
@@ -74,22 +60,17 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
         drawer: const DrawerMenu(),
         body: Consumer<HomeViewModel>(
           builder: (context, viewModel, child) {
-            return RefreshIndicator(
+            return EnhancedWorkGridView(
+              works: viewModel.works,
+              isLoading: viewModel.isLoading,
+              error: viewModel.error,
+              currentPage: viewModel.currentPage,
+              totalPages: viewModel.totalPages,
+              onPageChanged: (page) => viewModel.loadPage(page),
               onRefresh: () => viewModel.loadWorks(refresh: true),
-              child: WorkGridView(
-                works: viewModel.works,
-                isLoading: viewModel.works.isEmpty && viewModel.isLoading,
-                error: viewModel.error,
-                onRetry: () => viewModel.loadWorks(refresh: true),
-                layoutStrategy: _layoutStrategy,
-                scrollController: _scrollController,
-                bottomWidget: PaginationControls(
-                  currentPage: viewModel.currentPage,
-                  totalPages: viewModel.totalPages,
-                  isLoading: viewModel.isLoading,
-                  onPageChanged: _onPageChanged,
-                ),
-              ),
+              onRetry: () => viewModel.loadWorks(refresh: true),
+              layoutStrategy: _layoutStrategy,
+              scrollController: _scrollController,
             );
           },
         ),

@@ -21,6 +21,7 @@ class PaginationControls extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          const SizedBox(width: 32),
           IconButton(
             onPressed: currentPage > 1 && !isLoading
                 ? () => onPageChanged(currentPage - 1)
@@ -36,6 +37,21 @@ class PaginationControls extends StatelessWidget {
                     ? () => onPageChanged(currentPage + 1)
                     : null,
             icon: const Icon(Icons.chevron_right),
+          ),
+          SizedBox(
+            width: 32,
+            child: isLoading
+                ? const Padding(
+                    padding: EdgeInsets.only(left: 16),
+                    child: SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                      ),
+                    ),
+                  )
+                : null,
           ),
         ],
       ),
