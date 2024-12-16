@@ -1,5 +1,8 @@
 name: Build and Release
 
+permissions:
+  contents: write
+
 on:
   push:
     tags:
@@ -18,42 +21,18 @@ jobs:
         id: previoustag
         uses: "WyriHaximus/github-action-get-previous-tag@v1"
         
-      - name: Generate changelog
-        id: changelog
-        uses: mikepenz/release-changelog-builder-action@v4
-        with:
-          configuration: |
-            {
-              "categories": [
-                {
-                  "title": "## 🚀 Enhancements",
-                  "labels": ["feature", "enhancement"],
-                  "commits_case_sensitive": false,
-                  "commits": ["enhance", "improve", "update", "add", "implement"]
-                },
-                {
-                  "title": "## 🐛 Bug Fixes",
-                  "labels": ["fix", "bug"],
-                  "commits_case_sensitive": false,
-                  "commits": ["fix", "resolve", "correct"]
-                },
-                {
-                  "title": "## 🔄 Changes",
-                  "labels": ["change", "refactor"],
-                  "commits_case_sensitive": false,
-                  "commits": ["change", "modify", "refactor", "restructure"]
-                }
-              ],
-              "template": "#{{CHANGELOG}}\n\n<details>\n<summary>Other Changes</summary>\n\n#{{UNCATEGORIZED}}\n</details>",
-              "pr_template": "- #{{TITLE}}\n   #{{BODY}}",
-              "empty_template": "- No significant changes",
-              "max_tags_to_fetch": 200,
-              "max_pull_requests": 200,
-              "max_back_track_time_days": 90,
-              "exclude_merge_branches": ["merge pull request", "merge branch", "merge remote-tracking"]
-            }
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Prepare scripts
+        run: |
+          mkdir -p .github/scripts
+          chmod +x .github/scripts/process_commits.sh
+        
+      - name: Generate commit messages
+        id: commits
+        run: |
+          COMMITS=$(git log $(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD --pretty=format:"%s%n%b" | .github/scripts/process_commits.sh)
+          echo "commits<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMITS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
       
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -66,6 +45,11 @@ jobs:
         with:
           flutter-version: '3.27.0'
           channel: 'stable'
+          
+      - name: Get Flutter version
+        id: flutter_version
+        run: |
+          echo "FLUTTER_VERSION=$(flutter --version | head -n 1)" >> $GITHUB_ENV
       
       - name: Get dependencies
         run: flutter pub get
@@ -99,13 +83,8 @@ jobs:
             - Previous Version: ${{ steps.previoustag.outputs.tag }}
             - Built with Flutter ${{ env.FLUTTER_VERSION }}
             
-            ### Changelog
-            ${{ steps.changelog.outputs.changelog }}
-            
-            ### Commit History
-            ```
-            ${{ github.event.head_commit.message }}
-            ```
+            ### Changes since last release
+            ${{ steps.commits.outputs.commits }}
             
             ⚠️ This version may contain bugs and is not recommended for production use.
             
