@@ -4,6 +4,7 @@ import 'package:asmrapp/widgets/drawer_menu.dart';
 import 'package:asmrapp/screens/contents/home_content.dart';
 import 'package:asmrapp/screens/contents/recommend_content.dart';
 import 'package:asmrapp/screens/contents/popular_content.dart';
+import 'package:asmrapp/screens/search_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -60,7 +61,12 @@ class _MainScreenState extends State<MainScreen> {
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
-              // TODO: 实现搜索功能
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SearchScreen(),
+                ),
+              );
             },
           ),
         ],
