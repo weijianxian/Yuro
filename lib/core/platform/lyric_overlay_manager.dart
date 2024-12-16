@@ -39,6 +39,10 @@ class LyricOverlayManager {
   Future<void> show() async {
     await _controller.show();
     _isShowing = true;
+    final currentSubtitle = _subtitleService.currentSubtitleWithState;
+    if (currentSubtitle != null) {
+      await _controller.updateLyric(currentSubtitle.subtitle.text);
+    }
   }
 
   Future<void> hide() async {
