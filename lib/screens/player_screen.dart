@@ -1,3 +1,4 @@
+import 'package:asmrapp/core/platform/lyric_overlay_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:asmrapp/presentation/viewmodels/player_viewmodel.dart';
@@ -6,12 +7,14 @@ import 'package:asmrapp/widgets/player/player_progress.dart';
 import 'package:asmrapp/widgets/lyrics/lyric_display.dart';
 import 'package:asmrapp/widgets/player/player_cover.dart';
 
+
 class PlayerScreen extends StatelessWidget {
   const PlayerScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final viewModel = GetIt.I<PlayerViewModel>();
+    final lyricManager = GetIt.I<LyricOverlayManager>();
     
     return Scaffold(
       appBar: AppBar(
@@ -19,6 +22,12 @@ class PlayerScreen extends StatelessWidget {
           icon: const Icon(Icons.expand_more),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.lyrics_outlined),
+            onPressed: () => lyricManager.showWithPermissionCheck(context),
+          ),
+        ],
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
