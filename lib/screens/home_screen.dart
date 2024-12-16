@@ -26,7 +26,6 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
   void initState() {
     super.initState();
     _viewModel = HomeViewModel();
-    _viewModel.loadWorks();
   }
 
   @override
@@ -67,8 +66,8 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
               currentPage: viewModel.currentPage,
               totalPages: viewModel.totalPages,
               onPageChanged: (page) => viewModel.loadPage(page),
-              onRefresh: () => viewModel.loadWorks(refresh: true),
-              onRetry: () => viewModel.loadWorks(refresh: true),
+              onRefresh: () => viewModel.refresh(),
+              onRetry: () => viewModel.refresh(),
               layoutStrategy: _layoutStrategy,
               scrollController: _scrollController,
             );
