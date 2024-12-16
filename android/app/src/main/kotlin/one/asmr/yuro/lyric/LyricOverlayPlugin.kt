@@ -30,7 +30,7 @@ class LyricOverlayPlugin(private val context: Context) : MethodCallHandler {
                 result.success(null)
             }
             "show" -> {
-                service?.showLyric("测试歌词")
+                service?.showLyric("暂无歌词")
                 result.success(null)
             }
             "hide" -> {

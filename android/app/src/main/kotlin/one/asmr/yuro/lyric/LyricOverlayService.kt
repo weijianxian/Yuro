@@ -62,7 +62,7 @@ class LyricOverlayService : Service() {
         val savedY = prefs.getInt(KEY_Y, (screenHeight * 2 / 3))  // 屏幕高度的2/3处
         
         params = WindowManager.LayoutParams(
-            320.dpToPx(),
+            360.dpToPx(),
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
