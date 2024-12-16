@@ -8,6 +8,7 @@ class LyricOverlayManager {
   final ILyricOverlayController _controller;
   final ISubtitleService _subtitleService;
   StreamSubscription? _subscription;
+  bool _isShowing = false;
   
   LyricOverlayManager({
     required ILyricOverlayController controller,
@@ -37,12 +38,16 @@ class LyricOverlayManager {
 
   Future<void> show() async {
     await _controller.show();
+    _isShowing = true;
   }
 
   Future<void> hide() async {
     await _controller.hide();
+    _isShowing = false;
   }
-  
+
+  bool get isShowing => _isShowing;
+
   /// 处理显示悬浮歌词的完整流程
   Future<void> showWithPermissionCheck(BuildContext context) async {
     final hasPermission = await checkPermission();
@@ -80,6 +85,15 @@ class LyricOverlayManager {
         ],
       ),
     ) ?? false;
+  }
+
+  /// 切换显示/隐藏状态
+  Future<void> toggle(BuildContext context) async {
+    if (_isShowing) {
+      await hide();
+    } else {
+      await showWithPermissionCheck(context);
+    }
   }
   
   // 其他控制方法...

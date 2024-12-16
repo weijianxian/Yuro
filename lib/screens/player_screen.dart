@@ -24,8 +24,10 @@ class PlayerScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.lyrics_outlined),
-            onPressed: () => lyricManager.showWithPermissionCheck(context),
+            icon: Icon(
+              lyricManager.isShowing ? Icons.lyrics : Icons.lyrics_outlined,
+            ),
+            onPressed: () => lyricManager.toggle(context),
           ),
         ],
         backgroundColor: Colors.transparent,

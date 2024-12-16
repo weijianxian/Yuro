@@ -10,21 +10,25 @@ class LyricOverlayController implements ILyricOverlayController {
   @override
   Future<void> initialize() async {
     AppLogger.debug('[$_tag] 初始化');
+    await _channel.invokeMethod('initialize');
   }
   
   @override
   Future<void> show() async {
     AppLogger.debug('[$_tag] 显示悬浮窗');
+    await _channel.invokeMethod('show');
   }
   
   @override
   Future<void> hide() async {
     AppLogger.debug('[$_tag] 隐藏悬浮窗');
+    await _channel.invokeMethod('hide');
   }
   
   @override
   Future<void> updateLyric(String? text) async {
     AppLogger.debug('[$_tag] 更新歌词: ${text ?? '<空>'}');
+    await _channel.invokeMethod('updateLyric', {'text': text});
   }
   
   @override
@@ -43,5 +47,6 @@ class LyricOverlayController implements ILyricOverlayController {
   @override
   Future<void> dispose() async {
     AppLogger.debug('[$_tag] 释放资源');
+    await _channel.invokeMethod('dispose');
   }
 } 
