@@ -1,11 +1,13 @@
 package one.asmr.yuro.lyric
 
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.Binder
 import android.os.IBinder
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import android.widget.TextView
@@ -15,7 +17,18 @@ import android.view.Gravity
 class LyricOverlayService : Service() {
     private var windowManager: WindowManager? = null
     private var lyricView: View? = null
+    private var params: WindowManager.LayoutParams? = null
+    private var initialX = 0
+    private var initialY = 0
+    private var initialTouchX = 0f
+    private var initialTouchY = 0f
     private val binder = LocalBinder()
+    
+    companion object {
+        private const val PREFS_NAME = "LyricOverlayPrefs"
+        private const val KEY_X = "window_x"
+        private const val KEY_Y = "window_y"
+    }
     
     inner class LocalBinder : Binder() {
         val service: LyricOverlayService
@@ -39,20 +52,58 @@ class LyricOverlayService : Service() {
     private fun createLyricView() {
         lyricView = LayoutInflater.from(this).inflate(R.layout.lyric_overlay, null)
         
-        val params = WindowManager.LayoutParams(
-            240.dpToPx(),
+        // 获取屏幕高度
+        val displayMetrics = resources.displayMetrics
+        val screenHeight = displayMetrics.heightPixels
+        
+        // 读取保存的位置，默认位置设在屏幕2/3处
+        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val savedX = prefs.getInt(KEY_X, 50)  // 距离右边50dp
+        val savedY = prefs.getInt(KEY_Y, (screenHeight * 2 / 3))  // 屏幕高度的2/3处
+        
+        params = WindowManager.LayoutParams(
+            320.dpToPx(),
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
             WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.END
-            x = 100
-            y = 200
+            x = savedX
+            y = savedY
             windowAnimations = 0
+        }
+        
+        lyricView?.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    initialX = params?.x ?: 0
+                    initialY = params?.y ?: 0
+                    initialTouchX = event.rawX
+                    initialTouchY = event.rawY
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val dx = (event.rawX - initialTouchX).toInt()
+                    val dy = (event.rawY - initialTouchY).toInt()
+                    
+                    params?.x = initialX - dx
+                    params?.y = initialY + dy
+                    params?.let { windowManager?.updateViewLayout(lyricView, it) }
+                }
+                MotionEvent.ACTION_UP -> {
+                    // 保存新位置
+                    params?.let { params ->
+                        getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                            .edit()
+                            .putInt(KEY_X, params.x)
+                            .putInt(KEY_Y, params.y)
+                            .apply()
+                    }
+                }
+            }
+            true
         }
         
         windowManager?.addView(lyricView, params)
