@@ -3,8 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:asmrapp/widgets/drawer_menu.dart';
 import 'package:asmrapp/presentation/viewmodels/popular_viewmodel.dart';
 import 'package:asmrapp/presentation/layouts/work_layout_strategy.dart';
-import 'package:asmrapp/widgets/pagination_controls.dart';
-import 'package:asmrapp/widgets/work_grid_view.dart';
+import 'package:asmrapp/widgets/work_grid/enhanced_work_grid_view.dart';
 
 class PopularScreen extends StatefulWidget {
   const PopularScreen({super.key});
@@ -34,16 +33,6 @@ class _PopularScreenState extends State<PopularScreen> with AutomaticKeepAliveCl
     super.dispose();
   }
 
-  void _scrollToTop() {
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        0,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -56,30 +45,17 @@ class _PopularScreenState extends State<PopularScreen> with AutomaticKeepAliveCl
         drawer: const DrawerMenu(),
         body: Consumer<PopularViewModel>(
           builder: (context, viewModel, child) {
-            return Column(
-              children: [
-                Expanded(
-                  child: WorkGridView(
-                    works: viewModel.works,
-                    isLoading: viewModel.isLoading,
-                    error: viewModel.error,
-                    onRetry: () => viewModel.loadPopular(),
-                    layoutStrategy: _layoutStrategy,
-                    scrollController: _scrollController,
-                    bottomWidget: viewModel.works.isNotEmpty
-                        ? PaginationControls(
-                            currentPage: viewModel.currentPage,
-                            totalPages: viewModel.totalPages ?? 1,
-                            onPageChanged: (page) {
-                              viewModel.loadPage(page);
-                              _scrollToTop();
-                            },
-                            isLoading: viewModel.isLoading,
-                          )
-                        : null,
-                  ),
-                ),
-              ],
+            return EnhancedWorkGridView(
+              works: viewModel.works,
+              isLoading: viewModel.isLoading,
+              error: viewModel.error,
+              currentPage: viewModel.currentPage,
+              totalPages: viewModel.totalPages,
+              onPageChanged: (page) => viewModel.loadPage(page),
+              onRefresh: () => viewModel.loadPopular(refresh: true),
+              onRetry: () => viewModel.loadPopular(refresh: true),
+              layoutStrategy: _layoutStrategy,
+              scrollController: _scrollController,
             );
           },
         ),
