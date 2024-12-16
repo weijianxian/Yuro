@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:asmrapp/widgets/drawer_menu.dart';
 import 'package:asmrapp/presentation/viewmodels/recommend_viewmodel.dart';
-import 'package:asmrapp/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:asmrapp/presentation/layouts/work_layout_strategy.dart';
-import 'package:asmrapp/widgets/pagination_controls.dart';
-import 'package:asmrapp/widgets/work_grid_view.dart';
+import 'package:asmrapp/widgets/work_grid/enhanced_work_grid_view.dart';
+import 'package:asmrapp/presentation/viewmodels/auth_viewmodel.dart';
 
 class RecommendScreen extends StatefulWidget {
   const RecommendScreen({super.key});
@@ -25,7 +24,8 @@ class _RecommendScreenState extends State<RecommendScreen> with AutomaticKeepAli
   @override
   void initState() {
     super.initState();
-    _viewModel = RecommendViewModel(context.read<AuthViewModel>());
+    final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
+    _viewModel = RecommendViewModel(authViewModel);
     _viewModel.loadRecommendations();
   }
 
@@ -33,16 +33,6 @@ class _RecommendScreenState extends State<RecommendScreen> with AutomaticKeepAli
   void dispose() {
     _scrollController.dispose();
     super.dispose();
-  }
-
-  void _scrollToTop() {
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        0,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    }
   }
 
   @override
@@ -57,30 +47,17 @@ class _RecommendScreenState extends State<RecommendScreen> with AutomaticKeepAli
         drawer: const DrawerMenu(),
         body: Consumer<RecommendViewModel>(
           builder: (context, viewModel, child) {
-            return Column(
-              children: [
-                Expanded(
-                  child: WorkGridView(
-                    works: viewModel.works,
-                    isLoading: viewModel.isLoading,
-                    error: viewModel.error,
-                    onRetry: () => viewModel.loadRecommendations(),
-                    layoutStrategy: _layoutStrategy,
-                    scrollController: _scrollController,
-                    bottomWidget: viewModel.works.isNotEmpty
-                        ? PaginationControls(
-                            currentPage: viewModel.currentPage,
-                            totalPages: viewModel.totalPages ?? 1,
-                            onPageChanged: (page) {
-                              viewModel.loadPage(page);
-                              _scrollToTop();
-                            },
-                            isLoading: viewModel.isLoading,
-                          )
-                        : null,
-                  ),
-                ),
-              ],
+            return EnhancedWorkGridView(
+              works: viewModel.works,
+              isLoading: viewModel.isLoading,
+              error: viewModel.error,
+              currentPage: viewModel.currentPage,
+              totalPages: viewModel.totalPages,
+              onPageChanged: (page) => viewModel.loadPage(page),
+              onRefresh: () => viewModel.loadRecommendations(refresh: true),
+              onRetry: () => viewModel.loadRecommendations(refresh: true),
+              layoutStrategy: _layoutStrategy,
+              scrollController: _scrollController,
             );
           },
         ),
