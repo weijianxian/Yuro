@@ -7,6 +7,7 @@ on:
   push:
     tags:
       - 'v*'  # 当推送 v 开头的tag时触发，如 v1.0.0
+  workflow_dispatch:
 
 env:
   FLUTTER_VERSION: '3.27.0'
