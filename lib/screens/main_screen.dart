@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:asmrapp/screens/home_screen.dart';
-import 'package:asmrapp/screens/recommend_screen.dart';
-import 'package:asmrapp/screens/popular_screen.dart';
 import 'package:asmrapp/widgets/mini_player/mini_player.dart';
+import 'package:asmrapp/widgets/drawer_menu.dart';
+import 'package:asmrapp/screens/contents/home_content.dart';
+import 'package:asmrapp/screens/contents/recommend_content.dart';
+import 'package:asmrapp/screens/contents/popular_content.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -15,17 +16,14 @@ class _MainScreenState extends State<MainScreen> {
   final _pageController = PageController();
   int _currentIndex = 0;
 
-  final _pages = const [
-    HomeScreen(),
-    RecommendScreen(),
-    PopularScreen(),
-  ];
+  final _titles = const ['主页', '为你推荐', '热门作品'];
 
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
+  // 页面内容列表
+  final _pages = const [
+    HomeContent(),
+    RecommendContent(),
+    PopularContent(),
+  ];
 
   void _onPageChanged(int index) {
     setState(() {
@@ -42,8 +40,32 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(_titles[_currentIndex]),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_list),
+            onPressed: () {
+              // TODO: 实现过滤功能
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              // TODO: 实现搜索功能
+            },
+          ),
+        ],
+      ),
+      drawer: const DrawerMenu(),
       body: PageView(
         controller: _pageController,
         physics: const ClampingScrollPhysics(),
