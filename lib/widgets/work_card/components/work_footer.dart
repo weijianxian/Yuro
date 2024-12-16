@@ -21,7 +21,7 @@ class WorkFooter extends StatelessWidget {
               ),
         ),
         Text(
-          '${work.dlCount ?? 0}次下载',
+          '销量 ${work.dlCount ?? 0}',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 fontSize: 10,
               ),
