@@ -10,6 +10,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.TextView
 import one.asmr.yuro.R
+import android.view.Gravity
 
 class LyricOverlayService : Service() {
     private var windowManager: WindowManager? = null
@@ -39,14 +40,27 @@ class LyricOverlayService : Service() {
         lyricView = LayoutInflater.from(this).inflate(R.layout.lyric_overlay, null)
         
         val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
+            240.dpToPx(),
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
             PixelFormat.TRANSLUCENT
-        )
+        ).apply {
+            gravity = Gravity.TOP or Gravity.END
+            x = 100
+            y = 200
+            windowAnimations = 0
+        }
         
         windowManager?.addView(lyricView, params)
+    }
+    
+    private fun Int.dpToPx(): Int {
+        val scale = resources.displayMetrics.density
+        return (this * scale + 0.5f).toInt()
     }
     
     fun hideLyric() {
