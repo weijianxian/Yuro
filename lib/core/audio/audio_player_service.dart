@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:asmrapp/core/audio/events/playback_event.dart';
+import 'package:asmrapp/utils/logger.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:audio_session/audio_session.dart';
 import './i_audio_player_service.dart';
@@ -127,22 +127,48 @@ class AudioPlayerService implements IAudioPlayerService {
 
   @override
   Future<void> restorePlaybackState() async {
-    final state = await _stateManager.loadState();
-    if (state == null) return;
+    try {
+      AppLogger.debug('开始恢复播放状态');
+      final state = await _stateManager.loadState();
+      
+      if (state == null) {
+        AppLogger.debug('没有可恢复的播放状态');
+        return;
+      }
 
-    final context = PlaybackContext(
-      work: state.work,
-      files: state.files,
-      currentFile: state.currentFile,
-      playMode: state.playMode,
-    );
+      AppLogger.debug('已加载保存的状态: workId=${state.work.id}');
+      AppLogger.debug('播放列表信息: 长度=${state.playlist.length}, 索引=${state.currentIndex}');
 
-    final position = Duration(milliseconds: state.position);
-    await _playbackController.setPlaybackContext(context, initialPosition: position);
-    await _playbackController.stop();
-    
-    // 直接触发进度事件，PlayerViewModel 会在字幕加载完成后更新位置
-    _eventHub.emit(PlaybackProgressEvent(position, _player.bufferedPosition));
+      if (state.playlist.isEmpty) {
+        AppLogger.debug('保存的播放列表为空，跳过恢复');
+        return;
+      }
+
+      final context = PlaybackContext(
+        work: state.work,
+        files: state.files,
+        currentFile: state.currentFile,
+        playMode: state.playMode,
+      );
+
+      try {
+        await _playbackController.setPlaybackContext(
+          context,
+          initialPosition: Duration(milliseconds: state.position),
+        );
+        AppLogger.debug('播放状态恢复成功');
+      } catch (e) {
+        AppLogger.error('设置播放上下文失败，跳过状态恢复', e);
+      }
+    } catch (e, stack) {
+      AudioErrorHandler.handleError(
+        AudioErrorType.init,
+        '恢复播放状态',
+        e,
+        stack,
+      );
+      rethrow;
+    }
   }
 
   @override

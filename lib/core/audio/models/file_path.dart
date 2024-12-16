@@ -51,7 +51,7 @@ class FilePath {
   /// 获取同级文件列表
   /// 返回与目标文件在同一目录下的所有文件
   static List<Child> getSiblings(Child targetFile, Files root) {
-    // AppLogger.debug('开始获取同级文件: ${targetFile.title}');
+    AppLogger.debug('开始获取同级文件: ${targetFile.title}');
     
     // 获取目标文件的路径
     final path = getPath(targetFile, root);
@@ -61,22 +61,28 @@ class FilePath {
     }
 
     // 获取父目录路径
-    final parentPath = path.substring(0, path.lastIndexOf(separator));
+    final lastSeparator = path.lastIndexOf(separator);
+    final parentPath = lastSeparator > 0 ? path.substring(0, lastSeparator) : separator;
     AppLogger.debug('父目录路径: $parentPath');
 
-    // 查找父目录
-    final parentDir = _findDirectoryByPath(root.children, parentPath);
-    if (parentDir == null) {
-      AppLogger.debug('未找到父目录，返回空列表');
+    // 查找父目录内容
+    List<Child>? siblings;
+    if (parentPath == separator) {
+      // 如果是根目录，直接使用 root.children
+      AppLogger.debug('文件位于根目录，使用根目录文件列表');
+      siblings = root.children;
+    } else {
+      // 否则查找父目录
+      siblings = _findDirectoryByPath(root.children, parentPath);
+    }
+
+    if (siblings == null) {
+      AppLogger.debug('未找到父目录内容，返回空列表');
       return [];
     }
 
-    // AppLogger.debug('找到同级文件:');
-    // for (final file in parentDir) {
-    //   AppLogger.debug('- [${file.type}] ${file.title}');
-    // }
-
-    return parentDir;
+    AppLogger.debug('找到同级文件数量: ${siblings.length}');
+    return siblings;
   }
 
   /// 根据路径查找目录内容
@@ -120,7 +126,7 @@ class FilePath {
       if (audioFolderPath != null) return;
 
       if (folder.children != null) {
-        // 首先检查当前目录是否直接包含音频文件
+        // 首先检查当前��录是否直接包含音频文件
         bool hasDirectAudio = folder.children!.any((child) {
           if (child.type != 'folder') {
             final fileName = child.title?.toLowerCase() ?? '';

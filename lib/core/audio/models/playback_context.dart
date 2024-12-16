@@ -1,3 +1,4 @@
+import 'package:asmrapp/core/audio/utils/audio_error_handler.dart';
 import 'package:asmrapp/data/models/works/work.dart';
 import 'package:asmrapp/data/models/files/files.dart';
 import 'package:asmrapp/data/models/files/child.dart';
@@ -12,6 +13,29 @@ class PlaybackContext {
   final List<Child> playlist;
   final int currentIndex;
   final PlayMode playMode;
+
+  void validate() {
+    if (playlist.isEmpty) {
+      throw AudioError(
+        AudioErrorType.state,
+        '无效的播放列表状态：播放列表为空',
+      );
+    }
+    
+    if (currentIndex < 0 || currentIndex >= playlist.length) {
+      throw AudioError(
+        AudioErrorType.state,
+        '无效的播放列表索引：$currentIndex，列表长度：${playlist.length}',
+      );
+    }
+
+    if (!playlist.contains(currentFile)) {
+      throw AudioError(
+        AudioErrorType.state,
+        '当前文件不在播放列表中',
+      );
+    }
+  }
 
   // 私有构造函数
   const PlaybackContext._({
