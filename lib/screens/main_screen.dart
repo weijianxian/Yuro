@@ -93,74 +93,88 @@ class _MainScreenState extends State<MainScreen> {
         ChangeNotifierProvider.value(value: _recommendViewModel),
       ],
       child: Builder(
-        builder: (context) => Scaffold(
-          appBar: AppBar(
-            title: Text(_titles[_currentIndex]),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.filter_list),
-                onPressed: () {
-                  if (_currentIndex == 0) {
-                    context.read<HomeViewModel>().toggleFilterPanel();
-                  } else if (_currentIndex == 1) {
-                    context.read<RecommendViewModel>().toggleFilterPanel();
-                  } else if (_currentIndex == 2) {
-                    context.read<PopularViewModel>().toggleFilterPanel();
-                  }
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.search),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SearchScreen(),
+        builder: (context) {
+          // 根据当前页面获取对应的总数
+          final totalCount = _currentIndex == 0
+              ? context.watch<HomeViewModel>().pagination?.totalCount
+              : _currentIndex == 1
+                  ? context.watch<RecommendViewModel>().pagination?.totalCount
+                  : context.watch<PopularViewModel>().pagination?.totalCount;
+
+          // 构建标题文本
+          final title = totalCount != null
+              ? '${_titles[_currentIndex]} (${totalCount})'
+              : _titles[_currentIndex];
+
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(title),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.filter_list),
+                  onPressed: () {
+                    if (_currentIndex == 0) {
+                      context.read<HomeViewModel>().toggleFilterPanel();
+                    } else if (_currentIndex == 1) {
+                      context.read<RecommendViewModel>().toggleFilterPanel();
+                    } else if (_currentIndex == 2) {
+                      context.read<PopularViewModel>().toggleFilterPanel();
+                    }
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SearchScreen(),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+            drawer: const DrawerMenu(),
+            body: PageView(
+              controller: _pageController,
+              physics: const ClampingScrollPhysics(),
+              onPageChanged: _onPageChanged,
+              children: _pages,
+            ),
+            bottomNavigationBar: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const MiniPlayer(),
+                NavigationBar(
+                  height: 60,
+                  labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+                  backgroundColor: Theme.of(context).colorScheme.surface,
+                  elevation: 0,
+                  selectedIndex: _currentIndex,
+                  onDestinationSelected: _onTabTapped,
+                  destinations: const [
+                    NavigationDestination(
+                      icon: Icon(Icons.home_outlined),
+                      selectedIcon: Icon(Icons.home),
+                      label: '主页',
                     ),
-                  );
-                },
-              ),
-            ],
-          ),
-          drawer: const DrawerMenu(),
-          body: PageView(
-            controller: _pageController,
-            physics: const ClampingScrollPhysics(),
-            onPageChanged: _onPageChanged,
-            children: _pages,
-          ),
-          bottomNavigationBar: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const MiniPlayer(),
-              NavigationBar(
-                height: 60,
-                labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
-                backgroundColor: Theme.of(context).colorScheme.surface,
-                elevation: 0,
-                selectedIndex: _currentIndex,
-                onDestinationSelected: _onTabTapped,
-                destinations: const [
-                  NavigationDestination(
-                    icon: Icon(Icons.home_outlined),
-                    selectedIcon: Icon(Icons.home),
-                    label: '主页',
-                  ),
-                  NavigationDestination(
-                    icon: Icon(Icons.recommend_outlined),
-                    selectedIcon: Icon(Icons.recommend),
-                    label: '推荐',
-                  ),
-                  NavigationDestination(
-                    icon: Icon(Icons.trending_up_outlined),
-                    selectedIcon: Icon(Icons.trending_up),
-                    label: '热门',
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+                    NavigationDestination(
+                      icon: Icon(Icons.recommend_outlined),
+                      selectedIcon: Icon(Icons.recommend),
+                      label: '推荐',
+                    ),
+                    NavigationDestination(
+                      icon: Icon(Icons.trending_up_outlined),
+                      selectedIcon: Icon(Icons.trending_up),
+                      label: '热门',
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

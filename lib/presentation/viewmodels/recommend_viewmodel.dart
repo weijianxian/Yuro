@@ -58,6 +58,8 @@ class RecommendViewModel extends ChangeNotifier {
   bool get hasSubtitle => _hasSubtitle;
   bool get filterPanelExpanded => _filterPanelExpanded;
 
+  Pagination? get pagination => _pagination;
+
   // 切换字幕筛选
   void toggleSubtitleFilter() {
     _hasSubtitle = !_hasSubtitle;

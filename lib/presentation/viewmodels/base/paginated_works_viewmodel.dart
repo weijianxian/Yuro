@@ -79,4 +79,7 @@ abstract class PaginatedWorksViewModel extends ChangeNotifier {
     AppLogger.info('销毁$pageName ViewModel');
     super.dispose();
   }
+
+  // 添加 pagination getter
+  Pagination? get pagination => _pagination;
 } 
