@@ -86,11 +86,10 @@ class _HomeContentState extends State<HomeContent> with AutomaticKeepAliveClient
                     ],
                   ),
                   child: FilterPanel(
-                    expanded: true,
-                    hasSubtitle: viewModel.filterState.hasSubtitle,
+                    hasSubtitle: viewModel.hasSubtitle,
+                    onSubtitleChanged: viewModel.updateSubtitle,
                     orderField: viewModel.filterState.orderField,
                     isDescending: viewModel.filterState.isDescending,
-                    onSubtitleChanged: viewModel.updateSubtitle,
                     onOrderFieldChanged: viewModel.updateOrderField,
                     onSortDirectionChanged: viewModel.updateSortDirection,
                   ),

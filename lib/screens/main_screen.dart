@@ -7,6 +7,7 @@ import 'package:asmrapp/screens/contents/popular_content.dart';
 import 'package:asmrapp/screens/search_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:asmrapp/presentation/viewmodels/home_viewmodel.dart';
+import 'package:asmrapp/presentation/viewmodels/popular_viewmodel.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -19,6 +20,7 @@ class _MainScreenState extends State<MainScreen> {
   final _pageController = PageController();
   int _currentIndex = 0;
   final _homeViewModel = HomeViewModel();
+  final _popularViewModel = PopularViewModel();
 
   final _titles = const ['主页', '为你推荐', '热门作品'];
 
@@ -47,13 +49,17 @@ class _MainScreenState extends State<MainScreen> {
   void dispose() {
     _pageController.dispose();
     _homeViewModel.dispose();
+    _popularViewModel.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: _homeViewModel,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: _homeViewModel),
+        ChangeNotifierProvider.value(value: _popularViewModel),
+      ],
       child: Builder(
         builder: (context) => Scaffold(
           appBar: AppBar(
@@ -64,6 +70,8 @@ class _MainScreenState extends State<MainScreen> {
                 onPressed: () {
                   if (_currentIndex == 0) {
                     context.read<HomeViewModel>().toggleFilterPanel();
+                  } else if (_currentIndex == 2) {
+                    context.read<PopularViewModel>().toggleFilterPanel();
                   }
                 },
               ),

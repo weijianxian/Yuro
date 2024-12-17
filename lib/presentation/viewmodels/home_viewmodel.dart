@@ -8,11 +8,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeViewModel extends PaginatedWorksViewModel {
   static const String _filterStateKey = 'home_filter_state';
+  static const String _subtitleFilterKey = 'subtitle_filter';
   
   bool _filterPanelExpanded = false;
-  bool get filterPanelExpanded => _filterPanelExpanded;
-
+  bool _hasSubtitle = false;
   FilterState _filterState = const FilterState();
+  
+  bool get filterPanelExpanded => _filterPanelExpanded;
+  bool get hasSubtitle => _hasSubtitle;
   FilterState get filterState => _filterState;
 
   HomeViewModel() : super(GetIt.I<ApiService>());
@@ -20,6 +23,7 @@ class HomeViewModel extends PaginatedWorksViewModel {
   @override
   Future<void> onInit() async {
     await _loadFilterState();
+    await _loadSubtitleFilter();
   }
 
   Future<void> _loadFilterState() async {
@@ -32,6 +36,25 @@ class HomeViewModel extends PaginatedWorksViewModel {
       }
     } catch (e) {
       AppLogger.error('加载筛选状态失败', e);
+    }
+  }
+
+  Future<void> _loadSubtitleFilter() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _hasSubtitle = prefs.getBool(_subtitleFilterKey) ?? false;
+      notifyListeners();
+    } catch (e) {
+      AppLogger.error('加载字幕筛选状态失败', e);
+    }
+  }
+
+  Future<void> _saveSubtitleFilter() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_subtitleFilterKey, _hasSubtitle);
+    } catch (e) {
+      AppLogger.error('保存字幕筛选状态失败', e);
     }
   }
 
@@ -50,8 +73,8 @@ class HomeViewModel extends PaginatedWorksViewModel {
   }
 
   void updateSubtitle(bool value) {
-    _filterState = _filterState.copyWith(hasSubtitle: value);
-    _saveFilterState();
+    _hasSubtitle = value;
+    _saveSubtitleFilter();
     notifyListeners();
     refresh();
   }
@@ -90,7 +113,7 @@ class HomeViewModel extends PaginatedWorksViewModel {
   Future<WorksResponse> fetchPage(int page) {
     return apiService.getWorks(
       page: page,
-      hasSubtitle: _filterState.hasSubtitle,
+      hasSubtitle: _hasSubtitle,
       order: _filterState.orderField,
       sort: _filterState.sortValue,
     );
