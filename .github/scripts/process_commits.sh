@@ -34,10 +34,21 @@ process_commit() {
 # 处理详细信息
 process_details() {
   local details=""
+  local in_commit_body=false
   
   while IFS= read -r line; do
     if [[ $line == -* ]]; then
+      # 处理列表项
       details+="$(process_detail "$line")\n"
+    elif [[ $line =~ ^These[[:space:]]changes ]]; then
+      # 处理总结行，保持原样并添加换行
+      details+="     $line\n"
+    elif [[ -n $line ]]; then
+      # 处理其他非空行（比如列表项的延续行），保持缩进
+      details+="     $line\n"
+    else
+      # 空行处理
+      details+="\n"
     fi
   done
   
@@ -47,7 +58,7 @@ process_details() {
 # 详细信息的 emoji 映射
 process_detail() {
   local content="${1:2}" # 删除开头的 "- "
-  local prefix="     " # 增加缩进空格数
+  local prefix="     - " # 修改缩进格式，保持列表形式
   
   # 1. 首先检查动词开头
   case "$content" in
