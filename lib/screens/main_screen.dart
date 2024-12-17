@@ -8,7 +8,16 @@ import 'package:asmrapp/screens/search_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:asmrapp/presentation/viewmodels/home_viewmodel.dart';
 import 'package:asmrapp/presentation/viewmodels/popular_viewmodel.dart';
+import 'package:asmrapp/presentation/viewmodels/recommend_viewmodel.dart';
+import 'package:asmrapp/presentation/viewmodels/auth_viewmodel.dart';
 
+/// MainScreen 是应用的主界面，负责管理底部导航栏和对应的内容页面。
+/// 它采用了集中式的状态管理架构，所有子页面的 ViewModel 都在这里初始化和提供。
+///
+/// 架构说明：
+/// 1. ViewModel 初始化：所有页面的 ViewModel 都在 MainScreen 中初始化，确保单一实例
+/// 2. 状态提供：通过 MultiProvider 将 ViewModel 提供给整个子树
+/// 3. 生命周期管理：负责所有 ViewModel 的创建和销毁
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
@@ -19,17 +28,35 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   final _pageController = PageController();
   int _currentIndex = 0;
-  final _homeViewModel = HomeViewModel();
-  final _popularViewModel = PopularViewModel();
+
+  // 集中管理所有页面的 ViewModel
+  // 这些 ViewModel 将通过 Provider 提供给子页面
+  late final HomeViewModel _homeViewModel;
+  late final PopularViewModel _popularViewModel;
+  late final RecommendViewModel _recommendViewModel;
 
   final _titles = const ['主页', '为你推荐', '热门作品'];
 
   // 页面内容列表
+  // 注意：这些页面不应该创建自己的 ViewModel 实例
+  // 而是应该通过 Provider.of 或 context.read 获取 MainScreen 提供的实例
   final _pages = const [
     HomeContent(),
     RecommendContent(),
     PopularContent(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // 初始化所有 ViewModel
+    // 注意初始化顺序，如果有依赖关系需要先初始化依赖项
+    _homeViewModel = HomeViewModel();
+    _popularViewModel = PopularViewModel();
+    _recommendViewModel = RecommendViewModel(
+      Provider.of<AuthViewModel>(context, listen: false),
+    );
+  }
 
   void _onPageChanged(int index) {
     setState(() {
@@ -47,18 +74,23 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   void dispose() {
+    // 确保所有 ViewModel 都被正确释放
     _pageController.dispose();
     _homeViewModel.dispose();
     _popularViewModel.dispose();
+    _recommendViewModel.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
+      // 通过 MultiProvider 将所有 ViewModel 提供给子树
+      // 这样子页面就可以通过 Provider.of 或 context.read 获取对应的 ViewModel
       providers: [
         ChangeNotifierProvider.value(value: _homeViewModel),
         ChangeNotifierProvider.value(value: _popularViewModel),
+        ChangeNotifierProvider.value(value: _recommendViewModel),
       ],
       child: Builder(
         builder: (context) => Scaffold(
@@ -70,6 +102,8 @@ class _MainScreenState extends State<MainScreen> {
                 onPressed: () {
                   if (_currentIndex == 0) {
                     context.read<HomeViewModel>().toggleFilterPanel();
+                  } else if (_currentIndex == 1) {
+                    context.read<RecommendViewModel>().toggleFilterPanel();
                   } else if (_currentIndex == 2) {
                     context.read<PopularViewModel>().toggleFilterPanel();
                   }
