@@ -29,7 +29,6 @@ class _SimilarWorksScreenState extends State<SimilarWorksScreen> {
     super.initState();
     _viewModel = SimilarWorksViewModel(widget.work);
     _scrollController.addListener(_onScroll);
-    _viewModel.loadSimilarWorks();
   }
 
   @override
