@@ -16,8 +16,6 @@ class WorkTitle extends StatelessWidget {
       style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontSize: 14,
           ),
-      maxLines: 2,
-      overflow: TextOverflow.ellipsis,
     );
   }
 }
