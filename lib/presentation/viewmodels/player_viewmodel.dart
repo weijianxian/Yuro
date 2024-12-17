@@ -188,4 +188,28 @@ class PlayerViewModel extends ChangeNotifier {
 
   AudioTrackInfo? get currentTrackInfo => _audioService.currentTrack;
   PlaybackContext? get currentContext => _audioService.currentContext;
+
+  Future<void> seekToNextLyric() async {
+    final currentSubtitle = _subtitleService.currentSubtitleWithState;
+    final subtitleList = _subtitleService.subtitleList;
+    
+    if (currentSubtitle != null && subtitleList != null) {
+      final nextSubtitle = currentSubtitle.subtitle.getNext(subtitleList);
+      if (nextSubtitle != null) {
+        await seek(nextSubtitle.start);
+      }
+    }
+  }
+
+  Future<void> seekToPreviousLyric() async {
+    final currentSubtitle = _subtitleService.currentSubtitleWithState;
+    final subtitleList = _subtitleService.subtitleList;
+    
+    if (currentSubtitle != null && subtitleList != null) {
+      final previousSubtitle = currentSubtitle.subtitle.getPrevious(subtitleList);
+      if (previousSubtitle != null) {
+        await seek(previousSubtitle.start);
+      }
+    }
+  }
 }

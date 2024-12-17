@@ -7,6 +7,7 @@ import 'package:asmrapp/widgets/player/player_progress.dart';
 import 'package:asmrapp/widgets/lyrics/lyric_display.dart';
 import 'package:asmrapp/widgets/player/player_cover.dart';
 import 'package:asmrapp/screens/detail_screen.dart';
+import 'package:asmrapp/widgets/player/player_seek_controls.dart';
 
 
 class PlayerScreen extends StatelessWidget {
@@ -113,7 +114,9 @@ class PlayerScreen extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: const [
                       PlayerProgress(),
-                      SizedBox(height: 24),
+                      SizedBox(height: 16),
+                      PlayerSeekControls(),
+                      SizedBox(height: 16),
                       PlayerControls(),
                       SizedBox(height: 48),
                     ],
