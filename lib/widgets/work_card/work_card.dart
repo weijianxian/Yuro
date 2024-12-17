@@ -15,8 +15,14 @@ class WorkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Card(
       clipBehavior: Clip.antiAlias,
+      elevation: isDark ? 0 : 1,
+      color: isDark 
+          ? Theme.of(context).colorScheme.surfaceVariant
+          : Theme.of(context).colorScheme.surface,
       child: InkWell(
         onTap: onTap,
         child: Column(
