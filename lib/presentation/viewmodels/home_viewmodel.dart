@@ -76,6 +76,13 @@ class HomeViewModel extends PaginatedWorksViewModel {
     refresh();
   }
 
+  void closeFilterPanel() {
+    if (_filterPanelExpanded) {
+      _filterPanelExpanded = false;
+      notifyListeners();
+    }
+  }
+
   @override
   String get pageName => '主页';
 

@@ -21,9 +21,27 @@ class _HomeContentState extends State<HomeContent> with AutomaticKeepAliveClient
   bool get wantKeepAlive => true;
 
   @override
+  void initState() {
+    super.initState();
+    // 添加滚动监听
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    // 当滚动开始时收起筛选面板
+    if (_scrollController.position.pixels != _scrollController.position.minScrollExtent) {
+      final viewModel = context.read<HomeViewModel>();
+      if (viewModel.filterPanelExpanded) {
+        viewModel.closeFilterPanel(); // 需要在 ViewModel 中添加这个方法
+      }
+    }
   }
 
   @override
