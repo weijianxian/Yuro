@@ -7,28 +7,51 @@ import 'package:asmrapp/utils/logger.dart';
 import 'package:asmrapp/widgets/pagination_controls.dart';
 
 class SearchScreen extends StatelessWidget {
-  const SearchScreen({super.key});
+  final String? initialKeyword;
+
+  const SearchScreen({
+    super.key,
+    this.initialKeyword,
+  });
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => SearchViewModel(),
-      child: const SearchScreenContent(),
+      child: SearchScreenContent(initialKeyword: initialKeyword),
     );
   }
 }
 
 class SearchScreenContent extends StatefulWidget {
-  const SearchScreenContent({super.key});
+  final String? initialKeyword;
+
+  const SearchScreenContent({
+    super.key,
+    this.initialKeyword,
+  });
 
   @override
   State<SearchScreenContent> createState() => _SearchScreenContentState();
 }
 
 class _SearchScreenContentState extends State<SearchScreenContent> {
-  final _searchController = TextEditingController();
+  late final TextEditingController _searchController;
   final _layoutStrategy = const WorkLayoutStrategy();
   final _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController(text: widget.initialKeyword);
+    
+    // 如果有初始关键词，自动执行搜索
+    if (widget.initialKeyword?.isNotEmpty == true) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _onSearch();
+      });
+    }
+  }
 
   @override
   void dispose() {

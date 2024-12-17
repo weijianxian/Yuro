@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'screens/main_screen.dart';
 import 'package:asmrapp/core/theme/app_theme.dart';
 import 'package:asmrapp/core/theme/theme_controller.dart';
+import 'screens/search_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,6 +42,10 @@ class MyApp extends StatelessWidget {
             home: const MainScreen(),
             routes: {
               '/player': (context) => const PlayerScreen(),
+              '/search': (context) {
+                final keyword = ModalRoute.of(context)?.settings.arguments as String?;
+                return SearchScreen(initialKeyword: keyword);
+              },
             },
           );
         },

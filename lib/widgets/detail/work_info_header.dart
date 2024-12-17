@@ -22,7 +22,7 @@ class WorkInfoHeader extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         WorkStatsInfo(work: work),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         Wrap(
           spacing: 8,
           runSpacing: 8,
