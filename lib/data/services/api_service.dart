@@ -343,7 +343,7 @@ class ApiService {
       AppLogger.error('网络请求失败', e, e.stackTrace);
       throw Exception('网络请求失败: ${e.message}');
     } catch (e, stackTrace) {
-      AppLogger.error('添加到收藏夹失败', e, stackTrace);
+      AppLogger.error('添加到���藏夹失败', e, stackTrace);
       throw Exception('添加到收藏夹失败: $e');
     }
   }
@@ -403,6 +403,26 @@ class ApiService {
         return 'replay';
       case MarkStatus.onHold:
         return 'postponed';
+    }
+  }
+
+  /// 获取默认标记目标收藏夹
+  Future<Map<String, dynamic>> getDefaultMarkTargetPlaylist() async {
+    try {
+      final response = await _dio.get('/playlist/get-default-mark-target-playlist');
+
+      if (response.statusCode == 200) {
+        AppLogger.info('获取默认标记目标收藏夹成功: ${response.data}');
+        return response.data;
+      }
+
+      throw Exception('获取默认标记目标收藏夹失败: ${response.statusCode}');
+    } on DioException catch (e) {
+      AppLogger.error('网络请求失败', e, e.stackTrace);
+      throw Exception('网络请求失败: ${e.message}');
+    } catch (e, stackTrace) {
+      AppLogger.error('解析数据失败', e, stackTrace);
+      throw Exception('解析数据失败: $e');
     }
   }
 }
