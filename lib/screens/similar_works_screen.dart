@@ -1,3 +1,4 @@
+import 'package:asmrapp/widgets/filter/filter_with_keyword.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:asmrapp/data/models/works/work.dart';
@@ -27,13 +28,23 @@ class _SimilarWorksScreenState extends State<SimilarWorksScreen> {
   void initState() {
     super.initState();
     _viewModel = SimilarWorksViewModel(widget.work);
+    _scrollController.addListener(_onScroll);
     _viewModel.loadSimilarWorks();
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels != _scrollController.position.minScrollExtent) {
+      if (_viewModel.filterPanelExpanded) {
+        _viewModel.closeFilterPanel();
+      }
+    }
   }
 
   void _scrollToTop() {
@@ -53,30 +64,56 @@ class _SimilarWorksScreenState extends State<SimilarWorksScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('相关推荐'),
+          actions: [
+            Consumer<SimilarWorksViewModel>(
+              builder: (context, viewModel, _) => IconButton(
+                icon: const Icon(Icons.filter_list),
+                onPressed: viewModel.toggleFilterPanel,
+              ),
+            ),
+          ],
         ),
         body: Consumer<SimilarWorksViewModel>(
           builder: (context, viewModel, child) {
-            return Column(
+            return Stack(
               children: [
-                Expanded(
-                  child: WorkGridView(
-                    works: viewModel.works,
-                    isLoading: viewModel.isLoading,
-                    error: viewModel.error,
-                    onRetry: () => viewModel.loadSimilarWorks(),
-                    layoutStrategy: _layoutStrategy,
-                    scrollController: _scrollController,
-                    bottomWidget: viewModel.works.isNotEmpty
-                        ? PaginationControls(
-                            currentPage: viewModel.currentPage,
-                            totalPages: viewModel.totalPages ?? 1,
-                            onPageChanged: (page) {
-                              viewModel.loadPage(page);
-                              _scrollToTop();
-                            },
-                            isLoading: viewModel.isLoading,
-                          )
-                        : null,
+                Column(
+                  children: [
+                    Expanded(
+                      child: WorkGridView(
+                        works: viewModel.works,
+                        isLoading: viewModel.isLoading,
+                        error: viewModel.error,
+                        onRetry: () => viewModel.loadSimilarWorks(),
+                        layoutStrategy: _layoutStrategy,
+                        scrollController: _scrollController,
+                        bottomWidget: viewModel.works.isNotEmpty
+                            ? PaginationControls(
+                                currentPage: viewModel.currentPage,
+                                totalPages: viewModel.totalPages ?? 1,
+                                onPageChanged: (page) {
+                                  viewModel.loadPage(page);
+                                  _scrollToTop();
+                                },
+                                isLoading: viewModel.isLoading,
+                              )
+                            : null,
+                      ),
+                    ),
+                  ],
+                ),
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: AnimatedSlide(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInOut,
+                    offset: Offset(0, viewModel.filterPanelExpanded ? 0 : -1),
+                    child: FilterWithKeyword(
+                      hasSubtitle: viewModel.hasSubtitle,
+                      onSubtitleChanged: (_) => viewModel.toggleSubtitleFilter(),
+                    ),
                   ),
                 ),
               ],

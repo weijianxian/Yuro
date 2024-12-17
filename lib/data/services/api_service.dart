@@ -160,7 +160,7 @@ class ApiService {
         );
       }
 
-      throw Exception('获取收藏列表���败: ${response.statusCode}');
+      throw Exception('获取收藏列表失败: ${response.statusCode}');
     } on DioException catch (e) {
       AppLogger.error('网络请求失败', e, e.stackTrace);
       throw Exception('网络请求失败: ${e.message}');
