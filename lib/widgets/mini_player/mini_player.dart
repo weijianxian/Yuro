@@ -82,7 +82,7 @@ class MiniPlayer extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 4, 8, 4),
                         child: Hero(
-                          tag: 'player-cover',
+                          tag: 'mini-player-cover',
                           child: MiniPlayerCover(
                             coverUrl: viewModel.currentTrackInfo?.coverUrl,
                           ),

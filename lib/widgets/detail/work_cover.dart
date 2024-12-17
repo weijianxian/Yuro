@@ -6,6 +6,7 @@ class WorkCover extends StatelessWidget {
   final int workId;
   final String sourceId;
   final String? releaseDate;
+  final String? heroTag;
 
 
   const WorkCover({
@@ -14,22 +15,20 @@ class WorkCover extends StatelessWidget {
     required this.workId,
     required this.sourceId,
     this.releaseDate,
+    this.heroTag,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    Widget content = Stack(
       children: [
         AspectRatio(
           aspectRatio: 195 / 146,
-          child: Hero(
-            tag: 'work-cover-$workId',
-            child: CachedNetworkImage(
-              imageUrl: imageUrl,
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
-            ),
+          child: CachedNetworkImage(
+            imageUrl: imageUrl,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
           ),
         ),
         Positioned(
@@ -71,5 +70,14 @@ class WorkCover extends StatelessWidget {
           ),
       ],
     );
+
+    if (heroTag != null) {
+      return Hero(
+        tag: heroTag!,
+        child: content,
+      );
+    }
+
+    return content;
   }
 }

@@ -12,10 +12,12 @@ import 'package:asmrapp/screens/similar_works_screen.dart';
 
 class DetailScreen extends StatelessWidget {
   final Work work;
+  final bool fromPlayer;
 
   const DetailScreen({
     super.key,
     required this.work,
+    this.fromPlayer = false,
   });
 
   @override
@@ -38,6 +40,9 @@ class DetailScreen extends StatelessWidget {
                 workId: work.id ?? 0,
                 sourceId: work.sourceId ?? '',
                 releaseDate: work.release,
+                heroTag: fromPlayer 
+                  ? 'player-cover-${work.id}'
+                  : 'mini-player-cover',
               ),
               WorkInfo(work: work),
               Consumer<DetailViewModel>(

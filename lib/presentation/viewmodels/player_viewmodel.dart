@@ -187,4 +187,5 @@ class PlayerViewModel extends ChangeNotifier {
   }
 
   AudioTrackInfo? get currentTrackInfo => _audioService.currentTrack;
+  PlaybackContext? get currentContext => _audioService.currentContext;
 }

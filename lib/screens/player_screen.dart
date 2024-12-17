@@ -6,6 +6,7 @@ import 'package:asmrapp/widgets/player/player_controls.dart';
 import 'package:asmrapp/widgets/player/player_progress.dart';
 import 'package:asmrapp/widgets/lyrics/lyric_display.dart';
 import 'package:asmrapp/widgets/player/player_cover.dart';
+import 'package:asmrapp/screens/detail_screen.dart';
 
 
 class PlayerScreen extends StatelessWidget {
@@ -25,6 +26,22 @@ class PlayerScreen extends StatelessWidget {
           },
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            onPressed: () {
+              final currentWork = viewModel.currentContext?.work;
+              if (currentWork != null) {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => DetailScreen(
+                      work: currentWork,
+                      fromPlayer: true,
+                    ),
+                  ),
+                );
+              }
+            },
+          ),
           IconButton(
             icon: Icon(
               lyricManager.isShowing ? Icons.lyrics : Icons.lyrics_outlined,
@@ -47,7 +64,7 @@ class PlayerScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 32),
                   child: Hero(
-                    tag: 'player-cover',
+                    tag: 'player-cover-${viewModel.currentContext?.work.id ?? "default"}',
                     child: PlayerCover(
                       coverUrl: viewModel.currentTrackInfo?.coverUrl,
                     ),
