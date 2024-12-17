@@ -136,8 +136,9 @@ class PlaybackController {
       }
 
       // 5. 等待播放器准备完成
-      AppLogger.debug('等待播放器加载');
-      await _player.load();
+      // 删掉，会导致播放器索引回到0
+      // AppLogger.debug('等待播放器加载');
+      // await _player.load();
       
       // 6. 更新轨道信息
       AppLogger.debug('更新轨道信息');
