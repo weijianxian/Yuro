@@ -27,7 +27,7 @@ class PlayerProgress extends StatelessWidget {
       listenable: viewModel,
       builder: (context, _) {
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Column(
             children: [
               SliderTheme(
@@ -57,11 +57,15 @@ class PlayerProgress extends StatelessWidget {
                   children: [
                     Text(
                       _formatDuration(viewModel.position),
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                      ),
                     ),
                     Text(
                       _formatDuration(viewModel.duration),
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                      ),
                     ),
                   ],
                 ),

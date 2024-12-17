@@ -4,20 +4,94 @@ import 'package:get_it/get_it.dart';
 import 'package:asmrapp/presentation/viewmodels/player_viewmodel.dart';
 import 'package:asmrapp/widgets/player/player_controls.dart';
 import 'package:asmrapp/widgets/player/player_progress.dart';
-import 'package:asmrapp/widgets/lyrics/lyric_display.dart';
 import 'package:asmrapp/widgets/player/player_cover.dart';
 import 'package:asmrapp/screens/detail_screen.dart';
 import 'package:asmrapp/widgets/player/player_seek_controls.dart';
+import 'package:asmrapp/widgets/lyrics/components/player_lyric_view.dart';
 
-
-class PlayerScreen extends StatelessWidget {
+class PlayerScreen extends StatefulWidget {
   const PlayerScreen({super.key});
+
+  @override
+  State<PlayerScreen> createState() => _PlayerScreenState();
+}
+
+class _PlayerScreenState extends State<PlayerScreen> {
+  bool _showLyrics = false;
+  final GlobalKey _contentKey = GlobalKey();
+
+  Widget _buildContent(PlayerViewModel viewModel) {
+    if (_showLyrics) {
+      return LayoutBuilder(
+        key: _contentKey,
+        builder: (context, constraints) {
+          return PlayerLyricView();
+        },
+      );
+    }
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const SizedBox(height: 32),
+        // 封面
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Hero(
+            tag:
+                'player-cover-${viewModel.currentContext?.work.id ?? "default"}',
+            child: PlayerCover(
+              coverUrl: viewModel.currentTrackInfo?.coverUrl,
+            ),
+          ),
+        ),
+        const SizedBox(height: 32),
+        // 标题和艺术家
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            children: [
+              Hero(
+                tag: 'player-title',
+                child: Material(
+                  color: Colors.transparent,
+                  child: Text(
+                    viewModel.currentTrackInfo?.title ?? '未在播放',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              if (viewModel.currentTrackInfo?.artist != null)
+                Text(
+                  viewModel.currentTrackInfo!.artist,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.7),
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  double _getBottomBarHeight() {
+    return 32 + 8 + 48 + 8 + 48;
+  }
 
   @override
   Widget build(BuildContext context) {
     final viewModel = GetIt.I<PlayerViewModel>();
     final lyricManager = GetIt.I<LyricOverlayManager>();
-    
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -53,79 +127,33 @@ class PlayerScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      body: ListenableBuilder(
-        listenable: viewModel,
-        builder: (context, _) {
-          return SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 32),
-                // 封面
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
-                  child: Hero(
-                    tag: 'player-cover-${viewModel.currentContext?.work.id ?? "default"}',
-                    child: PlayerCover(
-                      coverUrl: viewModel.currentTrackInfo?.coverUrl,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 32),
-                // 标题和艺术家
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
-                  child: Column(
-                    children: [
-                      Hero(
-                        tag: 'player-title',
-                        child: Material(
-                          color: Colors.transparent,
-                          child: Text(
-                            viewModel.currentTrackInfo?.title ?? '未在播放',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      if (viewModel.currentTrackInfo?.artist != null)
-                        Text(
-                          viewModel.currentTrackInfo!.artist,
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // 字幕显示
-                const Expanded(
-                  child: LyricDisplay(),
-                ),
-                // 底部控制区域
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      PlayerProgress(),
-                      SizedBox(height: 16),
-                      PlayerSeekControls(),
-                      SizedBox(height: 16),
-                      PlayerControls(),
-                      SizedBox(height: 48),
-                    ],
-                  ),
-                ),
-              ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _showLyrics = !_showLyrics;
+                  });
+                },
+                child: _buildContent(viewModel),
+              ),
             ),
-          );
-        },
+            Container(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 32),
+              child: Column(
+                children: const [
+                  PlayerProgress(),
+                  SizedBox(height: 8),
+                  PlayerSeekControls(),
+                  SizedBox(height: 8),
+                  PlayerControls(),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

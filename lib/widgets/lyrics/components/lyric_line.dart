@@ -21,16 +21,14 @@ class LyricLine extends StatelessWidget {
       child: Text(
         subtitle.text,
         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-          fontSize: 18,
-          height: 1.2,
+          fontSize: 20,
+          height: 1.1,
           color: isActive 
             ? Theme.of(context).colorScheme.primary
             : Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
           fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
         ),
         textAlign: TextAlign.center,
-        maxLines: isActive ? null : 1,
-        overflow: isActive ? TextOverflow.visible : TextOverflow.ellipsis,
       ),
     );
   }
