@@ -4,9 +4,7 @@ import 'package:asmrapp/common/constants/strings.dart';
 import 'package:asmrapp/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:asmrapp/presentation/widgets/auth/login_dialog.dart';
 import 'package:asmrapp/screens/favorites_screen.dart';
-import 'package:asmrapp/screens/recommend_screen.dart';
 import 'package:asmrapp/screens/settings/cache_manager_screen.dart';
-import 'package:asmrapp/screens/popular_screen.dart';
 import 'package:asmrapp/core/theme/theme_controller.dart';
 
 class DrawerMenu extends StatelessWidget {
@@ -70,27 +68,7 @@ class DrawerMenu extends StatelessWidget {
                 );
               },
             ),
-            Consumer<AuthViewModel>(
-              builder: (context, authVM, _) {
-                return ListTile(
-                  leading: const Icon(Icons.recommend),
-                  title: const Text('为你推荐'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    if (!authVM.isLoggedIn) {
-                      _showLoginDialog(context);
-                      return;
-                    }
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const RecommendScreen(),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
+
             ListTile(
               leading: const Icon(Icons.favorite),
               title: const Text(Strings.favorites),
@@ -129,19 +107,6 @@ class DrawerMenu extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => const CacheManagerScreen(),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.trending_up),
-              title: const Text('热门作品'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const PopularScreen(),
                   ),
                 );
               },
