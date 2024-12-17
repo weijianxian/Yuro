@@ -25,9 +25,17 @@ class LyricOverlayPlugin(private val context: Context) : MethodCallHandler {
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
             "initialize" -> {
-                context.startService(serviceIntent)
-                context.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE)
-                result.success(null)
+                try {
+                    context.startService(serviceIntent)
+                    context.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE)
+                    result.success(null)
+                } catch (e: Exception) {
+                    result.error(
+                        "SERVICE_START_ERROR",
+                        e.message,
+                        e.toString()
+                    )
+                }
             }
             "show" -> {
                 service?.showLyric("")
