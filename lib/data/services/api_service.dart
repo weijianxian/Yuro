@@ -58,12 +58,27 @@ class ApiService {
   Future<WorksResponse> getWorks({
     int page = 1,
     bool hasSubtitle = false,
+    String order = 'create_date',
+    String sort = 'desc',
+    String playlistId = '',
   }) async {
     try {
-      final response = await _dio.get('/works', queryParameters: {
+      final queryParams = {
         'page': page,
-        'subtitle': hasSubtitle ? 1 : 0, 
-      });
+        'subtitle': hasSubtitle ? 1 : 0,
+        'order': order,
+        'sort': sort,
+      };
+
+      // 如果提供了收藏夹ID，添加到查询参数
+      if (playlistId.isNotEmpty) {
+        queryParams['withPlaylistStatus[]'] = playlistId;
+      }
+
+      final response = await _dio.get(
+        '/works',
+        queryParameters: queryParams,
+      );
 
       if (response.statusCode == 200) {
         final List<dynamic> works = response.data['works'] ?? [];
@@ -145,7 +160,7 @@ class ApiService {
         );
       }
 
-      throw Exception('获取收藏列表失败: ${response.statusCode}');
+      throw Exception('获取收藏列表���败: ${response.statusCode}');
     } on DioException catch (e) {
       AppLogger.error('网络请求失败', e, e.stackTrace);
       throw Exception('网络请求失败: ${e.message}');

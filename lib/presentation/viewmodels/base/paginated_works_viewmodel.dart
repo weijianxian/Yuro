@@ -16,10 +16,14 @@ abstract class PaginatedWorksViewModel extends ChangeNotifier {
     _init();
   }
 
-  // 初始化方法
-  void _init() {
+  // 修改为异步初始化
+  Future<void> _init() async {
+    await onInit(); // 添加初始化钩子
     loadPage(1);
   }
+
+  // 添加初始化钩子，供子类重写
+  Future<void> onInit() async {}
 
   // Getters
   List<Work> get works => _works;
