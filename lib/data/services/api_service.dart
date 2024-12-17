@@ -7,6 +7,7 @@ import 'package:asmrapp/data/models/works/work.dart';
 import 'package:asmrapp/data/models/works/pagination.dart';
 import 'package:asmrapp/utils/logger.dart';
 import 'package:asmrapp/data/services/interceptors/auth_interceptor.dart';
+import 'package:asmrapp/data/models/playlists_with_exist_statu/playlist.dart';
 
 
 class WorksResponse {
@@ -343,7 +344,7 @@ class ApiService {
       AppLogger.error('网络请求失败', e, e.stackTrace);
       throw Exception('网络请求失败: ${e.message}');
     } catch (e, stackTrace) {
-      AppLogger.error('添加到���藏夹失败', e, stackTrace);
+      AppLogger.error('添加到收藏夹失败', e, stackTrace);
       throw Exception('添加到收藏夹失败: $e');
     }
   }
@@ -407,13 +408,14 @@ class ApiService {
   }
 
   /// 获取默认标记目标收藏夹
-  Future<Map<String, dynamic>> getDefaultMarkTargetPlaylist() async {
+  Future<Playlist> getDefaultMarkTargetPlaylist() async {
     try {
       final response = await _dio.get('/playlist/get-default-mark-target-playlist');
 
       if (response.statusCode == 200) {
-        AppLogger.info('获取默认标记目标收藏夹成功: ${response.data}');
-        return response.data;
+        final playlist = Playlist.fromJson(response.data);
+        AppLogger.info('获取默认标记目标收藏夹成功: id=${playlist.id}, name=${playlist.name}');
+        return playlist;
       }
 
       throw Exception('获取默认标记目标收藏夹失败: ${response.statusCode}');
