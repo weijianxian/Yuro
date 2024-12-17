@@ -118,12 +118,17 @@ jobs:
 
       - name: Get Previous tag
         id: previoustag
-        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+        run: |
+          CURRENT_TAG=${GITHUB_REF#refs/tags/}
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 ${CURRENT_TAG}^ 2>/dev/null || echo "v0.0.0")
+          echo "tag=${PREVIOUS_TAG}" >> $GITHUB_OUTPUT
 
       - name: Generate commit messages
         id: commits
         run: |
-          COMMITS=$(git log $(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD --pretty=format:"%s%n%b" | .github/scripts/process_commits.sh)
+          CURRENT_TAG=${GITHUB_REF#refs/tags/}
+          PREV_TAG=${{ steps.previoustag.outputs.tag }}
+          COMMITS=$(git log ${PREV_TAG}..${CURRENT_TAG} --pretty=format:"%s%n%b" | .github/scripts/process_commits.sh)
           echo "commits<<EOF" >> $GITHUB_OUTPUT
           echo "$COMMITS" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
@@ -162,8 +167,8 @@ jobs:
             
             > **Note:** Please report any issues or bugs through the GitHub issue tracker.
           files: |
-            dist/app-release.apk
-            dist/app-release.aab
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/bundle/release/app-release.aab
             dist/app-release.ipa
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
