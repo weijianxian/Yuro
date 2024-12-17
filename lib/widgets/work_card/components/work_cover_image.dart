@@ -4,6 +4,7 @@ import 'package:shimmer/shimmer.dart';
 
 class WorkCoverImage extends StatelessWidget {
   final String imageUrl;
+  final int workId;
   final String sourceId;
   // 195/146 ≈ 1.336
   static const double _aspectRatio = 195 / 146;
@@ -11,6 +12,7 @@ class WorkCoverImage extends StatelessWidget {
   const WorkCoverImage({
     super.key,
     required this.imageUrl,
+    required this.workId,
     required this.sourceId,
   });
 
@@ -21,7 +23,7 @@ class WorkCoverImage extends StatelessWidget {
       child: Stack(
         children: [
           Hero(
-            tag: 'work-cover-$sourceId',
+            tag: 'work-cover-$workId',
             child: CachedNetworkImage(
               imageUrl: imageUrl,
               fit: BoxFit.cover,
