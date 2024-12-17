@@ -167,8 +167,8 @@ jobs:
             
             > **Note:** Please report any issues or bugs through the GitHub issue tracker.
           files: |
-            build/app/outputs/flutter-apk/app-release.apk
-            build/app/outputs/bundle/release/app-release.aab
+            dist/app-release.apk
+            dist/app-release.aab
             dist/app-release.ipa
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

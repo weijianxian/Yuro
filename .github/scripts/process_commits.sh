@@ -2,23 +2,52 @@
 
 # 主标题的 emoji 映射
 process_commit() {
-  case "$1" in
-    Add*|Implement*) echo "✨ $1" ;; # 新功能/实现
-    Enhance*|Improve*) echo "🚀 $1" ;; # 增强/改进
-    Update*) echo "⚡️ $1" ;; # 更新
-    Integrate*|Configure*) echo "🔌 $1" ;; # 集成/配置
-    Fix*|Resolve*) echo "🐛 $1" ;; # 修复
-    Refactor*) echo "♻️ $1" ;; # 重构
-    Remove*|Delete*) echo "🔥 $1" ;; # 删除
-    Revert*) echo "⏮️ $1" ;; # 回退
-    *) echo "🔧 $1" ;; # 其他更改
+  local title="$1"
+  case "$title" in
+    feat:*|feature:*) echo "✨ ${title#*: }" ;; # 新功能
+    fix:*) echo "🐛 ${title#*: }" ;; # 修复
+    docs:*) echo "📝 ${title#*: }" ;; # 文档
+    style:*) echo "💄 ${title#*: }" ;; # 样式
+    refactor:*) echo "♻️ ${title#*: }" ;; # 重构
+    perf:*) echo "⚡️ ${title#*: }" ;; # 性能
+    test:*) echo "🧪 ${title#*: }" ;; # 测试
+    build:*) echo "📦 ${title#*: }" ;; # 构建
+    ci:*) echo "🎡 ${title#*: }" ;; # CI
+    chore:*) echo "🔧 ${title#*: }" ;; # 杂项
+    revert:*) echo "⏮️ ${title#*: }" ;; # 回退
+    *) 
+      case "$title" in
+        Add*|Implement*) echo "✨ $title" ;; 
+        Enhance*|Improve*) echo "🚀 $title" ;; 
+        Update*) echo "⚡️ $title" ;; 
+        Integrate*|Configure*) echo "🔌 $title" ;; 
+        Fix*|Resolve*) echo "🐛 $title" ;; 
+        Refactor*) echo "♻️ $title" ;; 
+        Remove*|Delete*) echo "🔥 $title" ;; 
+        Revert*) echo "⏮️ $title" ;; 
+        *) echo "🔧 $title" ;; 
+      esac
+      ;;
   esac
+}
+
+# 处理详细信息
+process_details() {
+  local details=""
+  
+  while IFS= read -r line; do
+    if [[ $line == -* ]]; then
+      details+="$(process_detail "$line")\n"
+    fi
+  done
+  
+  echo -e "$details"
 }
 
 # 详细信息的 emoji 映射
 process_detail() {
   local content="${1:2}" # 删除开头的 "- "
-  local prefix="   " # 缩进
+  local prefix="     " # 增加缩进空格数
   
   # 1. 首先检查动词开头
   case "$content" in
@@ -109,12 +138,33 @@ process_detail() {
 }
 
 # 主处理逻辑
+current_commit=""
+commit_details=""
+
 while IFS= read -r line; do
-  if [[ $line == "" ]]; then
-    echo ""
+  if [[ $line =~ ^[A-Za-z] ]] && [[ ! $line =~ ^These[[:space:]]changes ]]; then
+    # 如果有之前的 commit，先输出它
+    if [ -n "$current_commit" ]; then
+      if [ -n "$commit_details" ]; then
+        echo "▶ $current_commit"
+        echo -e "$(process_details "$commit_details")\n"
+      else
+        echo "  $current_commit"
+      fi
+    fi
+    current_commit=$(process_commit "$line")
+    commit_details=""
   elif [[ $line == -* ]]; then
-    process_detail "$line"
-  elif [[ $line =~ ^[A-Za-z] ]] && [[ ! $line =~ ^These[[:space:]]changes ]]; then
-    process_commit "$line"
+    commit_details+="$line\n"
   fi
-done 
+done
+
+# 输出最后一个 commit
+if [ -n "$current_commit" ]; then
+  if [ -n "$commit_details" ]; then
+    echo "▶ $current_commit"
+    echo -e "$(process_details "$commit_details")"
+  else
+    echo "  $current_commit"
+  fi
+fi 
