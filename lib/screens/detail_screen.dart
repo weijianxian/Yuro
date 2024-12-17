@@ -26,7 +26,7 @@ class DetailScreen extends StatelessWidget {
       )..loadFiles(),
       child: Scaffold(
         appBar: AppBar(
-          title: Text('RJ${work.id ?? 0}'),
+          title: Text(work.sourceId ?? ''),
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.only(bottom: MiniPlayer.height),
@@ -35,7 +35,7 @@ class DetailScreen extends StatelessWidget {
             children: [
               WorkCover(
                 imageUrl: work.mainCoverUrl ?? '',
-                rjNumber: 'RJ${work.id ?? 0}',
+                rjNumber: work.sourceId ?? '',
                 releaseDate: work.release,
               ),
               WorkInfo(work: work),
