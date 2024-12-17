@@ -35,7 +35,7 @@ class DetailScreen extends StatelessWidget {
             children: [
               WorkCover(
                 imageUrl: work.mainCoverUrl ?? '',
-                rjNumber: work.sourceId ?? '',
+                sourceId: work.sourceId ?? '',
                 releaseDate: work.release,
               ),
               WorkInfo(work: work),
