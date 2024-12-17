@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:asmrapp/screens/player_screen.dart';
 import 'package:asmrapp/common/constants/strings.dart';
 import 'package:asmrapp/presentation/viewmodels/auth_viewmodel.dart';
 import 'core/di/service_locator.dart';
@@ -41,7 +40,7 @@ class MyApp extends StatelessWidget {
             themeMode: themeController.themeMode,
             home: const MainScreen(),
             routes: {
-              '/player': (context) => const PlayerScreen(),
+              // '/player': (context) => const PlayerScreen(),
               '/search': (context) {
                 final keyword = ModalRoute.of(context)?.settings.arguments as String?;
                 return SearchScreen(initialKeyword: keyword);

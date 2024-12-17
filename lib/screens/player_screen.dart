@@ -20,7 +20,9 @@ class PlayerScreen extends StatelessWidget {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.expand_more),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
         ),
         actions: [
           IconButton(
@@ -44,8 +46,11 @@ class PlayerScreen extends StatelessWidget {
                 // 封面
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 32),
-                  child: PlayerCover(
-                    coverUrl: viewModel.currentTrackInfo?.coverUrl,
+                  child: Hero(
+                    tag: 'player-cover',
+                    child: PlayerCover(
+                      coverUrl: viewModel.currentTrackInfo?.coverUrl,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -54,12 +59,18 @@ class PlayerScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 32),
                   child: Column(
                     children: [
-                      Text(
-                        viewModel.currentTrackInfo?.title ?? '未在播放',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
+                      Hero(
+                        tag: 'player-title',
+                        child: Material(
+                          color: Colors.transparent,
+                          child: Text(
+                            viewModel.currentTrackInfo?.title ?? '未在播放',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
-                        textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 8),
                       if (viewModel.currentTrackInfo?.artist != null)
