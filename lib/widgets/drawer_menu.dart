@@ -43,13 +43,6 @@ class DrawerMenu extends StatelessWidget {
                 ),
               ),
             ),
-            ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text(Strings.home),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
             Consumer<AuthViewModel>(
               builder: (context, authVM, _) {
                 return ListTile(
