@@ -3,13 +3,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 class WorkCover extends StatelessWidget {
   final String imageUrl;
-  final String rjNumber;
+  final int workId;
+  final String sourceId;
   final String? releaseDate;
+
 
   const WorkCover({
     super.key,
     required this.imageUrl,
-    required this.rjNumber,
+    required this.workId,
+    required this.sourceId,
     this.releaseDate,
   });
 
@@ -20,7 +23,7 @@ class WorkCover extends StatelessWidget {
         AspectRatio(
           aspectRatio: 195 / 146,
           child: Hero(
-            tag: 'work-cover-$rjNumber',
+            tag: 'work-cover-$workId',
             child: CachedNetworkImage(
               imageUrl: imageUrl,
               fit: BoxFit.cover,
@@ -39,7 +42,7 @@ class WorkCover extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              rjNumber,
+              sourceId,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.white,
                     fontSize: 12,

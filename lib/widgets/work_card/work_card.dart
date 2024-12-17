@@ -30,7 +30,8 @@ class WorkCard extends StatelessWidget {
           children: [
             WorkCoverImage(
               imageUrl: work.mainCoverUrl ?? '',
-              rjNumber: 'RJ${work.id ?? 0}',
+              workId: work.id ?? 0,
+              sourceId: work.sourceId ?? '',
             ),
             Expanded(
               child: WorkInfoSection(work: work),
