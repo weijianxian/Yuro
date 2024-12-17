@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:asmrapp/core/platform/dummy_lyric_overlay_controller.dart';
 import 'package:get_it/get_it.dart';
 import '../audio/i_audio_player_service.dart';
 import '../audio/audio_player_service.dart';
@@ -92,7 +94,11 @@ Future<void> setupServiceLocator() async {
 
 Future<void> setupSubtitleServices() async {
   getIt.registerLazySingleton<SubtitleLoader>(() => SubtitleLoader());
-  getIt.registerLazySingleton<ILyricOverlayController>(() => LyricOverlayController());
+  if (Platform.isAndroid) {
+    getIt.registerLazySingleton<ILyricOverlayController>(() => LyricOverlayController());
+  } else {
+    getIt.registerLazySingleton<ILyricOverlayController>(() => DummyLyricOverlayController());
+  }
   getIt.registerLazySingleton(() => LyricOverlayManager(
     controller: getIt(),
     subtitleService: getIt(),
