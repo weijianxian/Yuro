@@ -20,15 +20,25 @@ class WorkRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (int i = 0; i < works.length; i++) ...[
-            if (i > 0) SizedBox(width: spacing),
-            Expanded(
-              child: WorkCard(
-                work: works[i],
-                onTap: onWorkTap != null ? () => onWorkTap!(works[i]) : null,
-              ),
-            ),
-          ],
+          // 第一个卡片
+          Expanded(
+            child: works.isNotEmpty 
+                ? WorkCard(
+                    work: works[0],
+                    onTap: onWorkTap != null ? () => onWorkTap!(works[0]) : null,
+                  )
+                : const SizedBox.shrink(),
+          ),
+          SizedBox(width: spacing),
+          // 第二个卡片或占位符
+          Expanded(
+            child: works.length > 1
+                ? WorkCard(
+                    work: works[1],
+                    onTap: onWorkTap != null ? () => onWorkTap!(works[1]) : null,
+                  )
+                : const SizedBox.shrink(), // 空占位符，保持两列布局
+          ),
         ],
       ),
     );
