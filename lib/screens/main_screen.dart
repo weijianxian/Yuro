@@ -10,6 +10,7 @@ import 'package:asmrapp/presentation/viewmodels/home_viewmodel.dart';
 import 'package:asmrapp/presentation/viewmodels/popular_viewmodel.dart';
 import 'package:asmrapp/presentation/viewmodels/recommend_viewmodel.dart';
 import 'package:asmrapp/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:asmrapp/screens/contents/favorites_content.dart';
 
 /// MainScreen 是应用的主界面，负责管理底部导航栏和对应的内容页面。
 /// 它采用了集中式的状态管理架构，所有子页面的 ViewModel 都在这里初始化和提供。
@@ -26,8 +27,8 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  final _pageController = PageController();
-  int _currentIndex = 0;
+  final _pageController = PageController(initialPage: 1);
+  int _currentIndex = 1;
 
   // 集中管理所有页面的 ViewModel
   // 这些 ViewModel 将通过 Provider 提供给子页面
@@ -35,12 +36,13 @@ class _MainScreenState extends State<MainScreen> {
   late final PopularViewModel _popularViewModel;
   late final RecommendViewModel _recommendViewModel;
 
-  final _titles = const ['主页', '为你推荐', '热门作品'];
+  final _titles = const ['收藏', '主页', '为你推荐', '热门作品'];
 
   // 页面内容列表
   // 注意：这些页面不应该创建自己的 ViewModel 实例
   // 而是应该通过 Provider.of 或 context.read 获取 MainScreen 提供的实例
   final _pages = const [
+    FavoritesContent(),
     HomeContent(),
     RecommendContent(),
     PopularContent(),
@@ -95,11 +97,13 @@ class _MainScreenState extends State<MainScreen> {
       child: Builder(
         builder: (context) {
           // 根据当前页面获取对应的总数
-          final totalCount = _currentIndex == 0
+          final totalCount = _currentIndex == 1
               ? context.watch<HomeViewModel>().pagination?.totalCount
-              : _currentIndex == 1
+              : _currentIndex == 2
                   ? context.watch<RecommendViewModel>().pagination?.totalCount
-                  : context.watch<PopularViewModel>().pagination?.totalCount;
+                  : _currentIndex == 3
+                      ? context.watch<PopularViewModel>().pagination?.totalCount
+                      : null;
 
           // 构建标题文本
           final title = totalCount != null
@@ -154,6 +158,11 @@ class _MainScreenState extends State<MainScreen> {
                   selectedIndex: _currentIndex,
                   onDestinationSelected: _onTabTapped,
                   destinations: const [
+                    NavigationDestination(
+                      icon: Icon(Icons.favorite_outline),
+                      selectedIcon: Icon(Icons.favorite),
+                      label: '收藏',
+                    ),
                     NavigationDestination(
                       icon: Icon(Icons.home_outlined),
                       selectedIcon: Icon(Icons.home),
