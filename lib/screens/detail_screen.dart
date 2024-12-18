@@ -40,9 +40,7 @@ class DetailScreen extends StatelessWidget {
                 workId: work.id ?? 0,
                 sourceId: work.sourceId ?? '',
                 releaseDate: work.release,
-                heroTag: fromPlayer 
-                  ? 'player-cover-${work.id}'
-                  : 'mini-player-cover',
+                heroTag: 'work-cover-${work.id}',
               ),
               WorkInfo(work: work),
               Consumer<DetailViewModel>(

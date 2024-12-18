@@ -86,7 +86,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 32),
                       child: Hero(
-                        tag: 'player-cover-${_viewModel.currentContext?.work.id ?? "default"}',
+                        tag: 'mini-player-cover',
                         child: PlayerCover(
                           coverUrl: _viewModel.currentTrackInfo?.coverUrl,
                         ),
