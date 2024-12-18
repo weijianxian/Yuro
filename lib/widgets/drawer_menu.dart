@@ -6,6 +6,8 @@ import 'package:asmrapp/presentation/widgets/auth/login_dialog.dart';
 import 'package:asmrapp/screens/favorites_screen.dart';
 import 'package:asmrapp/screens/settings/cache_manager_screen.dart';
 import 'package:asmrapp/core/theme/theme_controller.dart';
+import 'package:asmrapp/core/platform/wakelock_controller.dart';
+import 'package:get_it/get_it.dart';
 
 class DrawerMenu extends StatelessWidget {
   const DrawerMenu({super.key});
@@ -114,6 +116,17 @@ class DrawerMenu extends StatelessWidget {
                   leading: Icon(_getThemeIcon(themeController.themeMode)),
                   title: Text(_getThemeText(themeController.themeMode)),
                   onTap: () => themeController.toggleThemeMode(),
+                );
+              },
+            ),
+            ListenableBuilder(
+              listenable: GetIt.I<WakeLockController>(),
+              builder: (context, _) {
+                final controller = GetIt.I<WakeLockController>();
+                return SwitchListTile(
+                  title: const Text('屏幕常亮'),
+                  value: controller.enabled,
+                  onChanged: (_) => controller.toggle(),
                 );
               },
             ),

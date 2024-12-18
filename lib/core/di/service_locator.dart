@@ -19,6 +19,7 @@ import '../../core/theme/theme_controller.dart';
 import '../../core/platform/i_lyric_overlay_controller.dart';
 import '../../core/platform/lyric_overlay_controller.dart';
 import '../../core/platform/lyric_overlay_manager.dart';
+import '../../core/platform/wakelock_controller.dart';
 
 final getIt = GetIt.instance;
 
@@ -90,6 +91,9 @@ Future<void> setupServiceLocator() async {
   getIt.registerLazySingleton<ThemeController>(
     () => ThemeController(prefs),
   );
+
+  // 注册 WakeLockController
+  getIt.registerLazySingleton(() => WakeLockController(prefs));
 }
 
 Future<void> setupSubtitleServices() async {

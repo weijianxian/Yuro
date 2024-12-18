@@ -8,6 +8,7 @@ import 'package:asmrapp/widgets/player/player_cover.dart';
 import 'package:asmrapp/screens/detail_screen.dart';
 import 'package:asmrapp/widgets/lyrics/components/player_lyric_view.dart';
 import 'package:asmrapp/widgets/player/player_work_info.dart';
+import 'package:asmrapp/core/platform/wakelock_controller.dart';
 
 class PlayerScreen extends StatefulWidget {
   const PlayerScreen({super.key});
@@ -19,7 +20,6 @@ class PlayerScreen extends StatefulWidget {
 class _PlayerScreenState extends State<PlayerScreen> {
   bool _showLyrics = false;
   bool _canSwitchView = true;
-  final GlobalKey _contentKey = GlobalKey();
   late final PlayerViewModel _viewModel;
 
   @override
@@ -137,6 +137,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
   @override
   Widget build(BuildContext context) {
     final lyricManager = GetIt.I<LyricOverlayManager>();
+    final wakeLockController = GetIt.I<WakeLockController>();
 
     return Scaffold(
       appBar: AppBar(
@@ -168,6 +169,20 @@ class _PlayerScreenState extends State<PlayerScreen> {
               lyricManager.isShowing ? Icons.lyrics : Icons.lyrics_outlined,
             ),
             onPressed: () => lyricManager.toggle(context),
+          ),
+          ListenableBuilder(
+            listenable: wakeLockController,
+            builder: (context, _) {
+              return IconButton(
+                icon: Icon(
+                  wakeLockController.enabled 
+                    ? Icons.lightbulb
+                    : Icons.lightbulb_outline,
+                ),
+                tooltip: wakeLockController.enabled ? '关闭屏幕常亮' : '开启屏幕常亮',
+                onPressed: () => wakeLockController.toggle(),
+              );
+            },
           ),
         ],
         backgroundColor: Colors.transparent,
