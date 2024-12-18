@@ -89,14 +89,14 @@ class _PlayerLyricViewState extends State<PlayerLyricView> {
             final subtitle = subtitleList.subtitles[index];
             final isActive = currentSubtitle?.subtitle == subtitle;
             
-            return SizedBox(
-              height: baseUnit * 1.6,  // 增加行高到 1.6 倍基础单位
-              child: Center(
-                child: LyricLine(
-                  subtitle: subtitle,
-                  isActive: isActive,
-                  opacity: isActive ? 1.0 : 0.5,
-                ),
+            return Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: baseUnit * 0.35,  // 改用padding来控制行间距
+              ),
+              child: LyricLine(
+                subtitle: subtitle,
+                isActive: isActive,
+                opacity: isActive ? 1.0 : 0.5,
               ),
             );
           },

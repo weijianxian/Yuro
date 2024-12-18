@@ -22,7 +22,7 @@ class LyricLine extends StatelessWidget {
         subtitle.text,
         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
           fontSize: 20,
-          height: 1.1,
+          height: 1.3,
           color: isActive 
             ? Theme.of(context).colorScheme.primary
             : Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
