@@ -6,9 +6,7 @@ import 'package:asmrapp/widgets/player/player_controls.dart';
 import 'package:asmrapp/widgets/player/player_progress.dart';
 import 'package:asmrapp/widgets/player/player_cover.dart';
 import 'package:asmrapp/screens/detail_screen.dart';
-import 'package:asmrapp/widgets/player/player_seek_controls.dart';
 import 'package:asmrapp/widgets/lyrics/components/player_lyric_view.dart';
-import 'package:marquee/marquee.dart';
 import 'package:asmrapp/widgets/player/player_work_info.dart';
 
 class PlayerScreen extends StatefulWidget {
@@ -20,6 +18,7 @@ class PlayerScreen extends StatefulWidget {
 
 class _PlayerScreenState extends State<PlayerScreen> {
   bool _showLyrics = false;
+  bool _canSwitchView = true;
   final GlobalKey _contentKey = GlobalKey();
 
   Widget _buildContent(PlayerViewModel viewModel) {
@@ -27,7 +26,13 @@ class _PlayerScreenState extends State<PlayerScreen> {
       return LayoutBuilder(
         key: _contentKey,
         builder: (context, constraints) {
-          return const PlayerLyricView();
+          return PlayerLyricView(
+            onScrollStateChanged: (canSwitch) {
+              setState(() {
+                _canSwitchView = canSwitch;
+              });
+            },
+          );
         },
       );
     }
@@ -88,9 +93,6 @@ class _PlayerScreenState extends State<PlayerScreen> {
     );
   }
 
-  double _getBottomBarHeight() {
-    return 32 + 8 + 48 + 8 + 48;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -138,9 +140,11 @@ class _PlayerScreenState extends State<PlayerScreen> {
             Expanded(
               child: GestureDetector(
                 onTap: () {
-                  setState(() {
-                    _showLyrics = !_showLyrics;
-                  });
+                  if (_canSwitchView) {
+                    setState(() {
+                      _showLyrics = !_showLyrics;
+                    });
+                  }
                 },
                 behavior: HitTestBehavior.opaque,
                 child: _buildContent(viewModel),

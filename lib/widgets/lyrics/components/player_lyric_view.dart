@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -7,10 +9,12 @@ import 'lyric_line.dart';
 
 class PlayerLyricView extends StatefulWidget {
   final bool immediateScroll;
+  final Function(bool canSwitch) onScrollStateChanged;
 
   const PlayerLyricView({
     super.key,
     this.immediateScroll = false,
+    required this.onScrollStateChanged,
   });
 
   @override
@@ -22,16 +26,21 @@ class _PlayerLyricViewState extends State<PlayerLyricView> {
   final ItemScrollController _itemScrollController = ItemScrollController();
   final ItemPositionsListener _itemPositionsListener = ItemPositionsListener.create();
   
-  // 添加一个标记，记录是否是首次构建
   bool _isFirstBuild = true;
   Subtitle? _lastScrolledSubtitle;
-  
+  Timer? _scrollDebounceTimer;
+
   @override
   void initState() {
     super.initState();
-    // 移除 initState 中的滚动逻辑，统一在 build 中处理
   }
-  
+
+  @override
+  void dispose() {
+    _scrollDebounceTimer?.cancel();
+    super.dispose();
+  }
+
   void _scrollToCurrentLyric(SubtitleWithState current) {
     if (!_itemScrollController.isAttached) return;
     
@@ -84,29 +93,48 @@ class _PlayerLyricViewState extends State<PlayerLyricView> {
           });
         }
 
-        return ScrollablePositionedList.builder(
-          itemCount: subtitleList.subtitles.length,
-          itemScrollController: _itemScrollController,
-          itemPositionsListener: _itemPositionsListener,
-          padding: EdgeInsets.symmetric(
-            vertical: screenHeight * 0.3,  // 增加上下边距到 30%
-            horizontal: baseUnit * 0.8,
-          ),
-          itemBuilder: (context, index) {
-            final subtitle = subtitleList.subtitles[index];
-            final isActive = currentSubtitle?.subtitle == subtitle;
-            
-            return Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: baseUnit * 0.35,  // 改用padding来控制行间距
-              ),
-              child: LyricLine(
-                subtitle: subtitle,
-                isActive: isActive,
-                opacity: isActive ? 1.0 : 0.5,
-              ),
-            );
+        return NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            // 只在用户手动滚动时处理
+            if (notification is ScrollStartNotification && 
+                notification.dragDetails != null) {  // dragDetails不为空表示是用户拖动
+              widget.onScrollStateChanged(false);
+              
+              // 重置定时器
+              _scrollDebounceTimer?.cancel();
+            } else if (notification is ScrollEndNotification) {
+              // 重置定时器
+              _scrollDebounceTimer?.cancel();
+              _scrollDebounceTimer = Timer(const Duration(milliseconds: 300), () {
+                widget.onScrollStateChanged(true);
+              });
+            }
+            return false;
           },
+          child: ScrollablePositionedList.builder(
+            itemCount: subtitleList.subtitles.length,
+            itemScrollController: _itemScrollController,
+            itemPositionsListener: _itemPositionsListener,
+            padding: EdgeInsets.symmetric(
+              vertical: screenHeight * 0.3,
+              horizontal: baseUnit * 0.8,
+            ),
+            itemBuilder: (context, index) {
+              final subtitle = subtitleList.subtitles[index];
+              final isActive = currentSubtitle?.subtitle == subtitle;
+              
+              return Padding(
+                padding: EdgeInsets.symmetric(
+                  vertical: baseUnit * 0.35,  // 改用padding来控制行间距
+                ),
+                child: LyricLine(
+                  subtitle: subtitle,
+                  isActive: isActive,
+                  opacity: isActive ? 1.0 : 0.5,
+                ),
+              );
+            },
+          ),
         );
       },
     );
