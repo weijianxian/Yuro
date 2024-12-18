@@ -30,7 +30,15 @@ class _PlayerLyricViewState extends State<PlayerLyricView> {
   
   bool _isFirstBuild = true;
   Subtitle? _lastScrolledSubtitle;
+  
+  // 用于控制视图切换的计时器和状态
+  // 当用户手动滚动时，暂时禁用视图切换功能，防止切换到封面
   Timer? _scrollDebounceTimer;
+  
+  // 用于控制自动滚动的计时器和状态
+  // 当用户手动滚动时，暂时禁用自动滚动功能，让用户可以自由浏览歌词
+  bool _allowAutoScroll = true;
+  Timer? _autoScrollDebounceTimer;
 
   @override
   void initState() {
@@ -39,26 +47,31 @@ class _PlayerLyricViewState extends State<PlayerLyricView> {
 
   @override
   void dispose() {
-    _scrollDebounceTimer?.cancel();
+    // 清理所有计时器
+    _scrollDebounceTimer?.cancel();    // 视图切换计时器
+    _autoScrollDebounceTimer?.cancel(); // 自动滚动计时器
     super.dispose();
   }
 
   void _scrollToCurrentLyric(SubtitleWithState current) {
     if (!_itemScrollController.isAttached) return;
     
-    // 避免重复滚动
+    // 如果当前禁用了自动滚动（用户正在手动浏览），则不执行自动滚动
+    if (!_allowAutoScroll) return;
+    
+    // 避免重复滚动到同一句歌词
     if (_lastScrolledSubtitle == current.subtitle) return;
     _lastScrolledSubtitle = current.subtitle;
     
-    // 首次构建时直接跳转到位置，不使用动画
     if (_isFirstBuild) {
       _isFirstBuild = false;
+      // 首次加载时直接跳转，不使用动画
       _itemScrollController.jumpTo(
         index: current.subtitle.index,
         alignment: 0.5,
       );
     } else {
-      // 后续的歌词切换使用动画
+      // 正常播放时使用平滑滚动动画
       _itemScrollController.scrollTo(
         index: current.subtitle.index,
         duration: const Duration(milliseconds: 300),
@@ -70,10 +83,8 @@ class _PlayerLyricViewState extends State<PlayerLyricView> {
 
   @override
   Widget build(BuildContext context) {
-    // 获取屏幕尺寸
     final screenHeight = MediaQuery.of(context).size.height;
-    // 计算基础单位，以屏幕高度��基准
-    final baseUnit = screenHeight * 0.04;  // 4% 的屏幕高度
+    final baseUnit = screenHeight * 0.04;
     
     return StreamBuilder<SubtitleWithState?>(
       stream: _subtitleService.currentSubtitleWithStateStream,
@@ -88,7 +99,6 @@ class _PlayerLyricViewState extends State<PlayerLyricView> {
           );
         }
 
-        // 当前歌词变化时，自动滚动
         if (currentSubtitle != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             _scrollToCurrentLyric(currentSubtitle);
@@ -97,18 +107,36 @@ class _PlayerLyricViewState extends State<PlayerLyricView> {
 
         return NotificationListener<ScrollNotification>(
           onNotification: (notification) {
-            // 只在用户手动滚动时处理
             if (notification is ScrollStartNotification && 
-                notification.dragDetails != null) {  // dragDetails不为空表示是用户拖动
+                notification.dragDetails != null) {  // 用户开始手动滚动
+              // 禁用视图切换功能
               widget.onScrollStateChanged(false);
               
-              // 重置定时器
+              // 禁用自动滚动功能
+              _allowAutoScroll = false;
+              
+              // 取消所有待执行的计时器
               _scrollDebounceTimer?.cancel();
-            } else if (notification is ScrollEndNotification) {
-              // 重置定时器
+              _autoScrollDebounceTimer?.cancel();
+            } else if (notification is ScrollEndNotification) {  // 用户结束滚动
+              // 设置视图切换计时器：300ms后恢复视图切换功能
               _scrollDebounceTimer?.cancel();
               _scrollDebounceTimer = Timer(const Duration(milliseconds: 300), () {
                 widget.onScrollStateChanged(true);
+              });
+              
+              // 设置自动滚动计时器：2000ms后恢复自动滚动功能
+              _autoScrollDebounceTimer?.cancel();
+              _autoScrollDebounceTimer = Timer(const Duration(milliseconds: 3000), () {
+                if (mounted) {
+                  setState(() {
+                    _allowAutoScroll = true;
+                    // 恢复时立即滚动到当前播放位置
+                    if (_subtitleService.currentSubtitleWithState != null) {
+                      _scrollToCurrentLyric(_subtitleService.currentSubtitleWithState!);
+                    }
+                  });
+                }
               });
             }
             return false;
@@ -134,13 +162,10 @@ class _PlayerLyricViewState extends State<PlayerLyricView> {
                   isActive: isActive,
                   opacity: isActive ? 1.0 : 0.5,
                   onTap: () async {
-                    // 点击时暂时禁用视图切换
                     widget.onScrollStateChanged(false);
                     
-                    // 跳转到对应时间点
                     await _viewModel.seek(subtitle.start);
                     
-                    // 延迟恢复视图切换功能
                     Future.delayed(const Duration(milliseconds: 500), () {
                       if (mounted) {
                         widget.onScrollStateChanged(true);
