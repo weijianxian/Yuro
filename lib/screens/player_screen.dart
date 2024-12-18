@@ -146,7 +146,12 @@ class _PlayerScreenState extends State<PlayerScreen> {
                 children: const [
                   PlayerProgress(),
                   SizedBox(height: 8),
-                  PlayerSeekControls(),
+                  // PlayerSeekControls(), // 暂时移除进度控制按钮
+                  // 原因:
+                  // 1. 当前按钮过多(6个)导致操作复杂
+                  // 2. 需要重新设计主次分明的控制界面
+                  // 3. 计划将部分功能改为手势操作
+                  // TODO: 重新设计更简洁的控制界面
                   SizedBox(height: 8),
                   PlayerControls(),
                 ],
