@@ -8,6 +8,7 @@ import 'package:asmrapp/data/models/works/pagination.dart';
 import 'package:asmrapp/utils/logger.dart';
 import 'package:asmrapp/data/services/interceptors/auth_interceptor.dart';
 import 'package:asmrapp/data/models/playlists_with_exist_statu/playlist.dart';
+import 'package:asmrapp/data/models/my_lists/my_playlists/my_playlists.dart';
 
 
 class WorksResponse {
@@ -423,6 +424,68 @@ class ApiService {
       }
 
       throw Exception('获取默认标记目标收藏夹失败: ${response.statusCode}');
+    } on DioException catch (e) {
+      AppLogger.error('网络请求失败', e, e.stackTrace);
+      throw Exception('网络请求失败: ${e.message}');
+    } catch (e, stackTrace) {
+      AppLogger.error('解析数据失败', e, stackTrace);
+      throw Exception('解析数据失败: $e');
+    }
+  }
+
+  /// 获取用户的播放列表
+  Future<MyPlaylists> getMyPlaylists({int page = 1}) async {
+    try {
+      final response = await _dio.get(
+        '/playlist/get-playlists',
+        queryParameters: {
+          'page': page,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final myPlaylists = MyPlaylists.fromJson(response.data);
+        AppLogger.info('获取播放列表成功: ${myPlaylists.playlists?.length ?? 0}个播放列表');
+        return myPlaylists;
+      }
+
+      throw Exception('获取播放列表失败: ${response.statusCode}');
+    } on DioException catch (e) {
+      AppLogger.error('网络请求失败', e, e.stackTrace);
+      throw Exception('网络请求失败: ${e.message}');
+    } catch (e, stackTrace) {
+      AppLogger.error('解析数据失败', e, stackTrace);
+      throw Exception('解析数据失败: $e');
+    }
+  }
+
+  /// 获取播放列表中的作品
+  Future<WorksResponse> getPlaylistWorks({
+    required String playlistId,
+    int page = 1,
+    int pageSize = 12,
+  }) async {
+    try {
+      final response = await _dio.get(
+        '/playlist/get-playlist-works',
+        queryParameters: {
+          'id': playlistId,
+          'page': page,
+          'pageSize': pageSize,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> works = response.data['works'] ?? [];
+        final pagination = Pagination.fromJson(response.data['pagination']);
+
+        return WorksResponse(
+          works: works.map((work) => Work.fromJson(work)).toList(),
+          pagination: pagination,
+        );
+      }
+
+      throw Exception('获取播放列表作品失败: ${response.statusCode}');
     } on DioException catch (e) {
       AppLogger.error('网络请求失败', e, e.stackTrace);
       throw Exception('网络请求失败: ${e.message}');

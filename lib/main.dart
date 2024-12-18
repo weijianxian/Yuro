@@ -42,7 +42,8 @@ class MyApp extends StatelessWidget {
             routes: {
               // '/player': (context) => const PlayerScreen(),
               '/search': (context) {
-                final keyword = ModalRoute.of(context)?.settings.arguments as String?;
+                final keyword =
+                    ModalRoute.of(context)?.settings.arguments as String?;
                 return SearchScreen(initialKeyword: keyword);
               },
             },

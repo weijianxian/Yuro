@@ -5,7 +5,6 @@ import 'package:asmrapp/presentation/viewmodels/home_viewmodel.dart';
 import 'package:asmrapp/presentation/layouts/work_layout_strategy.dart';
 import 'package:asmrapp/widgets/work_grid/enhanced_work_grid_view.dart';
 
-
 class HomeContent extends StatefulWidget {
   const HomeContent({super.key});
 
@@ -13,7 +12,8 @@ class HomeContent extends StatefulWidget {
   State<HomeContent> createState() => _HomeContentState();
 }
 
-class _HomeContentState extends State<HomeContent> with AutomaticKeepAliveClientMixin {
+class _HomeContentState extends State<HomeContent>
+    with AutomaticKeepAliveClientMixin {
   final _layoutStrategy = const WorkLayoutStrategy();
   final _scrollController = ScrollController();
 
@@ -36,7 +36,8 @@ class _HomeContentState extends State<HomeContent> with AutomaticKeepAliveClient
 
   void _onScroll() {
     // 当滚动开始时收起筛选面板
-    if (_scrollController.position.pixels != _scrollController.position.minScrollExtent) {
+    if (_scrollController.position.pixels !=
+        _scrollController.position.minScrollExtent) {
       final viewModel = context.read<HomeViewModel>();
       if (viewModel.filterPanelExpanded) {
         viewModel.closeFilterPanel(); // 需要在 ViewModel 中添加这个方法
@@ -101,4 +102,4 @@ class _HomeContentState extends State<HomeContent> with AutomaticKeepAliveClient
       },
     );
   }
-} 
+}
