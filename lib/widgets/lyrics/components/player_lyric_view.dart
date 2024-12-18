@@ -6,6 +6,7 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:asmrapp/core/subtitle/i_subtitle_service.dart';
 import 'package:asmrapp/core/audio/models/subtitle.dart';
 import 'lyric_line.dart';
+import 'package:asmrapp/presentation/viewmodels/player_viewmodel.dart';
 
 class PlayerLyricView extends StatefulWidget {
   final bool immediateScroll;
@@ -23,6 +24,7 @@ class PlayerLyricView extends StatefulWidget {
 
 class _PlayerLyricViewState extends State<PlayerLyricView> {
   final ISubtitleService _subtitleService = GetIt.I<ISubtitleService>();
+  final PlayerViewModel _viewModel = GetIt.I<PlayerViewModel>();
   final ItemScrollController _itemScrollController = ItemScrollController();
   final ItemPositionsListener _itemPositionsListener = ItemPositionsListener.create();
   
@@ -70,7 +72,7 @@ class _PlayerLyricViewState extends State<PlayerLyricView> {
   Widget build(BuildContext context) {
     // 获取屏幕尺寸
     final screenHeight = MediaQuery.of(context).size.height;
-    // 计算基础单位，以屏幕高度为基准
+    // 计算基础单位，以屏幕高度��基准
     final baseUnit = screenHeight * 0.04;  // 4% 的屏幕高度
     
     return StreamBuilder<SubtitleWithState?>(
@@ -125,12 +127,26 @@ class _PlayerLyricViewState extends State<PlayerLyricView> {
               
               return Padding(
                 padding: EdgeInsets.symmetric(
-                  vertical: baseUnit * 0.35,  // 改用padding来控制行间距
+                  vertical: baseUnit * 0.35,
                 ),
                 child: LyricLine(
                   subtitle: subtitle,
                   isActive: isActive,
                   opacity: isActive ? 1.0 : 0.5,
+                  onTap: () async {
+                    // 点击时暂时禁用视图切换
+                    widget.onScrollStateChanged(false);
+                    
+                    // 跳转到对应时间点
+                    await _viewModel.seek(subtitle.start);
+                    
+                    // 延迟恢复视图切换功能
+                    Future.delayed(const Duration(milliseconds: 500), () {
+                      if (mounted) {
+                        widget.onScrollStateChanged(true);
+                      }
+                    });
+                  },
                 ),
               );
             },
