@@ -12,6 +12,7 @@ import 'package:asmrapp/core/audio/models/playback_context.dart';
 import 'package:asmrapp/widgets/detail/playlist_selection_dialog.dart';
 import 'package:asmrapp/data/models/mark_status.dart';
 import 'package:asmrapp/widgets/detail/mark_selection_dialog.dart';
+import 'package:dio/dio.dart';
 
 class DetailViewModel extends ChangeNotifier {
   late final ApiService _apiService;
@@ -40,6 +41,9 @@ class DetailViewModel extends ChangeNotifier {
 
   bool _loadingMark = false;
   bool get loadingMark => _loadingMark;
+
+  // 添加取消标记
+  final _cancelToken = CancelToken();
 
   DetailViewModel({
     required this.work,
@@ -78,8 +82,10 @@ class DetailViewModel extends ChangeNotifier {
       AppLogger.error('检查相关推荐失败', e);
       _hasRecommendations = false;
     } finally {
-      _checkingRecommendations = false;
-      notifyListeners();
+      if (!_disposed) {
+        _checkingRecommendations = false;
+        notifyListeners();
+      }
     }
   }
 
@@ -92,14 +98,21 @@ class DetailViewModel extends ChangeNotifier {
 
     try {
       AppLogger.info('开始加载作品文件: ${work.id}');
-      _files = await _apiService.getWorkFiles(work.id.toString());
+      _files = await _apiService.getWorkFiles(
+        work.id.toString(),
+        cancelToken: _cancelToken,
+      );
       AppLogger.info('文件加载成功: ${work.id}');
     } catch (e) {
-      AppLogger.error('加载文件失败', e);
-      _error = e.toString();
+      if (e is! DioException || e.type != DioExceptionType.cancel) {
+        AppLogger.info('加载文件失败，用户取消请求');
+        _error = e.toString();
+      }
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (!_disposed) {
+        _isLoading = false;
+        notifyListeners();
+      }
     }
   }
 
@@ -279,6 +292,8 @@ class DetailViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
+    // 取消所有正在进行的请求
+    _cancelToken.cancel('ViewModel disposed');
     _disposed = true;
     super.dispose();
   }

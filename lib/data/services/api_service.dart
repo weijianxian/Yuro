@@ -29,11 +29,15 @@ class ApiService {
   }
 
   /// 获取作品文件列表
-  Future<Files> getWorkFiles(String workId) async {
+  Future<Files> getWorkFiles(String workId, {CancelToken? cancelToken}) async {
     try {
-      final response = await _dio.get('/tracks/$workId', queryParameters: {
-        'v': '1',
-      });
+      final response = await _dio.get(
+        '/tracks/$workId', 
+        queryParameters: {
+          'v': '1',
+        },
+        cancelToken: cancelToken,  // 添加 cancelToken 支持
+      );
 
       if (response.statusCode == 200) {
         final filesData = {
