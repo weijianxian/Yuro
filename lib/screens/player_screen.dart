@@ -22,77 +22,106 @@ class _PlayerScreenState extends State<PlayerScreen> {
   final GlobalKey _contentKey = GlobalKey();
 
   Widget _buildContent(PlayerViewModel viewModel) {
-    if (_showLyrics) {
-      return LayoutBuilder(
-        key: _contentKey,
-        builder: (context, constraints) {
-          return PlayerLyricView(
-            onScrollStateChanged: (canSwitch) {
-              setState(() {
-                _canSwitchView = canSwitch;
-              });
-            },
-          );
-        },
-      );
-    }
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const SizedBox(height: 32),
-        // 封面
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: Hero(
-            tag:
-                'player-cover-${viewModel.currentContext?.work.id ?? "default"}',
-            child: PlayerCover(
-              coverUrl: viewModel.currentTrackInfo?.coverUrl,
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 400),
+      switchInCurve: Curves.easeOutQuart,
+      switchOutCurve: Curves.easeInQuart,
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        final isLyrics = (child as dynamic).key == const ValueKey('lyrics');
+        
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: Offset(0, isLyrics ? 0.1 : -0.1),
+              end: Offset.zero,
+            ).animate(animation),
+            child: ScaleTransition(
+              scale: Tween<double>(
+                begin: 0.95,
+                end: 1.0,
+              ).animate(animation),
+              child: child,
             ),
           ),
-        ),
-        const SizedBox(height: 32),
-        // 标题和艺术家
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: Column(
-            children: [
-              Hero(
-                tag: 'player-title',
-                child: Material(
-                  color: Colors.transparent,
-                  child: Text(
-                    viewModel.currentTrackInfo?.title ?? '未在播放',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                    textAlign: TextAlign.center,
+        );
+      },
+      layoutBuilder: (currentChild, previousChildren) {
+        return Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            ...previousChildren,
+            if (currentChild != null) currentChild,
+          ],
+        );
+      },
+      child: _showLyrics
+          ? LayoutBuilder(
+              key: const ValueKey('lyrics'),
+              builder: (context, constraints) {
+                return PlayerLyricView(
+                  onScrollStateChanged: (canSwitch) {
+                    setState(() {
+                      _canSwitchView = canSwitch;
+                    });
+                  },
+                );
+              },
+            )
+          : Column(
+              key: const ValueKey('cover'),
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 32),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: Hero(
+                    tag:
+                        'player-cover-${viewModel.currentContext?.work.id ?? "default"}',
+                    child: PlayerCover(
+                      coverUrl: viewModel.currentTrackInfo?.coverUrl,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              if (viewModel.currentTrackInfo?.artist != null)
-                Text(
-                  viewModel.currentTrackInfo!.artist,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withOpacity(0.7),
+                const SizedBox(height: 32),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: Column(
+                    children: [
+                      Hero(
+                        tag: 'player-title',
+                        child: Material(
+                          color: Colors.transparent,
+                          child: Text(
+                            viewModel.currentTrackInfo?.title ?? '未在播放',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
                       ),
-                  textAlign: TextAlign.center,
+                      const SizedBox(height: 8),
+                      if (viewModel.currentTrackInfo?.artist != null)
+                        Text(
+                          viewModel.currentTrackInfo!.artist,
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withOpacity(0.7),
+                              ),
+                          textAlign: TextAlign.center,
+                        ),
+                    ],
+                  ),
                 ),
-            ],
-          ),
-        ),
-        const Spacer(),
-        // 作品信息
-        PlayerWorkInfo(context: viewModel.currentContext),
-      ],
+                const Spacer(),
+                PlayerWorkInfo(context: viewModel.currentContext),
+              ],
+            ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
