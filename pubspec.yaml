@@ -52,6 +52,7 @@ dependencies:
   flutter_cache_manager: ^3.4.1
   permission_handler: ^11.3.1
   scrollable_positioned_list: ^0.3.8
+  marquee: ^2.3.0
 
 dev_dependencies:
   flutter_test:

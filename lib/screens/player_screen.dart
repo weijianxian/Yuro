@@ -8,6 +8,8 @@ import 'package:asmrapp/widgets/player/player_cover.dart';
 import 'package:asmrapp/screens/detail_screen.dart';
 import 'package:asmrapp/widgets/player/player_seek_controls.dart';
 import 'package:asmrapp/widgets/lyrics/components/player_lyric_view.dart';
+import 'package:marquee/marquee.dart';
+import 'package:asmrapp/widgets/player/player_work_info.dart';
 
 class PlayerScreen extends StatefulWidget {
   const PlayerScreen({super.key});
@@ -79,6 +81,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
             ],
           ),
         ),
+        const Spacer(),
+        // 作品信息
+        PlayerWorkInfo(context: viewModel.currentContext),
       ],
     );
   }
@@ -147,12 +152,6 @@ class _PlayerScreenState extends State<PlayerScreen> {
                 children: const [
                   PlayerProgress(),
                   SizedBox(height: 8),
-                  // PlayerSeekControls(), // 暂时移除进度控制按钮
-                  // 原因:
-                  // 1. 当前按钮过多(6个)导致操作复杂
-                  // 2. 需要重新设计主次分明的控制界面
-                  // 3. 计划将部分功能改为手势操作
-                  // TODO: 重新设计更简洁的控制界面
                   SizedBox(height: 8),
                   PlayerControls(),
                 ],
