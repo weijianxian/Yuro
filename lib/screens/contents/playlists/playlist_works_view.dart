@@ -3,11 +3,13 @@ import 'package:provider/provider.dart';
 import 'package:asmrapp/data/models/my_lists/my_playlists/playlist.dart';
 import 'package:asmrapp/presentation/viewmodels/playlist_works_viewmodel.dart';
 import 'package:asmrapp/presentation/viewmodels/playlists_viewmodel.dart';
-import 'package:asmrapp/widgets/work_grid_view.dart';
+import 'package:asmrapp/widgets/work_grid/enhanced_work_grid_view.dart';
+import 'package:asmrapp/presentation/layouts/work_layout_strategy.dart';
 
 class PlaylistWorksView extends StatelessWidget {
   final Playlist playlist;
   final VoidCallback onBack;
+  final WorkLayoutStrategy _layoutStrategy = const WorkLayoutStrategy();
 
   const PlaylistWorksView({
     super.key,
@@ -47,29 +49,18 @@ class PlaylistWorksView extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: viewModel.isLoading && viewModel.works.isEmpty
-                    ? const Center(child: CircularProgressIndicator())
-                    : viewModel.error != null && viewModel.works.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(viewModel.error!),
-                                const SizedBox(height: 16),
-                                ElevatedButton(
-                                  onPressed: viewModel.refresh,
-                                  child: const Text('重试'),
-                                ),
-                              ],
-                            ),
-                          )
-                        : RefreshIndicator(
-                            onRefresh: viewModel.refresh,
-                            child: WorkGridView(
-                              works: viewModel.works,
-                              isLoading: viewModel.isLoading,
-                            ),
-                          ),
+                child: EnhancedWorkGridView(
+                  works: viewModel.works,
+                  isLoading: viewModel.isLoading,
+                  error: viewModel.error,
+                  onRetry: () => viewModel.refresh(),
+                  onRefresh: () => viewModel.refresh(),
+                  currentPage: viewModel.currentPage,
+                  totalPages: viewModel.totalPages,
+                  onPageChanged: (page) => viewModel.loadWorks(page: page),
+                  layoutStrategy: _layoutStrategy,
+                  emptyMessage: '暂无作品',
+                ),
               ),
             ],
           );

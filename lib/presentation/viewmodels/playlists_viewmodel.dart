@@ -28,6 +28,10 @@ class PlaylistsViewModel extends ChangeNotifier {
   List<Playlist> get playlists => _playlists ?? [];
   bool get isLoading => _isLoading;
   String? get error => _error;
+  int get currentPage => _currentPage;
+  int? get totalPages => _pagination?.totalCount != null && _pagination?.pageSize != null
+      ? (_pagination!.totalCount! / _pagination!.pageSize!).ceil()
+      : null;
   Playlist? get selectedPlaylist => _selectedPlaylist;
   List<Work> get playlistWorks => _playlistWorks;
   bool get loadingWorks => _loadingWorks;
@@ -44,7 +48,7 @@ class PlaylistsViewModel extends ChangeNotifier {
   /// 加载播放列表
   Future<void> loadPlaylists({int page = 1}) async {
     if (_isLoading) return;
-    if (page < 1 ) return;
+    if (page < 1 || (totalPages != null && page > totalPages!)) return;
 
     _isLoading = true;
     _error = null;

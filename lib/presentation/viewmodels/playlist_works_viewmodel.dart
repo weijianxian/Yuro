@@ -53,6 +53,5 @@ class PlaylistWorksViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> loadMore() => loadWorks(page: _currentPage + 1);
   Future<void> refresh() => loadWorks(page: 1);
 }
