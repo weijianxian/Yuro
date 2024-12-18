@@ -20,8 +20,15 @@ class _PlayerScreenState extends State<PlayerScreen> {
   bool _showLyrics = false;
   bool _canSwitchView = true;
   final GlobalKey _contentKey = GlobalKey();
+  late final PlayerViewModel _viewModel;
 
-  Widget _buildContent(PlayerViewModel viewModel) {
+  @override
+  void initState() {
+    super.initState();
+    _viewModel = GetIt.I<PlayerViewModel>();
+  }
+
+  Widget _buildContent() {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 400),
       switchInCurve: Curves.easeOutQuart,
@@ -68,64 +75,67 @@ class _PlayerScreenState extends State<PlayerScreen> {
                 );
               },
             )
-          : Column(
-              key: const ValueKey('cover'),
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(height: 32),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
-                  child: Hero(
-                    tag:
-                        'player-cover-${viewModel.currentContext?.work.id ?? "default"}',
-                    child: PlayerCover(
-                      coverUrl: viewModel.currentTrackInfo?.coverUrl,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 32),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
-                  child: Column(
-                    children: [
-                      Hero(
-                        tag: 'player-title',
-                        child: Material(
-                          color: Colors.transparent,
-                          child: Text(
-                            viewModel.currentTrackInfo?.title ?? '未在播放',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                            textAlign: TextAlign.center,
-                          ),
+          : ListenableBuilder(
+              listenable: _viewModel,
+              builder: (context, _) {
+                return Column(
+                  key: const ValueKey('cover'),
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 32),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Hero(
+                        tag: 'player-cover-${_viewModel.currentContext?.work.id ?? "default"}',
+                        child: PlayerCover(
+                          coverUrl: _viewModel.currentTrackInfo?.coverUrl,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      if (viewModel.currentTrackInfo?.artist != null)
-                        Text(
-                          viewModel.currentTrackInfo!.artist,
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurface
-                                    .withOpacity(0.7),
+                    ),
+                    const SizedBox(height: 32),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Column(
+                        children: [
+                          Hero(
+                            tag: 'player-title',
+                            child: Material(
+                              color: Colors.transparent,
+                              child: Text(
+                                _viewModel.currentTrackInfo?.title ?? '未在播放',
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                textAlign: TextAlign.center,
                               ),
-                          textAlign: TextAlign.center,
-                        ),
-                    ],
-                  ),
-                ),
-                const Spacer(),
-                PlayerWorkInfo(context: viewModel.currentContext),
-              ],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          if (_viewModel.currentTrackInfo?.artist != null)
+                            Text(
+                              _viewModel.currentTrackInfo!.artist,
+                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withOpacity(0.7),
+                                  ),
+                              textAlign: TextAlign.center,
+                            ),
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
+                    PlayerWorkInfo(context: _viewModel.currentContext),
+                  ],
+                );
+              },
             ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final viewModel = GetIt.I<PlayerViewModel>();
     final lyricManager = GetIt.I<LyricOverlayManager>();
 
     return Scaffold(
@@ -140,7 +150,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
           IconButton(
             icon: const Icon(Icons.info_outline),
             onPressed: () {
-              final currentWork = viewModel.currentContext?.work;
+              final currentWork = _viewModel.currentContext?.work;
               if (currentWork != null) {
                 Navigator.of(context).push(
                   MaterialPageRoute(
@@ -176,7 +186,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                   }
                 },
                 behavior: HitTestBehavior.opaque,
-                child: _buildContent(viewModel),
+                child: _buildContent(),
               ),
             ),
             Container(

@@ -32,6 +32,14 @@ class PlaybackStateManager {
 
   // 初始化状态监听
   void initStateListeners() {
+    // 监听播放器索引变化
+    _player.currentIndexStream.listen((index) {
+      if (index != null && _currentContext != null) {
+        final newFile = _currentContext!.playlist[index];
+        updateTrackAndContext(newFile, _currentContext!.work);
+      }
+    });
+
     // 直接监听 AudioPlayer 的原始流
     _player.playerStateStream.listen((state) async {
       final position = _player.position;

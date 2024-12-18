@@ -37,16 +37,8 @@ class PlaybackController {
       }
 
       if (_player.hasNext) {
-        final nextFile = _stateManager.currentContext!.getNextFile();
-        AppLogger.debug('获取到下一个文件: ${nextFile?.title}');
-        if (nextFile != null) {
-          _updateTrackAndContext(
-            nextFile, 
-            _stateManager.currentContext!.work
-          );
-          AppLogger.debug('执行切换到下一曲');
-          await _player.seekToNext();
-        }
+        AppLogger.debug('执行切换到下一曲');
+        await _player.seekToNext();
       } else {
         AppLogger.debug('没有下一曲可切换');
       }
