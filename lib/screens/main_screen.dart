@@ -122,11 +122,11 @@ class _MainScreenState extends State<MainScreen> {
                 IconButton(
                   icon: const Icon(Icons.filter_list),
                   onPressed: () {
-                    if (_currentIndex == 0) {
+                    if (_currentIndex == 1) {
                       context.read<HomeViewModel>().toggleFilterPanel();
-                    } else if (_currentIndex == 1) {
-                      context.read<RecommendViewModel>().toggleFilterPanel();
                     } else if (_currentIndex == 2) {
+                      context.read<RecommendViewModel>().toggleFilterPanel();
+                    } else if (_currentIndex == 3) {
                       context.read<PopularViewModel>().toggleFilterPanel();
                     }
                   },
