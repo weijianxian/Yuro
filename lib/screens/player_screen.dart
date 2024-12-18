@@ -137,6 +137,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                     _showLyrics = !_showLyrics;
                   });
                 },
+                behavior: HitTestBehavior.opaque,
                 child: _buildContent(viewModel),
               ),
             ),
