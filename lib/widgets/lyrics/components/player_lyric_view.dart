@@ -6,7 +6,12 @@ import 'package:asmrapp/core/audio/models/subtitle.dart';
 import 'lyric_line.dart';
 
 class PlayerLyricView extends StatefulWidget {
-  const PlayerLyricView({super.key});
+  final bool immediateScroll;
+
+  const PlayerLyricView({
+    super.key,
+    this.immediateScroll = false,
+  });
 
   @override
   State<PlayerLyricView> createState() => _PlayerLyricViewState();
@@ -17,37 +22,39 @@ class _PlayerLyricViewState extends State<PlayerLyricView> {
   final ItemScrollController _itemScrollController = ItemScrollController();
   final ItemPositionsListener _itemPositionsListener = ItemPositionsListener.create();
   
-  // 添加标记，记录是否是首次滚动
-  bool _isFirstScroll = true;
+  // 添加一个标记，记录是否是首次构建
+  bool _isFirstBuild = true;
+  Subtitle? _lastScrolledSubtitle;
   
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final currentSubtitle = _subtitleService.currentSubtitleWithState;
-      if (currentSubtitle != null) {
-        _itemScrollController.jumpTo(
-          index: currentSubtitle.subtitle.index,
-          alignment: 0.5,
-        );
-      }
-    });
+    // 移除 initState 中的滚动逻辑，统一在 build 中处理
   }
   
   void _scrollToCurrentLyric(SubtitleWithState current) {
     if (!_itemScrollController.isAttached) return;
     
-    if (_isFirstScroll) {
-      _isFirstScroll = false;
-      return; // 跳过首次滚动，因为 initState 已经处理了
-    }
+    // 避免重复滚动
+    if (_lastScrolledSubtitle == current.subtitle) return;
+    _lastScrolledSubtitle = current.subtitle;
     
-    _itemScrollController.scrollTo(
-      index: current.subtitle.index,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOutQuart,
-      alignment: 0.5,
-    );
+    // 首次构建时直接跳转到位置，不使用动画
+    if (_isFirstBuild) {
+      _isFirstBuild = false;
+      _itemScrollController.jumpTo(
+        index: current.subtitle.index,
+        alignment: 0.5,
+      );
+    } else {
+      // 后续的歌词切换使用动画
+      _itemScrollController.scrollTo(
+        index: current.subtitle.index,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutQuart,
+        alignment: 0.5,
+      );
+    }
   }
 
   @override

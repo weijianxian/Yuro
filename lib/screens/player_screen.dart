@@ -27,7 +27,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
       return LayoutBuilder(
         key: _contentKey,
         builder: (context, constraints) {
-          return PlayerLyricView();
+          return const PlayerLyricView();
         },
       );
     }
