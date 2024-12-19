@@ -109,7 +109,7 @@ class _PlayerLyricViewState extends State<PlayerLyricView> {
           onNotification: (notification) {
             if (notification is ScrollStartNotification && 
                 notification.dragDetails != null) {  // 用户开始手动滚动
-              // 禁用视图切换功能
+              // 立即禁用视图切换功能
               widget.onScrollStateChanged(false);
               
               // 禁用自动滚动功能
@@ -119,13 +119,15 @@ class _PlayerLyricViewState extends State<PlayerLyricView> {
               _scrollDebounceTimer?.cancel();
               _autoScrollDebounceTimer?.cancel();
             } else if (notification is ScrollEndNotification) {  // 用户结束滚动
-              // 设置视图切换计时器：300ms后恢复视图切换功能
+              // 延长视图切换的禁用时间到1秒
               _scrollDebounceTimer?.cancel();
-              _scrollDebounceTimer = Timer(const Duration(milliseconds: 300), () {
-                widget.onScrollStateChanged(true);
+              _scrollDebounceTimer = Timer(const Duration(milliseconds: 1000), () {
+                if (mounted) {
+                  widget.onScrollStateChanged(true);
+                }
               });
               
-              // 设置自动滚动计时器：2000ms后恢复自动滚动功能
+              // 自动滚动计时器保持3秒
               _autoScrollDebounceTimer?.cancel();
               _autoScrollDebounceTimer = Timer(const Duration(milliseconds: 3000), () {
                 if (mounted) {
