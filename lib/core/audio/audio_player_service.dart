@@ -61,6 +61,7 @@ class AudioPlayerService implements IAudioPlayerService {
         player: _player,
         stateManager: _stateManager,
         playlist: _playlist,
+        eventHub: _eventHub,
       );
 
       final session = await AudioSession.instance;
@@ -173,6 +174,7 @@ class AudioPlayerService implements IAudioPlayerService {
 
   @override
   Future<void> dispose() async {
+    _playbackController.dispose();
     _player.dispose();
     _notificationService.dispose();
   }

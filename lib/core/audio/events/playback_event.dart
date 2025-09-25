@@ -58,3 +58,8 @@ class InitialStateEvent extends PlaybackEvent {
   final PlaybackContext? context;
   InitialStateEvent(this.track, this.context);
 }
+
+/// 添加跳转事件
+class SkipToNextEvent extends PlaybackEvent {}
+
+class SkipToPreviousEvent extends PlaybackEvent {}

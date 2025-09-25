@@ -22,6 +22,8 @@ class AudioPlayerHandler extends BaseAudioHandler {
           MediaAction.seek,
           MediaAction.seekForward,
           MediaAction.seekBackward,
+          MediaAction.skipToPrevious,
+          MediaAction.skipToNext,
         },
         androidCompactActionIndices: const [0, 1, 2],
         processingState: const {
@@ -35,7 +37,9 @@ class AudioPlayerHandler extends BaseAudioHandler {
         updatePosition: event.position,
         bufferedPosition: _player.bufferedPosition,
         speed: _player.speed,
-        queueIndex: 0,
+        queueIndex: _player.currentIndex ?? 0,
+        // 确保包含音频总时长
+        duration: event.duration,
       );
       playbackState.add(state);
     });
@@ -63,5 +67,19 @@ class AudioPlayerHandler extends BaseAudioHandler {
   Future<void> stop() async {
     AppLogger.debug('AudioHandler: 停止命令');
     await _player.stop();
+  }
+
+  @override
+  Future<void> skipToNext() async {
+    AppLogger.debug('AudioHandler: 下一曲命令');
+    // 通过 EventHub 发送下一曲请求，让 PlaybackController 处理
+    _eventHub.emit(SkipToNextEvent());
+  }
+
+  @override
+  Future<void> skipToPrevious() async {
+    AppLogger.debug('AudioHandler: 上一曲命令');
+    // 通过 EventHub 发送上一曲请求，让 PlaybackController 处理
+    _eventHub.emit(SkipToPreviousEvent());
   }
 }

@@ -6,20 +6,39 @@ import '../utils/playlist_builder.dart';
 import '../utils/audio_error_handler.dart';
 import 'package:asmrapp/data/models/files/child.dart';
 import 'package:asmrapp/data/models/works/work.dart';
+import '../events/playback_event_hub.dart';
+import 'dart:async';
 
 
 class PlaybackController {
   final AudioPlayer _player;
   final PlaybackStateManager _stateManager;
   final ConcatenatingAudioSource _playlist;
+  final PlaybackEventHub _eventHub;
+  final List<StreamSubscription> _subscriptions = [];
 
   PlaybackController({
     required AudioPlayer player,
     required PlaybackStateManager stateManager,
     required ConcatenatingAudioSource playlist,
+    required PlaybackEventHub eventHub,
   }) : _player = player,
        _stateManager = stateManager,
-       _playlist = playlist;
+       _playlist = playlist,
+       _eventHub = eventHub {
+    _setupEventListeners();
+  }
+
+  void _setupEventListeners() {
+    // 监听跳转事件
+    _subscriptions.add(
+      _eventHub.skipToNext.listen((_) => next()),
+    );
+    
+    _subscriptions.add(
+      _eventHub.skipToPrevious.listen((_) => previous()),
+    );
+  }
 
   // 基础播放控制
   Future<void> play() => _player.play();
@@ -153,5 +172,13 @@ class PlaybackController {
   void _updateTrackAndContext(Child file, Work work) {
     AppLogger.debug('更新轨道和上下文: file=${file.title}');
     _stateManager.updateTrackAndContext(file, work);
+  }
+
+  // 资源清理
+  void dispose() {
+    for (var subscription in _subscriptions) {
+      subscription.cancel();
+    }
+    _subscriptions.clear();
   }
 } 

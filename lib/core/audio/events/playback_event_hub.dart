@@ -30,6 +30,13 @@ class PlaybackEventHub {
   late final Stream<RequestInitialStateEvent> requestInitialState = _eventSubject
       .whereType<RequestInitialStateEvent>();
 
+  // 添加跳转事件流
+  late final Stream<SkipToNextEvent> skipToNext = _eventSubject
+      .whereType<SkipToNextEvent>();
+      
+  late final Stream<SkipToPreviousEvent> skipToPrevious = _eventSubject
+      .whereType<SkipToPreviousEvent>();
+
   // 发送事件
   void emit(PlaybackEvent event) => _eventSubject.add(event);
 

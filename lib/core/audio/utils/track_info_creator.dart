@@ -8,21 +8,24 @@ class TrackInfoCreator {
     required String? artistName,
     required String? coverUrl,
     required String url,
+    Duration? duration,
   }) {
     return AudioTrackInfo(
       title: title,
       artist: artistName ?? '',
       coverUrl: coverUrl ?? '',
       url: url,
+      duration: duration,
     );
   }
   
-  static AudioTrackInfo createFromFile(Child file, Work work) {
+  static AudioTrackInfo createFromFile(Child file, Work work, {Duration? duration}) {
     return createTrackInfo(
       title: file.title ?? '',
       artistName: work.circle?.name,
       coverUrl: work.mainCoverUrl,
       url: file.mediaDownloadUrl!,
+      duration: duration,
     );
   }
 } 

@@ -60,6 +60,21 @@ class PlaybackStateManager {
         _player.bufferedPosition
       ));
     });
+
+    // 监听时长变化，当时长可用时更新轨道信息
+    _player.durationStream.listen((duration) {
+      if (duration != null && _currentTrack != null && _currentContext != null) {
+        // 如果当前轨道没有时长信息，则更新它
+        if (_currentTrack!.duration == null) {
+          final updatedTrackInfo = TrackInfoCreator.createFromFile(
+            _currentContext!.currentFile, 
+            _currentContext!.work, 
+            duration: duration
+          );
+          updateTrackInfo(updatedTrackInfo);
+        }
+      }
+    });
   }
 
   // 状态更新方法
@@ -81,7 +96,9 @@ class PlaybackStateManager {
       updateContext(newContext);
     }
     
-    final trackInfo = TrackInfoCreator.createFromFile(file, work);
+    // 获取当前播放器的时长（如果可用）
+    final duration = _player.duration;
+    final trackInfo = TrackInfoCreator.createFromFile(file, work, duration: duration);
     updateTrackInfo(trackInfo);
   }
 
