@@ -10,6 +10,20 @@ class AudioPlayerHandler extends BaseAudioHandler {
   AudioPlayerHandler(this._player, this._eventHub) {
     AppLogger.debug('AudioPlayerHandler 初始化');
     
+    // 监听轨道变更事件来更新队列
+    _eventHub.trackChange.listen((event) {
+      // 更新 MediaItem
+      final mediaItem = MediaItem(
+        id: event.track.url,
+        title: event.track.title,
+        artist: event.track.artist,
+        artUri: event.track.coverUrl.isNotEmpty ? Uri.tryParse(event.track.coverUrl) : null,
+        duration: event.track.duration,
+      );
+      this.mediaItem.add(mediaItem);
+      AppLogger.debug('MediaSession: 更新 MediaItem - ${event.track.title}, duration: ${event.track.duration}');
+    });
+    
     // 改为监听 EventHub
     _eventHub.playbackState.listen((event) {
       final state = PlaybackState(

@@ -25,7 +25,8 @@ class AudioNotificationService {
           androidNotificationChannelId: 'com.asmrapp.audio',
           androidNotificationChannelName: 'ASMR One 播放器',
           androidNotificationOngoing: true,
-          androidStopForegroundOnPause: true,
+          androidStopForegroundOnPause: false, // 让通知在暂停时保持可见
+          androidNotificationClickStartsActivity: true,
         ),
       );
 
@@ -49,7 +50,7 @@ class AudioNotificationService {
       id: trackInfo.url,
       title: trackInfo.title,
       artist: trackInfo.artist,
-      artUri: Uri.parse(trackInfo.coverUrl),
+      artUri: trackInfo.coverUrl.isNotEmpty ? Uri.tryParse(trackInfo.coverUrl) : null,
       duration: trackInfo.duration,
     );
 
