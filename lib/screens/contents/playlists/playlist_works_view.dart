@@ -5,11 +5,11 @@ import 'package:asmrapp/presentation/viewmodels/playlist_works_viewmodel.dart';
 import 'package:asmrapp/presentation/viewmodels/playlists_viewmodel.dart';
 import 'package:asmrapp/widgets/work_grid/enhanced_work_grid_view.dart';
 import 'package:asmrapp/presentation/layouts/work_layout_strategy.dart';
+import 'package:asmrapp/utils/toast_utils.dart';
 
-class PlaylistWorksView extends StatelessWidget {
+class PlaylistWorksView extends StatefulWidget {
   final Playlist playlist;
   final VoidCallback onBack;
-  final WorkLayoutStrategy _layoutStrategy = const WorkLayoutStrategy();
 
   const PlaylistWorksView({
     super.key,
@@ -18,13 +18,31 @@ class PlaylistWorksView extends StatelessWidget {
   });
 
   @override
+  State<PlaylistWorksView> createState() => _PlaylistWorksViewState();
+}
+
+class _PlaylistWorksViewState extends State<PlaylistWorksView> {
+  final WorkLayoutStrategy _layoutStrategy = const WorkLayoutStrategy();
+  String? _lastError;
+
+  @override
   Widget build(BuildContext context) {
     final playlistsViewModel = context.read<PlaylistsViewModel>();
     
     return ChangeNotifierProvider(
-      create: (_) => PlaylistWorksViewModel(playlist)..loadWorks(),
+      create: (_) => PlaylistWorksViewModel(widget.playlist)..loadWorks(),
       child: Consumer<PlaylistWorksViewModel>(
         builder: (context, viewModel, child) {
+          // 检查是否有新的错误需要显示 toast
+          if (viewModel.error != null && viewModel.error != _lastError) {
+            _lastError = viewModel.error;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              ToastUtils.showError(context, '加载作品失败: ${viewModel.error}');
+            });
+          } else if (viewModel.error == null) {
+            _lastError = null;
+          }
+
           return Column(
             children: [
               Material(
@@ -35,11 +53,11 @@ class PlaylistWorksView extends StatelessWidget {
                     children: [
                       IconButton(
                         icon: const Icon(Icons.arrow_back),
-                        onPressed: onBack,
+                        onPressed: widget.onBack,
                       ),
                       Expanded(
                         child: Text(
-                          playlistsViewModel.getDisplayName(playlist.name),
+                          playlistsViewModel.getDisplayName(widget.playlist.name),
                           style: Theme.of(context).textTheme.titleMedium,
                           overflow: TextOverflow.ellipsis,
                         ),

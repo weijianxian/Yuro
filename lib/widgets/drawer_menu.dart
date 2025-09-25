@@ -85,14 +85,14 @@ class DrawerMenu extends StatelessWidget {
                 );
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text(Strings.settings),
-              onTap: () {
-                Navigator.pop(context);
-                // TODO: 导航到设置页面
-              },
-            ),
+            // ListTile(
+            //   leading: const Icon(Icons.settings),
+            //   title: const Text(Strings.settings),
+            //   onTap: () {
+            //     Navigator.pop(context);
+            //     // TODO: 导航到设置页面
+            //   },
+            // ),
             ListTile(
               leading: const Icon(Icons.storage),
               title: const Text('缓存管理'),
