@@ -14,7 +14,8 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = "one.asmr.yuro"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    // ndkVersion = flutter.ndkVersion
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -46,12 +47,20 @@ android {
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix ".debug"
+            debuggable true
+            minifyEnabled false
+            shrinkResources false
+            manifestPlaceholders = [appName: "Yuro Debug"]
+        }
         release {
             signingConfig signingConfigs.release
             // 如果还有问题，可以临时禁用混淆
             minifyEnabled true  // 改为 false 可以禁用混淆
             shrinkResources true  // 改为 false 可以禁用资源压缩
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            manifestPlaceholders = [appName: "Yuro"]
         }
     }
 }
