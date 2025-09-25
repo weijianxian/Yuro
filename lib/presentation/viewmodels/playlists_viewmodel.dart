@@ -1,9 +1,9 @@
 import 'package:asmrapp/data/models/works/work.dart';
 import 'package:flutter/foundation.dart';
-import 'package:asmrapp/data/models/my_lists/my_playlists/my_playlists.dart';
 import 'package:asmrapp/data/models/my_lists/my_playlists/playlist.dart';
 import 'package:asmrapp/data/models/my_lists/my_playlists/pagination.dart';
 import 'package:asmrapp/data/services/api_service.dart';
+import 'package:asmrapp/data/repositories/auth_repository.dart';
 import 'package:asmrapp/utils/logger.dart';
 import 'package:get_it/get_it.dart';
 
@@ -42,7 +42,25 @@ class PlaylistsViewModel extends ChangeNotifier {
       : null;
 
   PlaylistsViewModel() {
-    loadPlaylists();
+    _initializeIfAuthenticated();
+  }
+
+  /// 如果用户已认证则初始化数据
+  Future<void> _initializeIfAuthenticated() async {
+    try {
+      final authRepository = GetIt.I.get<AuthRepository>();
+      final authData = await authRepository.getAuthData();
+      
+      if (authData?.token != null) {
+        loadPlaylists();
+      } else {
+        AppLogger.info('用户未登录，跳过播放列表加载');
+      }
+    } catch (e) {
+      AppLogger.error('检查认证状态失败', e);
+      // 如果检查认证状态失败，仍然尝试加载（让API调用处理错误）
+      loadPlaylists();
+    }
   }
 
   /// 加载播放列表

@@ -78,56 +78,67 @@ class _PlayerScreenState extends State<PlayerScreen> {
           : ListenableBuilder(
               listenable: _viewModel,
               builder: (context, _) {
-                return Column(
+                return SingleChildScrollView(
                   key: const ValueKey('cover'),
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 32),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32),
-                      child: Hero(
-                        tag: 'mini-player-cover',
-                        child: PlayerCover(
-                          coverUrl: _viewModel.currentTrackInfo?.coverUrl,
-                        ),
-                      ),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: MediaQuery.of(context).size.height - 
+                                 MediaQuery.of(context).padding.top - 
+                                 MediaQuery.of(context).padding.bottom - 
+                                 kToolbarHeight - 120, // 减去AppBar和底部控件的高度
                     ),
-                    const SizedBox(height: 32),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32),
-                      child: Column(
-                        children: [
-                          Hero(
-                            tag: 'player-title',
-                            child: Material(
-                              color: Colors.transparent,
-                              child: Text(
-                                _viewModel.currentTrackInfo?.title ?? '未在播放',
-                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                textAlign: TextAlign.center,
-                              ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 32),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                          child: Hero(
+                            tag: 'mini-player-cover',
+                            child: PlayerCover(
+                              coverUrl: _viewModel.currentTrackInfo?.coverUrl,
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          if (_viewModel.currentTrackInfo?.artist != null)
-                            Text(
-                              _viewModel.currentTrackInfo!.artist,
-                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurface
-                                        .withOpacity(0.7),
+                        ),
+                        const SizedBox(height: 32),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                          child: Column(
+                            children: [
+                              Hero(
+                                tag: 'player-title',
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: Text(
+                                    _viewModel.currentTrackInfo?.title ?? '未在播放',
+                                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                    textAlign: TextAlign.center,
                                   ),
-                              textAlign: TextAlign.center,
-                            ),
-                        ],
-                      ),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              if (_viewModel.currentTrackInfo?.artist != null)
+                                Text(
+                                  _viewModel.currentTrackInfo!.artist,
+                                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface
+                                            .withOpacity(0.7),
+                                      ),
+                                  textAlign: TextAlign.center,
+                                ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        PlayerWorkInfo(context: _viewModel.currentContext),
+                        const SizedBox(height: 32),
+                      ],
                     ),
-                    const Spacer(),
-                    PlayerWorkInfo(context: _viewModel.currentContext),
-                  ],
+                  ),
                 );
               },
             ),
@@ -206,8 +217,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
             ),
             Container(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 32),
-              child: Column(
-                children: const [
+              child: const Column(
+                children: [
                   PlayerProgress(),
                   SizedBox(height: 8),
                   SizedBox(height: 8),

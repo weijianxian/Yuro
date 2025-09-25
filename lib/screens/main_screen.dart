@@ -12,6 +12,7 @@ import 'package:asmrapp/presentation/viewmodels/popular_viewmodel.dart';
 import 'package:asmrapp/presentation/viewmodels/recommend_viewmodel.dart';
 import 'package:asmrapp/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:asmrapp/presentation/viewmodels/playlists_viewmodel.dart';
+import 'package:asmrapp/utils/toast_utils.dart';
 
 /// MainScreen 是应用的主界面，负责管理底部导航栏和对应的内容页面。
 /// 它采用了集中式的状态管理架构，所有子页面的 ViewModel 都在这里初始化和提供。
@@ -37,6 +38,9 @@ class _MainScreenState extends State<MainScreen> {
   late final PopularViewModel _popularViewModel;
   late final RecommendViewModel _recommendViewModel;
   late final PlaylistsViewModel _playlistsViewModel;
+
+  // 用于追踪已显示的错误，避免重复显示toast
+  String? _lastPlaylistError;
 
   final _titles = const ['收藏', '主页', '为你推荐', '热门作品'];
 
@@ -101,6 +105,19 @@ class _MainScreenState extends State<MainScreen> {
       ],
       child: Builder(
         builder: (context) {
+          // 监听PlaylistsViewModel的错误状态并显示toast
+          final playlistsViewModel = context.watch<PlaylistsViewModel>();
+          if (playlistsViewModel.error != null && 
+              playlistsViewModel.error != _lastPlaylistError && 
+              _currentIndex != 0) {
+            // 只在不是播放列表页面时显示toast，因为PlaylistsListView会处理自己的错误显示
+            _lastPlaylistError = playlistsViewModel.error;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              ToastUtils.showError(context, '加载播放列表失败: ${playlistsViewModel.error}');
+            });
+          } else if (playlistsViewModel.error == null) {
+            _lastPlaylistError = null;
+          }
           // 根据当前页面获取对应的总数
           final totalCount = _currentIndex == 1
               ? context.watch<HomeViewModel>().pagination?.totalCount
@@ -112,7 +129,7 @@ class _MainScreenState extends State<MainScreen> {
 
           // 构建标题文本
           final title = totalCount != null
-              ? '${_titles[_currentIndex]} (${totalCount})'
+              ? '${_titles[_currentIndex]} ($totalCount)'
               : _titles[_currentIndex];
 
           return Scaffold(
