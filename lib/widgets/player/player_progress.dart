@@ -58,13 +58,13 @@ class PlayerProgress extends StatelessWidget {
                     Text(
                       _formatDuration(viewModel.position),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7),
                       ),
                     ),
                     Text(
                       _formatDuration(viewModel.duration),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.7),
                       ),
                     ),
                   ],

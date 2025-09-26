@@ -134,7 +134,7 @@ class _SearchScreenContentState extends State<SearchScreenContent> {
                             fillColor: Theme.of(context)
                                 .colorScheme
                                 .surfaceContainerHighest
-                                .withOpacity(0.5),
+                                .withValues(alpha:0.5),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(24),
                               borderSide: BorderSide.none,

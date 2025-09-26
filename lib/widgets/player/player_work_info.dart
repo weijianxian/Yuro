@@ -45,7 +45,7 @@ class PlayerWorkInfo extends StatelessWidget {
                     .join('、') ?? 
                 '未知演员',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

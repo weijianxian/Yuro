@@ -33,7 +33,7 @@ class LyricLine extends StatelessWidget {
                 height: 1.3,
                 color: isActive 
                   ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                  : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
               ),
               textAlign: TextAlign.center,

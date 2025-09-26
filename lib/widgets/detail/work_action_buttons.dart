@@ -100,7 +100,7 @@ class _ActionButton extends StatelessWidget {
               Icon(
                 icon,
                 color: disabled 
-                    ? theme.colorScheme.onSurface.withOpacity(0.38)
+                    ? theme.colorScheme.onSurface.withValues(alpha:0.38)
                     : null,
               ),
             const SizedBox(height: 4),
@@ -108,7 +108,7 @@ class _ActionButton extends StatelessWidget {
               label,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: disabled
-                    ? theme.colorScheme.onSurface.withOpacity(0.38)
+                    ? theme.colorScheme.onSurface.withValues(alpha:0.38)
                     : null,
               ),
             ),
