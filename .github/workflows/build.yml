@@ -51,12 +51,16 @@ jobs:
 
       - name: Build App Bundle
         run: flutter build appbundle --release
+      
+      - name: Build Universal APK
+        run: flutter build apk --release
 
       - name: Upload Android artifacts
         uses: actions/upload-artifact@v4
         with:
           name: android-build
           path: |
+            build/app/outputs/flutter-apk/app-release.apk
             build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
             build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
             build/app/outputs/flutter-apk/app-x86_64-release.apk
@@ -170,6 +174,9 @@ jobs:
             > **Note:** Please report any issues or bugs through the GitHub issue tracker.
           files: |
             dist/flutter-apk/app-release.apk
+            dist/flutter-apk/app-armeabi-v7a-release.apk
+            dist/flutter-apk/app-arm64-v8a-release.apk
+            dist/flutter-apk/app-x86_64-release.apk
             dist/bundle/release/app-release.aab
             dist/app-release.ipa
         env:
