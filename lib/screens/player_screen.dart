@@ -17,15 +17,49 @@ class PlayerScreen extends StatefulWidget {
   State<PlayerScreen> createState() => _PlayerScreenState();
 }
 
-class _PlayerScreenState extends State<PlayerScreen> {
+class _PlayerScreenState extends State<PlayerScreen> with TickerProviderStateMixin {
   bool _showLyrics = false;
   bool _canSwitchView = true;
   late final PlayerViewModel _viewModel;
+  double _dragDistance = 0.0;
+  static const double _dismissThreshold = 100.0;
+  bool _isDragging = false;
+  late AnimationController _dismissAnimationController;
+  late Animation<double> _dismissAnimation;
 
   @override
   void initState() {
     super.initState();
     _viewModel = GetIt.I<PlayerViewModel>();
+    
+    _dismissAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    
+    _dismissAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _dismissAnimationController,
+      curve: Curves.easeOut,
+    ));
+    
+    _dismissAnimation.addListener(() {
+      setState(() {});
+    });
+    
+    _dismissAnimation.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        Navigator.of(context).pop();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _dismissAnimationController.dispose();
+    super.dispose();
   }
 
   Widget _buildContent() {
@@ -78,20 +112,12 @@ class _PlayerScreenState extends State<PlayerScreen> {
           : ListenableBuilder(
               listenable: _viewModel,
               builder: (context, _) {
-                return SingleChildScrollView(
+                return Column(
                   key: const ValueKey('cover'),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: MediaQuery.of(context).size.height - 
-                                 MediaQuery.of(context).padding.top - 
-                                 MediaQuery.of(context).padding.bottom - 
-                                 kToolbarHeight - 120, // 减去AppBar和底部控件的高度
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const SizedBox(height: 32),
-                        Padding(
+                  children: [
+                    Expanded(
+                      child: Center(
+                        child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 32),
                           child: Hero(
                             tag: 'mini-player-cover',
@@ -100,45 +126,18 @@ class _PlayerScreenState extends State<PlayerScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 32),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 32),
-                          child: Column(
-                            children: [
-                              Hero(
-                                tag: 'player-title',
-                                child: Material(
-                                  color: Colors.transparent,
-                                  child: Text(
-                                    _viewModel.currentTrackInfo?.title ?? '未在播放',
-                                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              if (_viewModel.currentTrackInfo?.artist != null)
-                                Text(
-                                  _viewModel.currentTrackInfo!.artist,
-                                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurface
-                                            .withValues(alpha:0.7),
-                                      ),
-                                  textAlign: TextAlign.center,
-                                ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                        PlayerWorkInfo(context: _viewModel.currentContext),
-                        const SizedBox(height: 32),
-                      ],
+                      ),
                     ),
-                  ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 16),
+                          PlayerWorkInfo(context: _viewModel.currentContext),
+                        ],
+                      ),
+                    ),
+                  ],
                 );
               },
             ),
@@ -200,33 +199,62 @@ class _PlayerScreenState extends State<PlayerScreen> {
         elevation: 0,
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  if (_canSwitchView) {
-                    setState(() {
-                      _showLyrics = !_showLyrics;
-                    });
-                  }
-                },
-                behavior: HitTestBehavior.opaque,
-                child: _buildContent(),
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 32),
-              child: const Column(
+        child: GestureDetector(
+          onVerticalDragStart: (details) {
+            _isDragging = true;
+            _dragDistance = 0.0;
+            _dismissAnimationController.value = 0.0;
+          },
+          onVerticalDragUpdate: (details) {
+            _dragDistance += details.delta.dy;
+            if (_dragDistance < 0) _dragDistance = 0;
+            
+            // 根据拖拽距离更新动画进度
+            final progress = (_dragDistance / _dismissThreshold).clamp(0.0, 1.0);
+            _dismissAnimationController.value = progress;
+          },
+          onVerticalDragEnd: (details) {
+            _isDragging = false;
+            if (_dragDistance > _dismissThreshold) {
+              // 完成关闭动画
+              _dismissAnimationController.forward();
+            } else {
+              // 回到原始位置
+              _dismissAnimationController.reverse();
+            }
+          },
+          onTap: () {
+            if (!_isDragging && _canSwitchView) {
+              setState(() {
+                _showLyrics = !_showLyrics;
+              });
+            }
+          },
+          behavior: HitTestBehavior.opaque,
+          child: Transform.translate(
+            offset: Offset(0, _dismissAnimation.value * 100), // 跟随动画向上移动
+            child: Opacity(
+              opacity: 1.0 - _dismissAnimation.value * 0.5, // 逐渐透明
+              child: Column(
                 children: [
-                  PlayerProgress(),
-                  SizedBox(height: 8),
-                  SizedBox(height: 8),
-                  PlayerControls(),
+                  Expanded(
+                    child: _buildContent(),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 32),
+                    child: const Column(
+                      children: [
+                        PlayerProgress(),
+                        SizedBox(height: 8),
+                        SizedBox(height: 8),
+                        PlayerControls(),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
