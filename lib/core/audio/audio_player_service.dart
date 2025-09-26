@@ -15,7 +15,6 @@ import './events/playback_event_hub.dart';
 class AudioPlayerService implements IAudioPlayerService {
   late final AudioPlayer _player;
   late final AudioNotificationService _notificationService;
-  late final ConcatenatingAudioSource _playlist;
   late final PlaybackStateManager _stateManager;
   late final PlaybackController _playbackController;
   final PlaybackEventHub _eventHub;
@@ -49,7 +48,6 @@ class AudioPlayerService implements IAudioPlayerService {
         _player,
         _eventHub,
       );
-      _playlist = ConcatenatingAudioSource(children: []);
 
       _stateManager = PlaybackStateManager(
         player: _player,
@@ -60,7 +58,6 @@ class AudioPlayerService implements IAudioPlayerService {
       _playbackController = PlaybackController(
         player: _player,
         stateManager: _stateManager,
-        playlist: _playlist,
       );
 
       final session = await AudioSession.instance;
